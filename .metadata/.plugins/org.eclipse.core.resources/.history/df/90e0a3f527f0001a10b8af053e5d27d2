@@ -1,0 +1,197 @@
+package bangla.spellChecker;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import bangla.WithTrie.*;
+import bangla.spellChecker.*;
+public class word_validation_process {
+
+	
+	private WordTokenizer WT;
+	private final static int DICTIONARY_WORD = 1;
+	private final static int NAMED_ENTITY = 2;
+	private final static int ANNOTATED_WORD = 3;
+	WordSuggestionV3 wordSuggestion = new WordSuggestionV3();
+	public word_validation_process() {
+		// TODO Auto-generated constructor stub
+		WT = new WordTokenizer();
+	}
+	public List<String> getTokenizedWord(String text){
+		text = text.replaceAll("[\n\r]+", " ");
+		WT.set_text(text);
+		return WT._tokenization();
+	}
+	
+	public spell_checking_dto copyDto(Map<Integer, spell_checking_dto> result_list, String data, Map<String, Integer> tracker,
+			spell_checking_dto suggested_word) {
+		spell_checking_dto temp_container  = result_list.get(tracker.get(data));
+		suggested_word.ID = temp_container.ID + 1;
+		suggested_word.isCorrect = temp_container.isCorrect;
+		suggested_word.lang_type = temp_container.lang_type;
+		if(temp_container.suggestion != null)
+			suggested_word.suggestion = (ArrayList<Pair>) temp_container.suggestion;
+		suggested_word.wordType = temp_container.wordType;
+		return suggested_word;
+	}
+	public spell_checking_dto createSuggestion(spell_checking_dto suggested_word, String data) {
+		suggested_word.isCorrect = 0;
+		if (suggested_word.suggestion == null)
+			suggested_word.suggestion = new ArrayList<Pair>();
+		Map<String, Integer> wordWithDistance = wordSuggestion.getSuggestedWord(data);
+		for(Map.Entry<String, Integer> entry: wordWithDistance.entrySet()) {
+				suggested_word.suggestion.add(new Pair(entry.getKey(), entry.getValue()));
+		}
+		return suggested_word;
+	}
+	
+	public Map<String, Integer> getInvertedIndex(List<String> tokenized_data){
+		int index = 0;
+		Map<String, Integer> invertedIndex = new HashMap<>();
+		for(String word : tokenized_data) {
+			if (invertedIndex.get(word) == null) {
+				invertedIndex.put(word, index);
+				index += 1;
+			}
+		}
+		return invertedIndex;
+	}
+	public String normalizeText(String s) 
+	{
+		// TODO Auto-generated method stub
+
+		String t = s;
+
+		t = t.replaceAll("[\\x{200A}\\x{200B}\\x{200C}]", "");			//	ZERO WIDTH	=	""
+
+		//t = t.replaceAll("(\\x{09F0})", "\u09B0");						//	ৰ	=	র			???
+		//t = t.replaceAll("(\\x{09F1})", "\u09AC");						//	ৱ	=	ব			???
+		
+		t = t.replaceAll("(\\x{0985})(\\x{09BE})", "\u0986");			//	অ	+	 া	=	আ
+		t = t.replaceAll("(\\x{09C7})(\\x{09BE})", "\u09CB");			//	ে	+	া	=	ো
+		t = t.replaceAll("(\\x{09C7})(\\x{09D7})", "\u09CC");			//	ে	+	ৗ	=	ৌ
+		t = t.replaceAll("(\\x{09AC})(\\x{09BC})", "\u09B0");			//	ব	+	়	=	র
+		t = t.replaceAll("(\\x{09A1})(\\x{09BC})", "\u09DC");			//	ড	+	়	=	ড়
+		t = t.replaceAll("(\\x{09A2})(\\x{09BC})", "\u09DD");			//	ঢ	+	়	=	ঢ়
+		t = t.replaceAll("(\\x{09AF})(\\x{09BC})", "\u09DF");			//	য	+	়	=	য়
+		
+		return t;		
+	}
+	
+	public spell_checking_dto getProcessedMap(spell_checking_dto suggested_word, String data_, Map<Integer, spell_checking_dto> result_list, Map<String,Integer> tracker,
+			String key, Map<Integer, TrieNodeWithList> table_query){
+		
+		String data = normalizeText(data_);
+		if (tracker.containsKey(data) == true) {	
+			suggested_word = copyDto(result_list, data, tracker, suggested_word);
+		}else {
+			
+			wordSuggestion.setDictionary(dictionaries.namedEntities);
+			if(wordSuggestion.searchWord(data) == true) {
+				suggested_word.isCorrect = 1;
+				suggested_word.wordType="named-entity";
+			}
+			if (suggested_word.isCorrect == 0) {
+				wordSuggestion.setDictionary(dictionaries.correctWords);
+				System.out.println("suggesting words not not found in named entity" + wordSuggestion.searchWord(data));
+				if(wordSuggestion.searchWord(data) == true) {
+					suggested_word.isCorrect = 1;
+				}
+				wordSuggestion.setDictionary(dictionaries.annotatedWords);
+				if(wordSuggestion.searchWord(data) == true) {
+					suggested_word.isCorrect = 1;
+				}
+			}
+			
+			if (suggested_word.isCorrect == 0){
+				
+				wordSuggestion.setDictionary(dictionaries.naturalErrorWords);
+				System.out.print("Start Searching error word dictionary");
+				if (wordSuggestion.searchWord(data)==true) {
+					System.out.print("I am searching natural error word dictionary");
+					suggested_word.wordType="error";
+					try {
+					TrieNodeWithList nodeChar = wordSuggestion.getWord(data);
+					if(nodeChar.getReferenceTable() == DICTIONARY_WORD && dictionaries.correctWords.inverseDict.get(nodeChar.getReferenceId())!=null)
+						suggested_word.suggestion.add(new Pair(dictionaries.correctWords.inverseDict.get(nodeChar.getReferenceId()),0));
+					if(nodeChar.getReferenceTable() == NAMED_ENTITY && dictionaries.namedEntities.inverseDict.get(nodeChar.getReferenceId())!=null)
+						suggested_word.suggestion.add(new Pair(dictionaries.namedEntities.inverseDict.get(nodeChar.getReferenceId()),0));
+					if(nodeChar.getReferenceTable() == ANNOTATED_WORD && dictionaries.annotatedWords.inverseDict.get(nodeChar.getReferenceId())!=null)
+						suggested_word.suggestion.add(new Pair(dictionaries.annotatedWords.inverseDict.get(nodeChar.getReferenceId()),0));
+					}catch(NullPointerException ex) {
+						ex.printStackTrace();
+					}
+				}else {
+					wordSuggestion.setDictionary(dictionaries.incorrectWords);
+					if (wordSuggestion.searchWord(data)==true) 
+						suggested_word.wordType="error";
+					else
+						suggested_word.wordType="unknown";
+					//wordSuggestion.setDictionary(dictionaries.dicWords);
+				}
+				// following piece of code is necessary for querying server
+				/*
+				wordSuggestion.setDictionary(dictionaries.dicWords);
+				if(wordSuggestion.searchWord(data) == true) {
+					TrieNodeWithList node = wordSuggestion.getWord(data);
+					
+					table_query.put(Integer.parseInt(key), node);
+				
+					//Pair suggestion = null;//dbQueryCacheMiss.getDataFromTable(node);
+					
+					if(suggestion!= null) {
+						if(suggested_word.suggestion == null)
+							suggested_word.suggestion = new ArrayList<Pair>();
+						suggested_word.suggestion.add(suggestion);
+					}
+					suggested_word.wordType="error";
+				}*/
+				wordSuggestion.setDictionary(dictionaries.correctWords);
+				suggested_word = createSuggestion(suggested_word, data);
+				wordSuggestion.setDictionary(dictionaries.annotatedWords);
+				suggested_word = createSuggestion(suggested_word, data);
+				wordSuggestion.setDictionary(dictionaries.namedEntities);
+				suggested_word = createSuggestion(suggested_word, data);
+			}
+		}
+		//encoded = this.gson.toJson(suggested_word);		
+		return suggested_word;
+
+	}
+	public Map<Integer, spell_checking_dto> getWordValidationInfo(Map<Integer, String> tokenized_data) {
+		//String encoded;
+		Map<Integer, spell_checking_dto> result_list = new HashMap<>();
+		Map<String, Integer> tracker = new HashMap<String, Integer>();
+		Map<Integer, TrieNodeWithList> table_query = new HashMap<>();
+		String data;
+		String key;
+		spell_checking_dto suggested_word;
+		for(Entry<Integer, String> comp : tokenized_data.entrySet()) {
+			//suggested_word = new suggested_word_dto();
+			
+			//List<spell_checking_dto> result_list = new ArrayList<spell_checking_dto>();
+			data = comp.getValue().toString().trim();
+			key = comp.getKey().toString().trim();
+			
+			//List<String> splitted_data = WT.splitting_slash(data);
+			//for(String datum : splitted_data) {
+				suggested_word = new spell_checking_dto();
+				suggested_word.word = data;
+				suggested_word.ID = 0;
+				suggested_word.isCorrect = 0;
+				suggested_word = getProcessedMap(suggested_word, data, result_list, tracker, key, table_query);
+				result_list.put(Integer.parseInt(key), suggested_word);
+				tracker.put(data, Integer.parseInt(key));
+			//}
+			//index += 1;
+		}
+		//if(table_query.size() != 0)
+			//result_list = dbQueryCacheMiss.getDataFromTable(table_query, result_list);
+		return  result_list;
+	}
+
+	
+}

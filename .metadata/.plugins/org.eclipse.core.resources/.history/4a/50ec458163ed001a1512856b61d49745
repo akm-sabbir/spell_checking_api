@@ -1,0 +1,521 @@
+package word_content;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
+
+import org.apache.log4j.Logger;
+
+import com.google.gson.Gson;
+
+import bangla.WithTrie.WordSuggestionV3;
+import bangla.grammarChecker.sentence_validation_process;
+import bangla.spellChecker.WordTokenizer;
+import bangla.spellChecker.spell_checking_dto;
+import bangla.spellChecker.word_validation_process;
+/**
+ * Servlet implementation class Word_contentServlet
+ */
+@WebServlet("/api/wordcontent")
+@MultipartConfig
+public class Word_contentServlet extends HttpServlet 
+{
+	private static final long serialVersionUID = 1L;
+    public static Logger logger = Logger.getLogger(Word_contentServlet.class);
+    String tableName = "word_content";
+    String tempTableName = "word_content_temp";
+	Word_contentDAO word_contentDAO;
+	int maxMissmatch=100;
+	spell_checking_dto suggested_word;
+	WordSuggestionV3 wordSuggestion = new WordSuggestionV3();
+	WordTokenizer WT = new WordTokenizer();
+	private word_validation_process sp_checker = new word_validation_process();
+	private sentence_validation_process gr_checker = new sentence_validation_process();
+    private Gson gson = new Gson();
+    
+    /**
+     * @see HttpServlet#HttpServlet()
+     * 
+     */
+    
+    public Word_contentServlet() 
+	{
+        super();
+    	try
+    	{
+			//approval_module_mapDTO = approval_module_mapDAO.getApproval_module_mapDTOByTableName("word_content");
+			//word_contentDAO = new Word_contentDAO(tableName, tempTableName, approval_module_mapDTO);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }   
+
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
+	{
+		System.out.println("I am In doGet request = " + request);
+		//LoginDTO loginDTO = (LoginDTO)request.getSession().getAttribute(SessionConstants.USER_LOGIN);
+		//UserDTO userDTO = UserRepository.getUserDTOByUserID(loginDTO);
+		/*
+		boolean isPermanentTable = true;
+		if(request.getParameter("isPermanentTable") != null)
+		{
+			isPermanentTable = Boolean.parseBoolean(request.getParameter("isPermanentTable"));
+		}
+		System.out.println("In servlet, isPermanentTable = " + isPermanentTable);
+		try
+		{
+			String actionType = request.getParameter("actionType");
+			if(actionType.equals("getAddPage"))
+			{
+				//if(PermissionRepository.checkPermissionByRoleIDAndMenuID(userDTO.roleID, MenuConstants.WORD_CONTENT_ADD))
+				{
+					getAddPage(request, response);
+				}
+				//else
+				{
+					//request.getRequestDispatcher(Constants.ERROR_PAGE).forward(request, response);
+				}
+			}
+			else if(actionType.equals("getEditPage"))
+			{
+				if(PermissionRepository.checkPermissionByRoleIDAndMenuID(userDTO.roleID, MenuConstants.WORD_CONTENT_UPDATE))
+				{
+					if(isPermanentTable)
+					{
+						getWord_content(request, response, tableName);
+					}
+					else
+					{
+						getWord_content(request, response, tempTableName);
+					}
+				}
+				else
+				{
+					request.getRequestDispatcher(Constants.ERROR_PAGE).forward(request, response);
+				}						
+			}
+			else if(actionType.equals("getURL"))
+			{
+				String URL = request.getParameter("URL");
+				System.out.println("URL = " + URL);
+				response.sendRedirect(URL);			
+			}
+			else if(actionType.equals("search"))
+			{
+				System.out.println("search requested");
+				if(PermissionRepository.checkPermissionByRoleIDAndMenuID(userDTO.roleID, MenuConstants.WORD_CONTENT_SEARCH))
+				{
+					
+					if(isPermanentTable)
+					{
+						searchWord_content(request, response, tableName, isPermanentTable);
+					}
+					else
+					{
+						searchWord_content(request, response, tempTableName, isPermanentTable);
+					}
+				}			
+			}
+			else if(actionType.equals("getApprovalPage"))
+			{
+				System.out.println("getApprovalPage requested");
+				if(PermissionRepository.checkPermissionByRoleIDAndMenuID(userDTO.roleID, MenuConstants.WORD_CONTENT_SEARCH))
+				{
+					searchWord_content(request, response, tempTableName, false);
+				}
+				else
+				{
+					request.getRequestDispatcher(Constants.ERROR_PAGE).forward(request, response);
+				}				
+			}
+			else
+			{
+				request.getRequestDispatcher(Constants.ERROR_PAGE).forward(request, response);
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+			logger.debug(ex);
+		}*/
+	}
+
+	private void getAddPage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
+	{
+		request.setAttribute("ID", -1L);
+		RequestDispatcher requestDispatcher = request.getRequestDispatcher("word_content/word_contentEdit.jsp");
+		requestDispatcher.forward(request, response);
+	}
+	private String getFileName(final Part part) 
+	{
+	    final String partHeader = part.getHeader("content-disposition");
+	    System.out.println("Part Header = {0}" +  partHeader);
+	    for (String content : part.getHeader("content-disposition").split(";")) {
+	        if (content.trim().startsWith("filename")) {
+	            return content.substring(
+	                    content.indexOf('=') + 1).trim().replace("\"", "");
+	        }
+	    }
+	    return null;
+	}
+
+	
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
+	{
+		// TODO Auto-generated method stub
+		//LoginDTO loginDTO = (LoginDTO)request.getSession().getAttribute(SessionConstants.USER_LOGIN);
+		//UserDTO userDTO = UserRepository.getUserDTOByUserID(loginDTO);
+		System.out.println(" calling the doPost operation");
+		String URL = "word_content/word_contentInPlaceEdit.jsp";
+		logger.info("Recieved a request to process: " );
+		String text_data = request.getParameter("identity");
+		if (text_data.length() == 0) {
+			return;
+		}
+		List<String> tokenized_sentence = new ArrayList<String>();
+		try {
+			tokenized_sentence = gr_checker.getTokenizedSentence(text_data);
+		}catch(Exception ex) {
+			logger.info("sentence tokenization process is throwing exception: " + ex.getMessage());
+		}
+		//List<String> tokenized_data = sp_checker.getTokenizedWord(text_data);
+		if(tokenized_sentence.size() <=0 ) {
+			return;
+		}
+		System.out.println("number of words after tokenization ");
+		//System.out.println(tokenized_data.size());
+		//Map<String, Integer> inverted_index = sp_checker.getInvertedIndex(tokenized_data);
+		Map<Integer, spell_checking_dto> result_list = new HashMap<>();
+		try {
+			Map<Integer, String> indexedWords = wordSuggestion.getIndexedWords(tokenized_sentence);
+			result_list = sp_checker.getWordValidationInfo(indexedWords);
+			System.out.println(result_list.size());
+		}catch(Exception ex ) {
+			System.out.println(ex.getMessage());
+			ex.printStackTrace();
+			//logger.info("Something wrong in the process" + ex.getMessage());
+		}
+		/*
+		if(tokenized_sentence.size() != 0) {
+			List<spell_checking_dto> result_list2 =  gr_checker.getSentenceValidationInfo(tokenized_sentence, result_list);
+			if(result_list2.size() != 0)
+				result_list.addAll(result_list2);
+		}*/
+		try {
+			result_list = gr_checker.getSentenceValidationInfo(tokenized_sentence, result_list);
+		}catch(Exception ex) {
+			System.out.println(ex.getMessage());
+			ex.printStackTrace();
+		}
+		PrintWriter out = response.getWriter();
+		String final_result = this.gson.toJson(result_list);
+		request.setAttribute("word_suggestion", final_result);
+		response.setContentType("application/json");
+		response.setCharacterEncoding("UTF-8");
+		response.setHeader("Access-Control-Allow-Origin", "*");
+		response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+		logger.debug("End of request processing: " );
+		out.print(final_result);
+		out.flush();
+		
+	}
+	
+	private void getDTO(HttpServletRequest request, HttpServletResponse response, String tableName) 
+	{
+		try 
+		{
+			System.out.println("In getDTO");
+			Word_contentDTO word_contentDTO = (Word_contentDTO)word_contentDAO.getDTOByID(Long.parseLong(request.getParameter("ID")), tableName);
+			PrintWriter out = response.getWriter();
+			response.setContentType("application/json");
+			response.setCharacterEncoding("UTF-8");
+			
+			String encoded = this.gson.toJson(word_contentDTO);
+			System.out.println("json encoded data = " + encoded);
+			out.print(encoded);
+			out.flush();
+		}
+		catch (NumberFormatException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	/*
+	private void approveWord_content(HttpServletRequest request, HttpServletResponse response, boolean b, UserDTO userDTO) 
+	{
+		try
+		{
+			long id = Long.parseLong(request.getParameter("idToApprove"));
+			Word_contentDTO word_contentDTO = (Word_contentDTO)word_contentDAO.getDTOByID(id, tempTableName);
+			word_contentDAO.manageWriteOperations(word_contentDTO, SessionConstants.APPROVE, id, userDTO);
+		}
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		}
+		
+	}
+	private void addWord_content(HttpServletRequest request, HttpServletResponse response, Boolean addFlag, UserDTO userDTO, String tableName, boolean isPermanentTable) throws IOException 
+	{
+		// TODO Auto-generated method stub
+		try 
+		{
+			request.setAttribute("failureMessage", "");
+			System.out.println("%%%% addWord_content");
+			String path = getServletContext().getRealPath("/img2/");
+			Word_contentDTO word_contentDTO;
+			String FileNamePrefix;
+			if(addFlag == true)
+			{
+				word_contentDTO = new Word_contentDTO();
+				FileNamePrefix = UUID.randomUUID().toString().substring(0, 10);
+			}
+			else
+			{
+				word_contentDTO = (Word_contentDTO)word_contentDAO.getDTOByID(Long.parseLong(request.getParameter("identity")), tableName);
+				FileNamePrefix = request.getParameter("identity");
+			}
+			
+			String Value = "";
+			Value = request.getParameter("word");
+			if(Value != null)
+			{
+				Value = Jsoup.clean(Value,Whitelist.simpleText());
+			}
+			System.out.println("word = " + Value);
+			if(Value != null && !Value.equalsIgnoreCase(""))
+			{
+				word_contentDTO.word = (Value);
+			}
+			else
+			{
+				System.out.println("FieldName has a null Value, not updating" + " = " + Value);
+			}
+			Value = request.getParameter("language");
+			if(Value != null)
+			{
+				Value = Jsoup.clean(Value,Whitelist.simpleText());
+			}
+			System.out.println("language = " + Value);
+			if(Value != null && !Value.equalsIgnoreCase(""))
+			{
+				word_contentDTO.language = (Value);
+			}
+			else
+			{
+				System.out.println("FieldName has a null Value, not updating" + " = " + Value);
+			}
+			
+			System.out.println("Done adding  addWord_content dto = " + word_contentDTO);
+			
+			if(addFlag == true)
+			{
+				word_contentDAO.manageWriteOperations(word_contentDTO, SessionConstants.INSERT, -1, userDTO);
+			}
+			else
+			{
+				if(isPermanentTable)
+				{
+					word_contentDAO.manageWriteOperations(word_contentDTO, SessionConstants.UPDATE, -1, userDTO);
+				}
+				else
+				{
+					word_contentDAO.manageWriteOperations(word_contentDTO, SessionConstants.VALIDATE, -1, userDTO);
+				}				
+				
+			}	
+			
+			String inPlaceSubmit = (String)request.getParameter("inplacesubmit");
+			
+			if(inPlaceSubmit != null && !inPlaceSubmit.equalsIgnoreCase(""))
+			{
+				getWord_content(request, response, tableName);
+			}
+			else
+			{
+				response.sendRedirect("Word_contentServlet?actionType=search");
+			}
+					
+		}
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	
+
+
+
+	
+	
+	
+
+	private void deleteWord_content(HttpServletRequest request, HttpServletResponse response, UserDTO userDTO, boolean deleteOrReject) throws IOException 
+	{				
+		try 
+		{
+			String[] IDsToDelete = request.getParameterValues("ID");
+			for(int i = 0; i < IDsToDelete.length; i ++)
+			{
+				long id = Long.parseLong(IDsToDelete[i]);
+				System.out.println("------ DELETING " + IDsToDelete[i]);
+				
+				if(deleteOrReject)
+				{
+					Word_contentDTO word_contentDTO = (Word_contentDTO)word_contentDAO.getDTOByID(id);
+					word_contentDAO.manageWriteOperations(word_contentDTO, SessionConstants.DELETE, id, userDTO);
+					response.sendRedirect("Word_contentServlet?actionType=search");
+				}
+				else
+				{
+					Word_contentDTO word_contentDTO = (Word_contentDTO)word_contentDAO.getDTOByID(id, tempTableName);
+					word_contentDAO.manageWriteOperations(word_contentDTO, SessionConstants.REJECT, id, userDTO);					
+					response.sendRedirect("Word_contentServlet?actionType=getApprovalPage");
+				}
+			}			
+		}
+		catch (Exception ex) 
+		{
+			ex.printStackTrace();
+		}
+		
+	}
+*/
+	private void getWord_content(HttpServletRequest request, HttpServletResponse response, String tableName) throws ServletException, IOException
+	{
+		System.out.println("in getWord_content");
+		Word_contentDTO word_contentDTO = null;
+		try 
+		{
+			word_contentDTO = (Word_contentDTO)word_contentDAO.getDTOByID(Long.parseLong(request.getParameter("ID")), tableName);
+			request.setAttribute("ID", word_contentDTO.iD);
+			request.setAttribute("word_contentDTO",word_contentDTO);
+			request.setAttribute("word_contentDAO",word_contentDAO);
+			
+			String URL= "";
+			
+			String inPlaceEdit = (String)request.getParameter("inplaceedit");
+			String inPlaceSubmit = (String)request.getParameter("inplacesubmit");
+			String getBodyOnly = (String)request.getParameter("getBodyOnly");
+			
+			if(inPlaceEdit != null && !inPlaceEdit.equalsIgnoreCase(""))
+			{
+				URL = "word_content/word_contentInPlaceEdit.jsp";	
+				request.setAttribute("inplaceedit","");				
+			}
+			else if(inPlaceSubmit != null && !inPlaceSubmit.equalsIgnoreCase(""))
+			{
+				URL = "word_content/word_contentSearchRow.jsp";
+				request.setAttribute("inplacesubmit","");					
+			}
+			else
+			{
+				if(getBodyOnly  != null && !getBodyOnly.equalsIgnoreCase(""))
+				{
+					URL = "word_content/word_contentEditBody.jsp?actionType=edit";
+				}
+				else
+				{
+					URL = "word_content/word_contentEdit.jsp?actionType=edit";
+				}				
+			}
+			
+			RequestDispatcher rd = request.getRequestDispatcher(URL);
+			rd.forward(request, response);
+		}
+		catch (NumberFormatException e) 
+		{
+			e.printStackTrace();
+		}
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	@Override
+	  protected void doOptions(HttpServletRequest req, HttpServletResponse resp)
+	          throws ServletException, IOException {
+	      setAccessControlHeaders(resp);
+	      resp.setStatus(HttpServletResponse.SC_OK);
+	  }
+
+	  private void setAccessControlHeaders(HttpServletResponse resp) {
+	      resp.setHeader("Access-Control-Allow-Origin", "*");
+	      resp.setHeader("Access-Control-Allow-Headers", "x-requested-with");
+	      resp.setHeader("Access-Control-Allow-Methods"," GET, POST, OPTIONS");
+		  //resp.setHeader("Access-Control-Allow-Headers","Content-Type");
+		  //resp.setHeader("Content-Type", "application/json");
+	  }
+	private void searchWord_content(HttpServletRequest request, HttpServletResponse response, String tableName, boolean isPermanent) throws ServletException, IOException
+	{
+		System.out.println("in  searchWord_content 1");
+		//LoginDTO loginDTO = (LoginDTO)request.getSession(true).getAttribute( SessionConstants.USER_LOGIN );
+		//UserDTO userDTO = UserRepository.getUserDTOByUserID(loginDTO);
+		String ajax = (String)request.getParameter("ajax");
+		boolean hasAjax = false;
+		if(ajax != null && !ajax.equalsIgnoreCase(""))
+		{
+			hasAjax = true;
+		}
+		System.out.println("ajax = " + ajax + " hasajax = " + hasAjax);
+		/*
+        RecordNavigationManager3 rnManager = new RecordNavigationManager3(
+			SessionConstants.NAV_WORD_CONTENT,
+			request,
+			word_contentDAO,
+			SessionConstants.VIEW_WORD_CONTENT,
+			SessionConstants.SEARCH_WORD_CONTENT,
+			tableName,
+			isPermanent,
+			userDTO.approvalPathID);
+        try
+        {
+			System.out.println("trying to dojob");
+            rnManager.doJob(loginDTO);
+        }
+        catch(Exception e)
+        {
+			System.out.println("failed to dojob" + e);
+        }
+
+		request.setAttribute("word_contentDAO",word_contentDAO);
+        RequestDispatcher rd;
+        if(hasAjax == false)
+        {
+        	System.out.println("Going to word_content/word_contentSearch.jsp");
+        	rd = request.getRequestDispatcher("word_content/word_contentSearch.jsp");
+        }
+        else
+        {
+        	System.out.println("Going to word_content/word_contentSearchForm.jsp");
+        	rd = request.getRequestDispatcher("word_content/word_contentSearchForm.jsp");
+        }
+		rd.forward(request, response);*/
+	}
+	
+}
+

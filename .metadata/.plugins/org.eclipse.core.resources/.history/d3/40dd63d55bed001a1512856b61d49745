@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="spell_checking_api">
+        <property name="context-root" value="spell_checking_api"/>
+    </wb-module>
+</project-modules>

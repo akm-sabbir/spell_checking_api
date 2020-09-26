@@ -1,0 +1,167 @@
+package repository;
+import javax.servlet.*;
+
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.PropertyConfigurator;
+
+import bangla.WithTrie.TrieNodeWithList;
+import bangla.WithTrie.WordSuggestionV3;
+import bangla.WithTrie.dictionary;
+import bangla.grammarChecker.ValidateNoSpaceBetweenWords;
+import bangla.grammarChecker.ValidateShadhuCholitMixure;
+import bangla.grammarChecker.ValidateSpaceErrorBetweenWords;
+import bangla.grammarChecker.ValidateSubVerbRelError;
+import bangla.spellChecker.dictionaries;
+import bangla.spellChecker.spell_checking_dao;
+import bangla.spellChecker.spell_checking_dto;
+import bangla.spellChecker.spell_checking_repository;
+import bangla.spellChecker.word_dto;
+import repository.RepositoryManager;
+
+import java.io.File;
+import java.io.IOException;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;  
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+public class dictionaryInitializer implements ServletContextListener{  
+	
+	private static final long serialVersionUID = 7107778882102998266L;
+	private spell_checking_repository sp_rep;
+	private static int errorDictSize = 25000;
+	private static int namedEntitySize = 25000;
+	private static int dictSize = 25000;
+	private static int dictWordSize = 25000;
+	private String log4jConfPath = "log4j.properties";
+	//PropertyConfigurator.configure(log4jConfPath);
+	public spell_checking_repository createAndGetSpDao(WordSuggestionV3 wordSuggestion, spell_checking_dao sp_dao,
+			dictionary dict) {
+		sp_rep = new spell_checking_repository();
+    	sp_rep.setDAO(sp_dao);
+    	sp_rep.setDictionary(dict);
+    	sp_rep.setWordSuggestionV3(wordSuggestion);
+    	return sp_rep;
+	}
+	
+	public void contextInitialized(ServletContextEvent event) {
+		//PropertyConfigurator.configure(configFilename);
+		//BasicConfigurator.configure();
+		ServletContext context = event.getServletContext();
+		String log4jConfigFile = context.getInitParameter("log4j.properties");
+		//System.out.println(log4jConfigFile);
+		String fullPath = "E:\\ProjectsRepo" + File.separator +"src"+ File.separator + "log4j.properties";
+		System.out.println(fullPath);
+		PropertyConfigurator.configure(fullPath);
+		System.out.println("project Deployment Started");
+		try {
+			System.out.println("Loading mysql Driver");
+			Class.forName("com.mysql.jdbc.Driver").newInstance();
+		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	try{  
+		WordSuggestionV3 wordSuggestion = new WordSuggestionV3();
+    	spell_checking_dao sp_dao = new spell_checking_dao();
+    	// Dictionary size is fairly small so i am reading it all in one go.
+    	String sql = "SELECT * FROM dictionary_words limit " + dictSize;
+		System.out.println(sql);
+		//sp_rep = createAndGetSpDao(wordSuggestion, sp_dao, dictionaries.correctWords );
+    	//RepositoryManager.getInstance().addRepository(sp_rep);
+    	try {
+			this.buildDictionary(sql, wordSuggestion, sp_dao, dictionaries.correctWords, dictSize);
+			wordSuggestion.setDictionary(dictionaries.correctWords);
+			/*
+			if(wordSuggestion.searchWord("পড়ে") == true)
+				System.out.println(wordSuggestion.getWord("পড়ে"));
+			else
+				System.out.println("pore is not in the dicionary");
+				*/
+			sql = "SELECT * FROM annotated_word limit " + dictSize;
+			this.buildDictionary(sql, wordSuggestion, sp_dao, dictionaries.annotatedWords, dictSize);
+			System.out.println("dictionary build up completed");
+			System.out.println("Now i am starting repository manager");
+			// we dont need  it in future
+			this.buildValidSpaceDictionary(dictionaries.correctWords.getDictionary());
+			this.buildVerbAndPurusList(sp_dao);
+			// incorrect word table is pretty big so i am reading it with limit and keeping track of the pointer
+			sql = "SELECT * FROM error_word limit " + errorDictSize;
+			this.buildDictionary(sql, wordSuggestion, sp_dao, dictionaries.incorrectWords, errorDictSize);
+			System.out.print("Error word dictionary build up has been completed");
+			sql = "SELECT *  FROM named_entity limit " + namedEntitySize;
+			this.buildDictionary(sql, wordSuggestion, sp_dao, dictionaries.namedEntities, namedEntitySize);
+			sql = "select * from natural_error_word limit " + dictWordSize; 
+			this.buildDictionary(sql, wordSuggestion, sp_dao, dictionaries.naturalErrorWords, dictWordSize);
+			System.out.println("Named Entity dictionary build up has been completed");
+			//RepositoryManager.getInstance().startMachine();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	System.out.println("Trying to form the dictionary");  
+	  
+	}catch(Exception e){e.printStackTrace();}  
+	}  
+	
+	public void buildValidSpaceDictionary(TrieNodeWithList root) {
+		//ValidateSpaceErrorBetweenWords.buildTrie(words);
+		ValidateSpaceErrorBetweenWords.setDictionary(root);
+		ValidateNoSpaceBetweenWords.setDictionary(root);
+		return;
+	}
+	
+	public void buildVerbAndPurusList(spell_checking_dao sp_dao) {
+		String sql = "SELECT cholit_word, sadhu_word ";
+		sql += " FROM verb_list " ;
+		String[] columns = {"cholit_word", "sadhu_word"};
+		List<String> column_ = Arrays.asList(columns);
+		List<spell_checking_dto> sadhuCholit =  sp_dao.getSpellCheckingDTOs(sql, column_);
+		ValidateShadhuCholitMixure.buildTrie(sadhuCholit);
+		ValidateSubVerbRelError.buildTrie(sadhuCholit);
+		sql = "SELECT pronoun, grade ";
+		sql += " FROM purus " ;
+		String[] columns2 = {"pronoun", "grade"};
+		column_ = Arrays.asList(columns2);
+		List<spell_checking_dto> purus =  sp_dao.getSpellCheckingDTOs(sql, column_);
+		ValidateSubVerbRelError.setPurushMap(purus);
+		sql = "SELECT cholito, shadhu, subjects ";
+		sql += " FROM sub_verb_map " ;
+		String[] columns3 = {"cholito", "shadhu", "subjects"};
+		column_ = Arrays.asList(columns3);
+		List<ArrayList<String>> subVerbMap = sp_dao.getSubjectVerbMap(sql, column_);
+		ValidateSubVerbRelError.buildSubVerbMap(subVerbMap);
+		
+		return;
+	}
+	
+	public void buildDictionary(String sql, WordSuggestionV3 wordSuggestion, spell_checking_dao sp_dao, dictionary Words, int offset) {
+		
+		System.out.println(sql);
+		List<word_dto> words =  sp_dao.getDTOs(new ArrayList<Long>(),sql, Words);
+		sp_rep = createAndGetSpDao(wordSuggestion, sp_dao, Words );
+		try {
+			wordSuggestion.init_dictionary(words, Words);
+			wordSuggestion.setDictionarySize(words.size());
+			Words.setOffset(offset);
+			RepositoryManager.getInstance().addRepository(sp_rep);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	  
+	public void contextDestroyed(ServletContextEvent arg0) {  
+		RepositoryManager.getInstance().shutDown();
+		System.out.println("project undeployed");  
+	          
+	} 
+	public static void main(String[] args) {
+		dictionaryInitializer dic = new dictionaryInitializer();
+		dic.contextInitialized(null);
+	}
+	
+}

@@ -1,0 +1,97 @@
+package bangla.grammarChecker;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import repository.dictionaryInitializer;
+import bangla.spellChecker.SentenceTokenizer;
+import bangla.spellChecker.WordTokenizer;
+import bangla.spellChecker.spell_checking_dao;
+import bangla.spellChecker.spellchecking_Servlet;
+import bangla.spellChecker.word_dto;
+
+public class Main {
+	
+	public static String concatWithCommas(Collection<String> words) {
+	    StringBuilder wordList = new StringBuilder();
+	    for (String word : words) {
+	        wordList.append(word + " ");
+	    }
+	    return new String(wordList.deleteCharAt(wordList.length() - 1));
+	}
+	public void mainInvalidateSpace() {
+		spell_checking_dao sp_dao = new spell_checking_dao();
+    	String sql = "SELECT * ";
+		sql += " FROM word " ;
+		sql += " limit " + new Integer(113000).toString();
+		System.out.println(sql);
+		ArrayList<Integer> arrList = new ArrayList<>();
+		//List<word_dto> words =  sp_dao.getDTOs(arrList,  sql, null);
+		//ValidateNoSpaceBetweenWords.buildTrie(words);
+		GrammerCheckerDto res = ValidateNoSpaceBetweenWords.hasError(" এবসতি গুলো একসাথে একই রাস্তার মধ্যে দেখা যায়।");
+		if(res.isValidSentence) {
+			System.out.println("Valid sentence");
+		} else {
+			System.out.println(res.errorType);
+			System.out.println("Invalid word: " + res.wordSuggestion.get(0).wordName);
+			System.out.println("Correct words: " + res.wordSuggestion.get(0).suggestedWord);
+		}
+	}
+	
+	public void mainValidateSpace() {
+		// TODO Auto-generated method stub
+				spell_checking_dao sp_dao = new spell_checking_dao();
+		    	String sql = "SELECT * ";
+				sql += " FROM word " ;
+				sql += " limit " + new Integer(200000).toString();
+				System.out.println(sql);
+				ArrayList<Long> arrList = new ArrayList<>();
+				List<word_dto> words =  sp_dao.getDTOs(arrList,  sql, null);
+				ValidateSpaceErrorBetweenWords.buildTrie(words);
+				GrammerCheckerDto res = ValidateSpaceErrorBetweenWords.hasError("মাস্টার মশাই কি আমাকে ডেকেছেন?");
+				if(res.isValidSentence) {
+					System.out.println("Valid sentence");
+				} else {
+					System.out.println(res.errorType);
+					System.out.println("Wrong word: " + res.wordSuggestion.get(0).wordName);
+					System.out.println("Correct word: " + res.wordSuggestion.get(0).suggestedWord);
+				}
+	}
+
+	public void mainValidateVerbSubRelation() {
+		//ValidateSubVerbRelError.setPurushMap();
+				//ValidateSubVerbRelError.buildTrie();
+				//System.out.println(ValidateSubVerbRelError.isPurushWord("আমরা"));
+				//System.out.println(ValidateSubVerbRelError.isVerb("আগালে"));
+				dictionaryInitializer sp = new dictionaryInitializer();
+				spell_checking_dao sp_dao = new spell_checking_dao();
+				sp.buildVerbAndPurusList(sp_dao);
+				//while(true) {
+					//Scanner in = new Scanner(System.in);
+					String sentence = "তিনি ভাত খাই";//;;;;
+					WordTokenizer wt = new WordTokenizer();
+					wt.set_text(sentence);
+					List<String> strings = wt._tokenization();
+					sentence = concatWithCommas(strings);
+					GrammerCheckerDto res = ValidateSubVerbRelError.hasError(sentence);
+					if(res.isValidSentence==false) { 
+						System.out.println("Error Type: " + res.errorType);
+						System.out.println("Word: " + res.wordSuggestion.get(0).wordName + "\nWord type: " + res.wordSuggestion.get(0).wordType + "\nsuggested word: " + res.wordSuggestion.get(0).suggestedWord);
+					} else {
+						System.out.println("Right sentence");
+					}
+				//}
+				
+	}
+	
+	public static void main(String[] args) {
+		SentenceTokenizer st = new SentenceTokenizer();
+		WordTokenizer wt = new WordTokenizer();
+		wt.set_text("পড়ে।");
+		System.out.println(wt._tokenization());
+	}
+
+}
+// এবসতি গুলো একসাথে একই রাস্তার মধ্যে দেখা যায়।
+// জাফর ধানও গমের চাষাাবাদ করে।

@@ -1,0 +1,130 @@
+package bangla.grammarChecker;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import bangla.WithTrie.dictionaryWords;
+import bangla.spellChecker.*;
+
+public class sentence_validation_process {
+	
+	private WordTokenizer WT = new WordTokenizer();
+	private SentenceTokenizer ST = new SentenceTokenizer();
+	public List<String> getTokenizedSentence(String text){
+		
+		ST.set_text(text);
+		List<String> sentences = ST._tokenization();
+		return sentences;
+	}
+	public  String concatWithSpaces(Collection<String> words) {
+	    StringBuilder wordList = new StringBuilder();
+	    for (String word : words) {
+	        wordList.append(word + " ");
+	    }
+	    return new String(wordList.deleteCharAt(wordList.length() - 1));
+	}
+	public Map<Integer, spell_checking_dto> getCheckedWordsForSentences(GrammerCheckerDto res, int baseIndex){
+		String[] errType = null;
+		spell_checking_dto suggested_word=null;
+		Map<Integer, spell_checking_dto> result_list = new HashMap<>();
+		if(res.isValidSentence == false) {
+			errType = res.errorType.split(" ");
+			for (int i = 0; i < res.wordSuggestion.size(); i++) {
+				suggested_word = new spell_checking_dto();
+				suggested_word.word = res.wordSuggestion.get(i).wordName;
+				suggested_word.isCorrect = 1;
+				suggested_word.wordType = errType[i];
+				suggested_word.suggestion = new ArrayList<Pair>();
+				suggested_word.suggestion.add(new Pair(res.wordSuggestion.get(i).suggestedWord, 0));
+				result_list.put(i, suggested_word);
+			}
+		}
+		return result_list;
+	}
+	public Map<Integer, spell_checking_dto> getCheckedWordsForSentencesUpdateMap(GrammerCheckerDto res, Map<Integer, spell_checking_dto> maps, int baseIndex){
+		int index;
+		String errType[];
+		if(res.isValidSentence == false) {
+			//errType = res.errorType.split(" ");			
+			for (int i = 0; i < res.wordSuggestion.size(); i++) {
+				index = baseIndex + res.wordSuggestion.get(i).wordIndex;
+				if(maps.get(index).isCorrect == 1 && (res.errorType == "invalid-space-in-word" || res.errorType == "no-space-between-words"))
+					continue;
+				//maps.get(index).isCorrect = 0;
+				if (maps.get(index).suggestion == null){
+					maps.get(index).suggestion = new ArrayList<Pair>();
+				}
+				maps.get(index).suggestion.add(new Pair(res.wordSuggestion.get(i).suggestedWord, -1));/// null pointer exception here what is the reason
+				if(res.errorType == "invalid-space-in-word")
+					maps.get(index).word = res.wordSuggestion.get(i).wordName;
+				if (maps.get(index).wordType == null)
+					maps.get(index).wordType = res.errorType;
+				else
+					maps.get(index).wordType += " " + res.errorType;
+			}
+		}
+		return maps;
+	}
+	public Map<Integer, spell_checking_dto> getSentenceValidationInfo(List<String> sentences, Map<Integer, spell_checking_dto> wordMapping){
+		Map<Integer, spell_checking_dto> result_list = new HashMap<>();
+		//ArrayList<spell_c-hecking_dto> result_list = new ArrayList<>();
+		GrammerCheckerDto res;
+		//int index = size ;
+		List<String> words ;
+		int baseInd = 0;
+		for (String each_sentence : sentences) {
+			
+			
+			WT.set_text(each_sentence);
+			words = WT._tokenization();
+			if(words.size() < 2) {
+				baseInd += words.size();
+				continue;
+			}
+			each_sentence = concatWithSpaces(words);
+			ValidateNoSpaceBetweenWords.setDictionary(dictionaries.correctWords.getDictionary());
+			//wordSuggestion.setDictionary(dictionaries.incorrectWords);
+			res = ValidateNoSpaceBetweenWords.hasError(each_sentence);
+			wordMapping = getCheckedWordsForSentencesUpdateMap(res, wordMapping ,baseInd);
+			//List<spell_checking_dto> returned_result = getCheckedWordsForSentences(res, baseInd);
+			//if (returned_result.size() != 0) 
+				//result_list.addAll(returned_result);
+			
+			
+			res = ValidateSpaceErrorBetweenWords.hasError(each_sentence);
+			wordMapping = getCheckedWordsForSentencesUpdateMap(res, wordMapping ,baseInd);
+			//returned_result = getCheckedWordsForSentences(res);
+			//if (returned_result.size() != 0) 
+				//result_list.addAll(returned_result);
+			
+			res = ValidateShadhuCholitMixure.hasMixure(each_sentence);
+			wordMapping = getCheckedWordsForSentencesUpdateMap(res, wordMapping ,baseInd);
+			//returned_result = getCheckedWordsForSentences(res);
+			//if (returned_result.size() != 0) 
+				//result_list.addAll(returned_result);
+			res = ValidateNirdeshokError.hasError(each_sentence);
+			wordMapping = getCheckedWordsForSentencesUpdateMap(res, wordMapping, baseInd);
+			
+			if() {
+				for(int i = 0 ; i < words.hashCode() - 2; i++) {
+					System.out.println("Checking subject verb agreement");
+					res = ValidateSubVerbRelError.hasError(each_sentence);
+					wordMapping = getCheckedWordsForSentencesUpdateMap(res, wordMapping ,baseInd);
+					//returned_result = getCheckedWordsForSentences(res);
+					//if (returned_result.size() != 0) 
+						//result_list.addAll(returned_result);
+				}
+			}
+			//suggested_sen.ID =index;
+			//result_list.add(suggested_sen);
+			//result_list.put(index, suggested_sen);
+			//index += 1;
+			baseInd += words.size();
+		}
+		return wordMapping;
+	}
+}

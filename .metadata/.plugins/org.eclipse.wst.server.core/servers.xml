@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<servers>
+  <server auto-publish-setting="2" auto-publish-time="1" configuration-id="/Servers/apache_web_server-config" deployDir="wtpwebapps" hostname="localhost" id="apache_web_server" name="apache_web_server" runtime-id="Apache Tomcat v9.0" server-type="org.eclipse.jst.server.tomcat.90" server-type-id="org.eclipse.jst.server.tomcat.90" start-timeout="45" stop-timeout="15" testEnvironment="true" timestamp="1">
+    <list key="modules" value0="spell_checking_api::org.eclipse.jst.jee.server:spell_checking_api::jst.web::3.0"/>
+  </server>
+</servers>

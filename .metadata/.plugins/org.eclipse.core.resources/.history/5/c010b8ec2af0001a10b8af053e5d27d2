@@ -1,0 +1,455 @@
+package bangla.WithTrie;
+
+import java.io.IOException;
+
+import java.util.Queue;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.PriorityQueue;
+import java.util.Scanner;
+
+import bangla.spellChecker.Pair;
+import bangla.spellChecker.WordTokenizer;
+import bangla.spellChecker.word_dto;
+
+public class WordSuggestionV3 {
+	public class encaptulator{
+		public int curr;
+		public String currWord;
+		public String targetWord;
+		int misMatch;
+		TrieNodeWithList root;
+		public encaptulator(int curr,String currWord, int misMatch, TrieNodeWithList root) {
+			this.curr = curr;
+			this.currWord = currWord;
+			this.misMatch = misMatch;
+			this.root = root;
+		}
+	}
+	public dictionary root;
+	private static int maxMisMatch = 0;
+	private static String letter = "অআইঈউঊঋঌএঐওঔকখগঘঙচছজঝঞটঠডঢণতথদধনপফবভমযরলশষসহড়ঢ়য়";
+	private static int similarLetterWeight = 25;
+	private static int firstHalfWeight = 100;
+	private static int secondHalfWeight = 50;
+	private static int nonRootLetterWeight = 25;
+	private int dictionarySize = 0;
+	private int[] costTracker = new int[101];
+	private Queue<encaptulator> Q = new LinkedList<encaptulator>(); 
+	private WordTokenizer WT = new WordTokenizer();
+	public void setDictionary(dictionary dict) {
+		this.root = dict;
+	}
+	public  void insert(String word, word_dto wto) {
+		if(root == null) {
+			System.out.println("dictionary can not null");
+			throw new NullPointerException("Trie dictionary is null");
+		}
+		//List<TrieNodeWithList> child = root.dict.children;
+		TrieNodeWithList recurseRoot = root.dict;
+		for(int i=0;i<word.length();i++) {
+			char c = word.charAt(i);
+			TrieNodeWithList temp=null;
+			boolean isFound = false;
+			for(TrieNodeWithList node: recurseRoot.children) {
+				if(node.c==c) {
+					temp = node;
+					isFound = true;
+					break;
+				}
+			}
+			if(!isFound) {
+				temp = new TrieNodeWithList(c);
+				temp.parent = recurseRoot;
+				temp.isWord= false;
+				recurseRoot.children.add(temp);
+			}
+			if(i==word.length() - 1) {
+				temp.isWord = true;
+				temp.createTime = System.currentTimeMillis();
+				temp.freq = getMax(temp.freq, wto.freq);
+				if(wto.reference_table != 0) {
+					temp.reference_id = wto.reference_id;
+					temp.reference_table = wto.reference_table;
+				}
+				this.root.inverseDict.put(wto.ID, wto.word);
+			
+			}
+			recurseRoot = temp;
+		}
+		return;
+	}
+	public int getMax(int trieNode, int tableFreq) {
+		return trieNode > tableFreq ? trieNode : tableFreq;
+	}
+	public  boolean searchWord(String word) {
+		List<TrieNodeWithList> child = root.dict.children;
+		for(int i=0;i<word.length();i++) {
+			char c = word.charAt(i);
+			if(c=='\u0000')
+				return false;
+			TrieNodeWithList temp=null;
+			boolean isFound = false;
+			try {
+				for(TrieNodeWithList node: child) {
+					if(node.c==c) {
+						temp=node;
+						isFound = true;
+						break;
+					}
+				}
+			}catch(NullPointerException ex) {
+				System.out.println("There is a null pointer exception occured");
+				System.out.println(ex.getMessage());
+			}
+			if(!isFound) return false;
+			child=temp.children;
+			if(i==word.length()-1) {
+				if(temp.isWord) {
+					temp.hitCount += 1;
+					temp.createTime= System.currentTimeMillis();//renmaed to access time
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	
+	public  TrieNodeWithList getWord(String word) {
+		List<TrieNodeWithList> child = root.dict.children;
+		for(int i=0;i<word.length();i++) {
+			char c = word.charAt(i);
+			TrieNodeWithList temp=null;
+			for(TrieNodeWithList node: child) {
+				if(node.c==c) {
+					temp=node;
+					break;
+				}
+			}
+			
+			child=temp.children;
+			if(i==word.length()-1 && temp.isWord == true) 
+				return temp;
+		}
+		return null;
+	}
+	Map<String,Integer> wordWithDistance;
+	Queue<Pair> queueWithDistance;
+	int cnt;
+	public void dfs(int curr,String currWord,  String word, int misMatch, TrieNodeWithList root) {
+		cnt++;
+		if(root.isWord) {
+			String tempWord = currWord + root.c;
+			if(word.length()>curr) {
+				int tempM = 0;
+				if(word.charAt(curr)!=root.c) {
+					tempM = 100;
+				}
+				int total = misMatch + tempM + ((word.length() - curr - 1) * 100);
+				if(total <= maxMisMatch) {
+					if(wordWithDistance.containsKey(tempWord)) {
+						if(total<wordWithDistance.get(tempWord)) {
+							wordWithDistance.put(tempWord, total);
+						}
+					} else {
+						wordWithDistance.put(tempWord, total);
+					}
+					
+				}
+			} else if(misMatch + 100 <= maxMisMatch) {
+				if(wordWithDistance.containsKey(tempWord)) {
+					if(misMatch+1<wordWithDistance.get(tempWord)) {
+						wordWithDistance.put(tempWord, misMatch+100);
+					}
+				} else {
+					wordWithDistance.put(tempWord, misMatch+100);
+				}
+				
+			}
+			 
+		}
+		if(misMatch>maxMisMatch) {
+			return;
+		}
+		
+		if(word.length()-1 < curr) {
+			for(TrieNodeWithList node: root.children) {
+				dfs(curr, currWord+root.c, word, misMatch+100, node);
+			}
+			return;
+		}
+		
+		int match=0;
+		if(word.charAt(curr)!=root.c) {
+			match=100;
+		}
+		for(TrieNodeWithList node: root.children) {
+			dfs(curr+1, currWord+root.c, word, misMatch+match, node);
+			dfs(curr, currWord+root.c, word, misMatch+match, node);
+		}
+		
+	}
+	
+	public void fillUpDictionary(int curr, String currWord,  String word, int misMatch, TrieNodeWithList root) {
+		
+		if(root.isWord==true && Math.abs((currWord + root.c).length() - word.length()) <= 1 ) {
+			if(word.length()>curr) {
+				int tempM = 0;
+				if(word.charAt(curr)!=root.c) {
+					if(letter.indexOf(root.c) >= 0) {
+						if(isSimilarLetter(word.charAt(curr), root.c))
+							tempM = similarLetterWeight; // if letters are similar
+						else if(curr>=(word.length()/2)) 
+							tempM = secondHalfWeight;
+						else 
+							tempM = firstHalfWeight;
+					} else tempM = nonRootLetterWeight;				
+				}
+				int currMisMatch = misMatch + tempM + ((word.length() - curr - 1) * 50);
+				if(currMisMatch <= maxMisMatch) {
+					String tempWord = currWord + root.c;
+					if(wordWithDistance.containsKey(tempWord)) {
+						int d = wordWithDistance.get(tempWord);
+						if(d > currMisMatch) {
+							costTracker[d] -= 1;
+							wordWithDistance.put(tempWord, currMisMatch);
+							costTracker[currMisMatch] += 1;
+						}
+					} else {
+						wordWithDistance.put(tempWord, currMisMatch);
+						costTracker[currMisMatch] += 1;
+					}
+				}
+			} else if(misMatch + secondHalfWeight <= maxMisMatch) {
+				String tempWord = currWord + root.c;
+				if(wordWithDistance.containsKey(tempWord)) {
+					int d = wordWithDistance.get(tempWord);
+					if(d > (misMatch+secondHalfWeight)) {
+						costTracker[d] -= 1;
+						wordWithDistance.put(tempWord, misMatch + secondHalfWeight);
+						costTracker[misMatch + secondHalfWeight] += 1;
+					}
+				} else {
+					
+						wordWithDistance.put(tempWord, misMatch + secondHalfWeight);
+						costTracker[misMatch + secondHalfWeight] += 1;
+					
+				}
+			}
+			 
+		}
+		return ;
+	}
+	
+	public int getMatchValue(int curr, String word, TrieNodeWithList root) {
+		int match = 0 ;
+		if(word.charAt(curr) != root.c) {
+			if(letter.indexOf(root.c) >= 0) {
+				if(isSimilarLetter(word.charAt(curr), root.c))
+					match = similarLetterWeight;
+				else if(curr>=(word.length()/2)) 
+					match = secondHalfWeight;
+				else 
+				   match = firstHalfWeight;
+			} else {
+				match = nonRootLetterWeight;
+			}
+            
+		}
+		return match;
+	}
+	public void dfsV2(int curr,String currWord,  String word, int misMatch, TrieNodeWithList root) {
+		cnt++;
+		encaptulator  observationOb= null;
+		Q.add(new encaptulator(curr, currWord, misMatch, root));
+		try {
+			while (Q.size() > 0) {
+				//if(word.length() - curr < -1)
+				//return;
+				observationOb = (encaptulator)Q.element();
+				Q.poll();
+				curr = observationOb.curr;
+				currWord = observationOb.currWord;
+				misMatch = observationOb.misMatch;
+				root = observationOb.root;
+				fillUpDictionary(curr, currWord, word, misMatch, root);
+				if(misMatch > maxMisMatch) {
+					//return;
+					continue;
+				}
+				if(word.length() - 1  < curr) {
+					String tempCurrWord = currWord + root.c;
+					for(TrieNodeWithList node: root.children) {
+						if(letter.indexOf(node.c) >= 0) {
+							//dfsV2(curr , tempCurrWord, word, misMatch + secondHalfWeight, node);
+							Q.add(new encaptulator(curr, tempCurrWord, misMatch + secondHalfWeight, node));
+						} else {
+							Q.add(new encaptulator(curr, tempCurrWord, misMatch + nonRootLetterWeight, node));
+							//dfsV2(curr , tempCurrWord, word, misMatch + nonRootLetterWeight, node);
+						}
+				
+					}
+				continue;
+				//return;
+				}
+		
+				int match= getMatchValue(curr, word, root);	
+				String tempCurrWord = currWord + root.c;
+				for(TrieNodeWithList node: root.children) {
+					Q.add(new encaptulator(curr + 1, tempCurrWord, misMatch + match, node));
+					Q.add(new encaptulator(curr , tempCurrWord, misMatch + match, node));
+					//dfsV2(curr + 1 , tempCurrWord, word, misMatch + (match), node);
+					//dfsV2(curr, tempCurrWord, word, misMatch + match, node);
+				}
+				if (wordWithDistance.size() > 10 && (costTracker[25] + costTracker[50]) != 0)
+					break;
+			}
+		}catch(NoSuchElementException ex) {
+			System.out.print(ex.getMessage());
+			ex.getStackTrace();
+		}
+			Q.clear();
+	}
+	
+	
+	List<String> arr = new ArrayList<>();
+	public  void init_dictionary(List<word_dto> words, dictionary dict) throws IOException {
+		this.root = dict; 
+		buildTrie(words);
+	}
+	/*
+	public static void init_error_dictionary(List<word_dto> words) throws IOException {
+		buildTrie(words, 1);
+	}
+	public static void init_named_entity_dictionary(List<word_dto> words) throws IOException {
+		buildTrie(words, 2);
+	}*/
+	public Map<String, Integer> getSuggestedWord(String word) {
+		    
+		    maxMisMatch=100;
+		    costTracker[25] = 0;
+		    costTracker[50] = 0;
+		    costTracker[75] = 0;
+		    costTracker[100] = 0;
+		    if(word.length() < 8)
+		    	maxMisMatch = 50;
+			wordWithDistance = new HashMap<>();
+			queueWithDistance = new PriorityQueue<Pair>();
+			// get suggested word with distance
+			cnt=0;
+			while(wordWithDistance.size() ==0 && maxMisMatch <= 100) {
+				for(TrieNodeWithList node: root.dict.children) {
+					if (node.c == word.charAt(0))
+						dfsV2(0, "", word, 0, node);
+				}
+				maxMisMatch += 25;
+			}
+			/*
+			for(int i=0;i<=maxMisMatch;i+=25) {
+				if(!wordWithDistance.containsValue(i))
+					continue;
+				System.out.println("distance = " + i);
+				
+				for(Map.Entry<String, Integer> entry: wordWithDistance.entrySet()) {
+					if(i==entry.getValue())
+					System.out.print(entry.getKey() + " ");
+				}
+				System.out.println();
+			}*/
+		return wordWithDistance;
+	}
+	
+	public Map<Integer, String> getIndexedWords(List<String> sentences){
+		Map<Integer, String> indexedWords = new HashMap<>();
+		int index = 0;
+		List<String> words;
+		int baseIndex = 0;
+		for(int sentence_i = 0; sentence_i < sentences.size(); sentence_i++ ) {
+			WT.set_text(sentences.get(sentence_i));
+			words = WT._tokenization();
+			index = 0;
+			for(int word_i=0 ; word_i < words.size(); word_i++) {
+				if (words.get(word_i).length() != 0) {
+					indexedWords.put(baseIndex + word_i, words.get(word_i));
+					index++;
+				}
+			}
+			baseIndex += words.size();
+		}
+		return indexedWords;
+		
+	}
+	private static boolean isSimilarLetter(char a, char b) {
+		if((a=='শ'||a=='ষ'||a=='স') && (b=='শ'||b=='ষ'||b=='স')) return true;
+		
+		if((a=='র'||a=='ড'||a=='ঢ') && (b=='র'||b=='ড'||b=='ঢ')) return true;
+		
+		if((a=='জ'||a=='য') && (b=='জ'||b=='য')) return true;
+		
+		if((a=='অ'||a=='আ') && (b=='অ'||b=='আ')) return true;
+		
+		if((a=='এ'||a=='ঐ') && (b=='এ'||b=='ঐ')) return true;
+		
+		if((a=='ও'||a=='ঔ') && (b=='ও'||b=='ঔ')) return true;
+		
+		if((a=='ই'||a=='ঈ') && (b=='ই'||b=='ঈ')) return true;
+		
+		if((a=='উ'||a=='ঊ') && (b=='উ'||b=='ঊ')) return true;
+		
+		if((a=='ন'||a=='ণ') && (b=='ন'||b=='ণ')) return true;
+		
+		return false;
+	}
+	public String normalizeText(String s) 
+	{
+		// TODO Auto-generated method stub
+
+		String t = s;
+
+		t = t.replaceAll("[\\x{200A}\\x{200B}\\x{200C}]", "");			//	ZERO WIDTH	=	""
+
+		//t = t.replaceAll("(\\x{09F0})", "\u09B0");						//	ৰ	=	র			???
+		//t = t.replaceAll("(\\x{09F1})", "\u09AC");						//	ৱ	=	ব			???
+		
+		t = t.replaceAll("(\\x{0985})(\\x{09BE})", "\u0986");			//	অ	+	 া	=	আ
+		t = t.replaceAll("(\\x{09C7})(\\x{09BE})", "\u09CB");			//	ে	+	া	=	ো
+		t = t.replaceAll("(\\x{09C7})(\\x{09D7})", "\u09CC");			//	ে	+	ৗ	=	ৌ
+		t = t.replaceAll("(\\x{09AC})(\\x{09BC})", "\u09B0");			//	ব	+	়	=	র
+		t = t.replaceAll("(\\x{09A1})(\\x{09BC})", "\u09DC");			//	ড	+	়	=	ড়
+		t = t.replaceAll("(\\x{09A2})(\\x{09BC})", "\u09DD");			//	ঢ	+	়	=	ঢ়
+		t = t.replaceAll("(\\x{09AF})(\\x{09BC})", "\u09DF");			//	য	+	়	=	য়
+		
+		return t;		
+	}
+	private  void buildTrie(List<word_dto> words) {
+		
+		for(word_dto s: words) {
+			insert(this.normalizeText(s.word), s);
+			this.root.inverseDict.put(s.ID, s.word);
+			}
+
+	}
+	
+	public  int getDictionarySize() {
+		return dictionarySize;
+	}
+	
+	public void setDictionarySize(int size) {
+		// TODO Auto-generated method stub
+		this.root.setSize(size);
+	}
+	private  void printWord(String word) {
+		System.out.println(word.length());
+		for(int i=0;i<word.length();i++) {
+			System.out.print(word.charAt(i) + " ");
+		}
+		System.out.println();
+	}
+	
+
+}

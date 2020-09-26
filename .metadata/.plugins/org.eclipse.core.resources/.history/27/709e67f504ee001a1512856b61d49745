@@ -1,0 +1,326 @@
+package bangla.spellChecker;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Hashtable;
+import java.sql.DriverManager;
+//import de.bytefish.jsqlserverbulkinsert.*;
+import java.util.List;
+import java.time.LocalDate;
+import org.apache.log4j.Logger;
+
+import bangla.WithTrie.dictionary;
+import bangla.spellChecker.*;
+import dbm.DBMR;
+import dbm.DBMW;
+import pb.TempTableDTO;
+//import project_tracker.FilesDAO;
+import repository.RepositoryManager;
+import util.CommonDTO;
+import javax.servlet.http.HttpSession;
+
+public class spell_checking_dao {
+
+
+	Logger logger = Logger.getLogger(getClass());
+
+	public spell_checking_dao() {
+		//super(tableName, tempTableName, approval_module_mapDTO);
+		// TODO Auto-generated constructor stub
+	}
+
+	public Connection getConnection() throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException{
+		Connection connection = DBMW.getInstance().getConnection();
+		return connection;
+	}
+
+
+	//need another getter for repository
+	public word_dto getDTOByID (long ID, String tableName) throws Exception
+	{
+		Connection connection = null;
+		ResultSet rs = null;
+		Statement stmt = null;
+		word_dto wordDto = new word_dto();
+		//Applicant_profileDTO applicant_profileDTO = null;
+		try{
+			
+			String sql = "SELECT * ";
+
+			sql += " FROM " + tableName;
+			
+            sql += " WHERE ID=" + ID;
+			
+			//printSql(sql);
+			
+			connection = DBMR.getInstance().getConnection();
+			stmt = connection.createStatement();
+
+
+			rs = stmt.executeQuery(sql);
+			
+			if(rs.next()){
+				wordDto.word = rs.getString("content");
+			}			
+			
+			
+		}catch(Exception ex){
+			ex.printStackTrace();
+		}finally{
+			try{ 
+				if (stmt != null) {
+					stmt.close();
+				}
+			} catch (Exception e){}
+			
+			try{ 
+				if (connection != null){ 
+					DBMR.getInstance().freeConnection(connection); 
+				} 
+			}catch(Exception ex2){}
+		}
+		return wordDto;
+	}
+	
+
+	public tableStatusDTO getDTOForUpdateTime (String tableName, String dbName) throws Exception
+	{
+		Connection connection = null;
+		ResultSet rs = null;
+		Statement stmt = null;
+		tableStatusDTO table_status = null;
+		try{
+			
+			String sql = "SHOW TABLE STATUS" ;
+			sql += " FROM " + dbName;
+            sql += " LIKE '" + tableName + "'";
+			//System.out.println(sql);
+			String sql2 = "select min(ID) as minID, max(ID) as maxID, count(*) as count from " + tableName ;
+			//Class.forName("com.mysql.jdbc.Driver");
+			connection = DBMR.getInstance().getConnection();
+			stmt = connection.createStatement();
+			rs = stmt.executeQuery(sql2);
+			if(rs.next()){
+				table_status = new tableStatusDTO();
+				//table_status.Rows = rs.getInt("Rows");
+				table_status.Rows = rs.getInt("count");
+				table_status.minID = rs.getLong("minID");
+				table_status.maxID = rs.getLong("maxID");
+				/*
+				if (rs.getDate("Update_time") != null)
+					table_status.Update_time = rs.getDate("Update_time").getTime();
+				else {
+					table_status.Update_time = 0;
+					System.out.println("System is uptodate");
+				}*/
+				System.out.println("Number of rows in table " + tableName + " is: " + table_status.Rows);
+			}			
+			
+			
+		}catch(Exception ex){
+			ex.printStackTrace();
+		}finally{
+			try{ 
+				if (stmt != null) {
+					stmt.close();
+				}
+			} catch (Exception e){}
+			
+			try{ 
+				if (connection != null)
+				{
+					DBMR.getInstance().freeConnection(connection);
+				} 
+			}catch(Exception ex2){}
+		}
+		return table_status;
+	}
+	public List<spell_checking_dto> getSpellCheckingDTOs(String sql, List<String> columns){
+		List<spell_checking_dto> data_DTO = new ArrayList<>();
+		Connection connection = null;
+		ResultSet rs = null;
+		Statement stmt = null;
+		spell_checking_dto  sp_dto= null;
+		try{
+			//System.out.println(sql);
+			//logger.debug("sql " + sql);
+			//Class.forName("com.mysql.jdbc.Driver");
+			connection = DBMR.getInstance().getConnection();
+			stmt = connection.createStatement();
+			stmt.setQueryTimeout(20);
+			rs = stmt.executeQuery(sql);
+			while(rs.next()){
+				sp_dto = new spell_checking_dto();
+				sp_dto.word = rs.getString(columns.get(0));
+				sp_dto.wordType = rs.getString(columns.get(1));
+				//wordDto.word_type = rs.getInt("service_id");
+				//wordDto.lang_type = rs.getInt("service_type");
+				//System.out.println("got this DTO: " + word_dto.word);
+				data_DTO.add(sp_dto);
+
+			}				
+		}catch(Exception ex){
+			ex.printStackTrace();
+		}finally{
+			try{ 
+				if (stmt != null) {
+					stmt.close();
+				}
+			} catch (Exception e){}
+			
+			try{ 
+				if (connection != null){ 
+					DBMR.getInstance().freeConnection(connection); 
+				} 
+			}catch(Exception ex2){}
+		}
+		return data_DTO;
+	}
+	
+	public ArrayList<ArrayList<String>> getSubjectVerbMap(String sql, List<String> columns){
+		ArrayList<String> data_DTO ;
+		ArrayList<ArrayList<String>> container = new ArrayList<>();
+		Connection connection = null;
+		ResultSet rs = null;
+		Statement stmt = null;
+		spell_checking_dto  sp_dto= null;
+		try{
+			//System.out.println(sql);
+			//logger.debug("sql " + sql);
+			//Class.forName("com.mysql.jdbc.Driver");
+			connection = DBMR.getInstance().getConnection();
+			stmt = connection.createStatement();
+			stmt.setQueryTimeout(20);
+			rs = stmt.executeQuery(sql);
+			while(rs.next()){
+				data_DTO = new ArrayList<>();
+				data_DTO.add(rs.getString(columns.get(0)));
+				data_DTO.add( rs.getString(columns.get(1)));
+				data_DTO.addAll(Arrays.asList(rs.getString(columns.get(2)).trim(",").split(",")));
+				//wordDto.word_type = rs.getInt("service_id");
+				//wordDto.lang_type = rs.getInt("service_type");
+				//System.out.println("got this DTO: " + word_dto.word);
+				container.add(data_DTO);
+
+			}				
+		}catch(Exception ex){
+			ex.printStackTrace();
+		}finally{
+			try{ 
+				if (stmt != null) {
+					stmt.close();
+				}
+			} catch (Exception e){}
+			
+			try{ 
+				if (connection != null){ 
+					DBMR.getInstance().freeConnection(connection); 
+				} 
+			}catch(Exception ex2){}
+		}
+		return container;
+	}
+	
+
+	public List<word_dto> getDTOs(ArrayList<Long> elements, String sql, dictionary dict){
+		Connection connection = null;
+		ResultSet rs = null;
+		Statement stmt = null;
+		word_dto wordDto = null;
+		List<word_dto> data_DTOList = new ArrayList<>();
+		if (elements.size() != 0 && sql.contains("limit") == false) { 
+			sql += " WHERE ID IN ( ";
+
+			for(int i = 0;i<elements.size();i++){
+				if(i!=0){
+					sql+=",";
+				}
+				sql+=((ArrayList<?>)elements).get(i);
+			}
+			sql+=")";
+		}else if(sql.contains("limit") == false) {
+			return data_DTOList;
+		} 
+		
+
+		
+		try{
+			
+			//System.out.println("Inside GET_DTO function and executing sql: " + sql);
+			//logger.debug("sql " + sql);
+			//Class.forName("com.mysql.jdbc.Driver").newInstance();
+			connection = DBMR.getInstance().getConnection();
+			stmt = connection.createStatement();
+			stmt.setQueryTimeout(50);
+			rs = stmt.executeQuery(sql);
+			while(rs.next()){
+				wordDto = dict.extractFromResultSet(rs);
+				data_DTOList.add(wordDto);
+			}						
+			
+		}catch(Exception ex){
+			ex.printStackTrace();
+		}finally{
+			try{ 
+				if (stmt != null) {
+					stmt.close();
+				}
+			} catch (Exception e){}
+			
+			try{ 
+				if (connection != null){ 
+					DBMR.getInstance().freeConnection(connection); 
+				} 
+			}catch(Exception ex2){}
+		}
+		
+		return data_DTOList;
+	
+	}
+	public List<word_dto> getWordDTOs(Collection recordIDs, String sql, dictionary dict){
+		Connection connection = null;
+		ResultSet rs = null;
+		Statement stmt = null;
+		word_dto wordDto = null;
+		List<word_dto> data_DTOList = new ArrayList<>();
+		try{
+			
+			System.out.println("Inside GET_DTO function and sql: " + sql);
+			logger.debug("sql " + sql);
+			//Class.forName("com.mysql.jdbc.Driver").newInstance();
+			connection = DBMR.getInstance().getConnection();
+			stmt = connection.createStatement();
+			rs = stmt.executeQuery(sql);
+			while(rs.next()){
+				
+			}						
+			
+		}catch(Exception ex){
+			ex.printStackTrace();
+		}finally{
+			try{ 
+				if (stmt != null) {
+					stmt.close();
+				}
+			} catch (Exception e){}
+			
+			try{ 
+				if (connection != null){ 
+					DBMR.getInstance().freeConnection(connection); 
+				} 
+			}catch(Exception ex2){}
+		}
+		
+		return data_DTOList;
+	
+	}
+	
+	
+		
+}

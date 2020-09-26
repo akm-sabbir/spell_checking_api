@@ -1,0 +1,215 @@
+package subjectVerbRelationalError;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import bangla.spellChecker.WordTokenizer;
+import bangla.WithTrie.TrieNodeWithList;
+import bangla.WithTrie.WordSuggestion;
+import bangla.WithTrie.WordSuggestionV3;
+
+
+public class ValidateSubVerbRelError {
+	private static final String notFound = "NotFound";
+	private static final List<String> priority1 = Arrays.asList("আমি","আমরা","মোরা","তুমি","তোমরা","তোমাদের","সে","তারা","আপনি","আপনারা","তিনি","তিঁনি","তারা","ইনি","এরা","উনি","ওরা");
+	static Map<String,String> purushMap;
+	static WordTokenizer WT = new WordTokenizer();
+	static Map<String,Integer> verbIndex = new HashMap<>();
+	static List<List<String>> subVerbMatrix = new ArrayList<>();								 
+	static TrieNode verbList = new TrieNode();
+	public static GrammerCheckerDto hasError(String sentence) {
+		WT.set_text(sentence);
+		List<String> words = WT._tokenization();
+		String subject = findSubject(words);
+		String verb = findVerb(words);
+		System.out.println(subject + " " + verb);
+		GrammerCheckerDto retDto = new GrammerCheckerDto();
+		if(subject.equals(notFound) || verb.equals(notFound)) {
+			retDto.isValidSentence=true;
+			return retDto;
+		}
+		if(!isSubjectVerbConflict(subject, verb)) {
+			retDto.isValidSentence=true;
+			return retDto;
+		} else {
+			retDto.isValidSentence=false;
+			retDto.errorType="subject-verb-agreement-error";
+			WordSuggestion suggestion = new WordSuggestionV3();
+			suggestion.wordName=subject;
+            suggestion.wordIndex = findWordIndex(words, subject);
+			suggestion.wordType="subject";
+														   
+			suggestion.suggestedWord = getSuggestedSubject(verb);
+			retDto.wordSuggestion = Arrays.asList(suggestion);
+			return retDto;
+		}
+	}
+    private static int findWordIndex(List<String> words, String word) {
+		//List<String> words = Arrays.asList(sentence.split(" "));
+		for(int i=0;i<words.size();i++) {
+			if(words.get(i).equals(word)) {
+				return i;
+			}
+		}
+		return 0;
+	}
+	private static String getSuggestedSubject(String verb) {
+		int index = verbIndex.get(verb);
+		if(subVerbMatrix.get(index).size()>0) return subVerbMatrix.get(index).get(0);
+		return notFound;
+	}
+	private static boolean isSubjectVerbConflict(String subject, String verb) {
+		if(verbIndex.containsKey(verb)) {
+			int index = verbIndex.get(verb);
+		//	System.out.println(verb);
+			if(subVerbMatrix.get(index).contains(subject)) {
+				return false;
+			} else {
+				return true;
+			}
+		}
+		return false;
+	}
+	private static String findSubject(List<String> words) {
+		List<String> allSubject = new ArrayList<>();
+		for(String word: words) {
+			String type = isPurushWord(word);
+			if(!type.equals(notFound)) {
+				allSubject.add(word);
+			}
+		}
+		if(allSubject.size()==0) {
+			return notFound;
+		} else if(allSubject.size()==1) {
+			return allSubject.get(0);
+		} else {
+			if(priority1.contains(allSubject.get(0))) {
+				return allSubject.get(0);
+			} else if(priority1.contains(allSubject.get(1))) {
+				return allSubject.get(1);
+			} else return allSubject.get(0);
+		}
+	}
+	private static String findVerb(List<String> words) {
+		String verb=notFound;
+		String bivokti=notFound;
+		for(String word: words) {
+			String verbCandidate = removeIfNeg(word);
+			if(isVerb(verbCandidate)) {
+				if(verbCandidate.substring(verbCandidate.length()-1).equals("র")) {
+					bivokti=verbCandidate;
+				} else {
+					verb=verbCandidate;
+					break;
+				}
+			}
+		}
+		if(!verb.equals(notFound)) {
+			return verb;
+		} else {
+			return bivokti;
+		}
+	}
+	private static String removeIfNeg(String word) {
+		int len = word.length();
+		if(len>2) {
+			if(word.substring(len-2).equals("নি") || word.substring(len-2).equals("না")) {
+				return word.substring(0, len-2);
+			} else return word;
+		} else return word;
+	}
+	public static void setPurushMap(List<spell_checking_dto> rows) {
+		purushMap = new HashMap<>();
+		/*
+		List<String> lines = new ArrayList<>();
+		try {
+			lines = ReadCsvFile.getPurusWordsFromCsvFile();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		*/
+		for(spell_checking_dto row: rows) {
+			//List<String> words = Arrays.asList(line.split(","));
+			//if(line.size()>1) {
+			purushMap.put(row.word, row.wordType);
+			//}
+		}
+	}
+	public static String isPurushWord(String word) {
+		if(purushMap.containsKey(word)) {
+			return purushMap.get(word);
+		} else {
+			return notFound;
+		}
+	}
+	public static void buildTrie(List<spell_checking_dto> words) {
+		spell_checking_dto mixed ;
+	   
+												
+						   
+					   
+   
+		for(int i=0;i<words.size();i++) {
+//			String vrb="";
+			List<String> mixed = Arrays.asList(words.get(i).split(","));
+			if(mixed.size()>0 && !mixed.get(0).equals("invalid")) {
+				Trie.insert(mixed.get(0), verbList);
+//				vrb = mixed.get(0);
+			}
+			if(mixed.size()>1 && !mixed.get(1).equals("invalid")) {
+				Trie.insert(mixed.get(1), verbList);
+//				if(vrb.equals("")) 
+//					vrb = mixed.get(1);
+			}
+			//VerbTagging.tagVerb(vrb);
+		}
+		//VerbTagging.writeSubject();
+		//System.out.println("Finish");
+	}
+	public static void buildSubVerbMap(ArrayList<String> line) {
+                /*
+		List<String> line = new ArrayList<>();
+		try {
+			line = ReadCsvFile.getSubVerbFromCsvFile();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}*/
+		int index=0;
+		for(int i=0;i<line.size();i++) {
+			List<String> mixed = Arrays.asList(line.get(i).split(","));
+			if(mixed.size()>0 && !mixed.get(0).equals("invalid")) {
+				verbIndex.put(mixed.get(0), index);
+				subVerbMatrix.add(new ArrayList<>());
+				for(int j=2;j<mixed.size();j++) {
+					if(mixed.get(j).length()>0 && mixed.get(j).charAt(0)=='"') {
+						subVerbMatrix.get(index).add(mixed.get(j).substring(1, mixed.get(j).length()));
+					} else if(mixed.get(j).length()>=2){
+						subVerbMatrix.get(index).add(mixed.get(j));
+					}
+				}
+				index++;
+			}
+			if(mixed.size()>1 && !mixed.get(1).equals("invalid")) {
+				verbIndex.put(mixed.get(1), index);
+				subVerbMatrix.add(new ArrayList<>());
+				for(int j=2;j<mixed.size();j++) {
+					if(mixed.get(j).length()>0 && mixed.get(j).charAt(0)=='"') {
+						subVerbMatrix.get(index).add(mixed.get(j).substring(1, mixed.get(j).length()));
+					} else if(mixed.get(j).length()>=2){
+						subVerbMatrix.get(index).add(mixed.get(j));
+					}
+				}
+				index++;
+			}
+		}
+		//System.out.println("finish");
+	}
+	public static boolean isVerb(String word) {
+		return Trie.searchWord(word, verbList);
+	}
+
+}
