@@ -5,8 +5,8 @@ package bangla.dao;
 import org.apache.log4j.Logger;
 
 import bangla.WithTrie.TrieNodeWithList;
-import bangla.grammarchecker.ValidateShadhuCholitMixure;
-import bangla.grammarchecker.ValidateSubVerbRelError;
+import bangla.grammarchecker.ShadhuCholitMixureChecker;
+import bangla.grammarchecker.SubVerbRelErrorChecker;
 import bangla.spellchecker.spell_checking_dto;
 import dbm.DBMR;
 import repository.Repository;
@@ -48,11 +48,11 @@ public class SadhuCholitMixture implements Repository{
 		return;
 	}
 	public void insert(String sql, List<String> columns){
-		List<GrammarDto> data_DTO = new ArrayList<>();
+		List<spell_checking_dto> data_DTO = new ArrayList<>();
 		Connection connection = null;
 		ResultSet rs = null;
 		Statement stmt = null;
-		GrammarDto  sp_dto= null;
+		spell_checking_dto  sp_dto= null;
 		try{
 			//System.out.println(sql);
 			//logger.debug("sql " + sql);
@@ -62,9 +62,9 @@ public class SadhuCholitMixture implements Repository{
 			stmt.setQueryTimeout(20);
 			rs = stmt.executeQuery(sql);
 			while(rs.next()){
-				sp_dto = new GrammarDto();
-				sp_dto.content = rs.getString(columns.get(0));// column names should be explicit
-				sp_dto.type_ = rs.getString(columns.get(1));
+				sp_dto = new spell_checking_dto();
+				sp_dto.word = rs.getString(columns.get(0));// column names should be explicit
+				sp_dto.wordType = rs.getString(columns.get(1));
 				//wordDto.word_type = rs.getInt("service_id");
 				//wordDto.lang_type = rs.getInt("service_type");
 				//System.out.println("got this DTO: " + word_dto.word);
@@ -86,8 +86,8 @@ public class SadhuCholitMixture implements Repository{
 				} 
 			}catch(Exception ex2){}
 		}
-		ValidateShadhuCholitMixure.buildTrie(data_DTO);
-		ValidateSubVerbRelError.buildTrie(data_DTO);
+		ShadhuCholitMixureChecker.buildTrie(data_DTO);
+		SubVerbRelErrorChecker.buildTrie(data_DTO);
 		return ;
 	}
 	@Override

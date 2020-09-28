@@ -16,15 +16,15 @@ public class GrammerCheckerFactory {
 	private static BanglaGrammerChecker getGrammerChecker(String checkerType) {
 		if(checkerType==null) return null;
 		if(checkerType.equals(GrammerCheckerTypes.SHADHU_CHOLIT_ERROR.toString())) 
-			return new ValidateShadhuCholitMixure();
+			return new ShadhuCholitMixureChecker();
 		else if(checkerType.equals(GrammerCheckerTypes.SUBJECT_VERB_AGREEMENT_ERROR.toString()))
-			return new ValidateSubVerbRelError();
+			return new SubVerbRelErrorChecker();
 		else if(checkerType.equals(GrammerCheckerTypes.NO_SPACE_BETWEEN_WORDS_ERROR.toString())) 
-			return new ValidateNoSpaceBetweenWords();
+			return new NoSpaceBetweenWordsChecker();
 		else if(checkerType.equals(GrammerCheckerTypes.SPACE_BETWEEN_WORDS_ERROR.toString()))
-			return new ValidateSpaceErrorBetweenWords();
+			return new SpaceErrorBetweenWordsChecker();
 		else if(checkerType.equals(GrammerCheckerTypes.WRONG_NIRDESHOK_ERROR.toString()))
-			return new ValidateNirdeshokError();
+			return new NirdeshokErrorChecker();
 		return null;
 	}
 	public static void initializeRegisteredCheckers() {

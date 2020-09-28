@@ -82,7 +82,7 @@ public class Word_contentServlet extends HttpServlet
 		String URL = "word_content/word_contentInPlaceEdit.jsp";
 		logger.info("Recieved a request to process: " );
 		String text_data = request.getParameter("content");
-		String permission = request.getParameter("PermissionToStoreData");
+		//String permission = request.getParameter("PermissionToStoreData");
 		String service = request.getParameter("Service");
 		if (text_data.length() == 0 || text_data.length() > 15000) {
 			logger.debug("End of request processing: " );
@@ -90,7 +90,7 @@ public class Word_contentServlet extends HttpServlet
 			return;
 		}
 		String results= null;
-		if(service.toLowerCase().equals("spellAndgrammarchecking")) {
+		if(service.toLowerCase().equals("spellandgrammarchecking")) {
 			bangla.SpellAndGrammarChecker spgChecker = new bangla.SpellAndGrammarChecker();
 			results = spgChecker.check(text_data);
 		}

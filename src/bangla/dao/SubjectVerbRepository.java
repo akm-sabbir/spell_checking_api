@@ -5,7 +5,7 @@ package bangla.dao;
 import org.apache.log4j.Logger;
 
 import bangla.WithTrie.TrieNodeWithList;
-import bangla.grammarchecker.ValidateSubVerbRelError;
+import bangla.grammarchecker.SubVerbRelErrorChecker;
 import bangla.spellchecker.spell_checking_dto;
 import dbm.DBMR;
 import repository.Repository;
@@ -61,13 +61,14 @@ public class SubjectVerbRepository implements Repository{
 			while(rs.next()){
 				data_DTO = new ArrayList<>();
 				data_DTO.add(rs.getString(columns.get(0)));
-				data_DTO.add( rs.getString(columns.get(1)));
+				data_DTO.add(rs.getString(columns.get(1)));
 				if(rs.getString(columns.get(2)) == null) {
 					System.out.print("pronoun list can not be null");
 					continue;
 				}
-				String[] splitted_pro= rs.getString(columns.get(2)).trim().split(",");
-				data_DTO.add(rs.getString(columns.get(2)).trim());//addAll(Arrays.asList(splitted_pro));
+				data_DTO.add(rs.getString(columns.get(2)));
+				//String[] splitted_pro= rs.getString(columns.get(2)).trim().split(",");
+				//data_DTO.add(rs.getString(columns.get(2)).trim());//addAll(Arrays.asList(splitted_pro));
 				//wordDto.word_type = rs.getInt("service_id");
 				//wordDto.lang_type = rs.getInt("service_type");
 				//System.out.println("got this DTO: " + word_dto.word);
@@ -100,7 +101,7 @@ public class SubjectVerbRepository implements Repository{
 		String[] columns3 = {"cholito", "shadhu", "subjects"};
 		List<String> column_ = Arrays.asList(columns3);
 		List<ArrayList<String>> subVerbMap = getSubjectVerbMap(sql, column_);
-		ValidateSubVerbRelError.buildSubVerbMap(subVerbMap);
+		SubVerbRelErrorChecker.buildSubVerbMap(subVerbMap);
 		
 		
 		

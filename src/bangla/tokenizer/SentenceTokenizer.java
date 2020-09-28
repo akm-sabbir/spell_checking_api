@@ -94,7 +94,7 @@ public class SentenceTokenizer {
 			//ValidateNoSpaceBetweenWords.setDictionary(dictionaries.correctWords.getDictionary());
 			
 			for(BanglaGrammerChecker checker: grammarCheckers) {
-				res = checker.hasError(each_sentence);
+				res = checker.hasError(words);
 				wordMapping = getCheckedWordsForSentencesUpdateMap(res, wordMapping ,baseInd);
 			}
 			
