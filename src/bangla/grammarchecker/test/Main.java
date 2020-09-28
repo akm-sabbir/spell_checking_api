@@ -4,14 +4,23 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import bangla.dao.AnnotatedWordRepository;
+import bangla.dao.DictionaryRepository;
+import bangla.dao.NamedEntityRepository;
+import bangla.dao.NaturalErrorRepository;
+import bangla.dao.SadhuCholitMixture;
+import bangla.dao.SubjectVerbRepository;
+import bangla.dao.gradedPronoun;
 import bangla.grammarchecker.BanglaGrammerChecker;
 import bangla.grammarchecker.GrammerCheckerDto;
+import bangla.grammarchecker.GrammerCheckerFactory;
 import bangla.grammarchecker.NirdeshokErrorChecker;
 import bangla.grammarchecker.NoSpaceBetweenWordsChecker;
 import bangla.grammarchecker.ShadhuCholitMixureChecker;
 import bangla.grammarchecker.SpaceErrorBetweenWordsChecker;
 import bangla.grammarchecker.SubVerbRelErrorChecker;
 import bangla.tokenizer.WordTokenizer;
+import repository.RepositoryManager;
 
 
 public class Main {
@@ -89,7 +98,14 @@ public class Main {
 //	}
 //	
 	public static void main(String[] args) {
-		
+		GrammerCheckerFactory.initializeRegisteredCheckers();
+    	RepositoryManager.getInstance().addRepository(AnnotatedWordRepository.getInstance(), true);
+    	RepositoryManager.getInstance().addRepository(DictionaryRepository.getInstance(), true);
+    	RepositoryManager.getInstance().addRepository(NamedEntityRepository.getInstance(), true);
+    	RepositoryManager.getInstance().addRepository(NaturalErrorRepository.getInstance(), true);
+    	RepositoryManager.getInstance().addRepository(SubjectVerbRepository.getInstance(),true);
+    	RepositoryManager.getInstance().addRepository(SadhuCholitMixture.getInstance(),true);
+    	RepositoryManager.getInstance().addRepository(gradedPronoun.getInstance(),true);
 //		dictionaryInitializer di = new dictionaryInitializer();
 //		di.contextInitialized("");
 //		System.out.println("++++++++++++++++++++++++++++");
