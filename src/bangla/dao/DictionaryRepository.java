@@ -15,7 +15,7 @@ public class DictionaryRepository implements Repository{
 	
 	static Logger logger = Logger.getLogger(DictionaryRepository.class);
 	static DictionaryRepository instance = null;
-	public dictionaryCorrectWords root;
+	public dictionaryCorrectWords root = null;
 	public static final String tableName="dictionary_words";
 	
 	private DictionaryRepository(){

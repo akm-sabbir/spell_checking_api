@@ -15,7 +15,7 @@ public class NamedEntityRepository implements Repository{
 	
 	static Logger logger = Logger.getLogger(NamedEntityRepository.class);
 	static NamedEntityRepository instance = null;
-	public dictionaryNamedEntity root;
+	public dictionaryNamedEntity root = null;
 	public static final String tableName="named_entity";
 	
 	private NamedEntityRepository(){

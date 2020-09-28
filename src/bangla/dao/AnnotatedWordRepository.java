@@ -15,7 +15,7 @@ public class AnnotatedWordRepository implements Repository{
 	
 	static Logger logger = Logger.getLogger(AnnotatedWordRepository.class);
 	static AnnotatedWordRepository instance = null;
-	public dictionaryAnnotatedWords root;
+	public dictionaryAnnotatedWords root = null;
 	public static final String tableName="annotated_word";
 	
 	private AnnotatedWordRepository(){
