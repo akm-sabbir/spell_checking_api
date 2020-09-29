@@ -108,21 +108,22 @@ public class Main {
     	RepositoryManager.getInstance().addRepository(gradedPronoun.getInstance(),true);
 //		dictionaryInitializer di = new dictionaryInitializer();
 //		di.contextInitialized("");
-//		System.out.println("++++++++++++++++++++++++++++");
+		System.out.println("++++++++++++++++++++++++++++");
 	//	checkSadhuCholitoMixure();
-//		System.out.println("++++++++++++++++++++++++++++");
-		checkSubjectVerb();
-//		System.out.println("++++++++++++++++++++++++++++");
+		System.out.println("++++++++++++++++++++++++++++");
+	//	checkSubjectVerb();
+		System.out.println("++++++++++++++++++++++++++++");
 //		checkNoSpaceError();
 //		System.out.println("++++++++++++++++++++++++++++");
 //		checkInvalidSpaceError();
-//		System.out.println("++++++++++++++++++++++++++++");
-//		checkNirdeshokError();
+		System.out.println("++++++++++++++++++++++++++++");
+		checkNirdeshokError();
 	}
 	static WordTokenizer WT = new WordTokenizer();
 	private static void checkSadhuCholitoMixure() {
 		ShadhuCholitMixureChecker validator = new ShadhuCholitMixureChecker();
 		List<String> sentences = new ArrayList<>();
+		sentences.add("তাহারা যাচ্ছিল");
 		sentences.add("আমি খাবার খাইতে রাজি হলাম");
 		sentences.add("তিনি আমাকে দেখে বিস্মিত হইলেন");
 		sentences.add("আমি ভাবিয়াছিলাম তারা কাজটি করবে না");

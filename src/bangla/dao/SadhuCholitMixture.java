@@ -90,6 +90,44 @@ public class SadhuCholitMixture implements Repository{
 		SubVerbRelErrorChecker.buildTrie(data_DTO);
 		return ;
 	}
+	public void insertSadhuCholitPronoun(String sql, List<String> columns){
+		List<spell_checking_dto> data_DTO = new ArrayList<>();
+		Connection connection = null;
+		ResultSet rs = null;
+		Statement stmt = null;
+		spell_checking_dto  sp_dto= null;
+		try{
+			connection = DBMR.getInstance().getConnection();
+			stmt = connection.createStatement();
+			stmt.setQueryTimeout(20);
+			rs = stmt.executeQuery(sql);
+			while(rs.next()){
+				sp_dto = new spell_checking_dto();
+				// as column 0 is pronoun which is shadhu so we put it into wordType
+				sp_dto.wordType = rs.getString(columns.get(0));// column names should be explicit
+				// as column 1 is vice_versa which is cholito so we put it into word
+				sp_dto.word = rs.getString(columns.get(1));
+				data_DTO.add(sp_dto);
+
+			}				
+		}catch(Exception ex){
+			ex.printStackTrace();
+		}finally{
+			try{ 
+				if (stmt != null) {
+					stmt.close();
+				}
+			} catch (Exception e){}
+			
+			try{ 
+				if (connection != null){ 
+					DBMR.getInstance().freeConnection(connection); 
+				} 
+			}catch(Exception ex2){}
+		}
+		ShadhuCholitMixureChecker.buildTrie(data_DTO);
+		return ;
+	}
 	@Override
 	public void reload(boolean realoadAll) {
 		String sql = "SELECT cholit_word, sadhu_word ";
@@ -98,6 +136,11 @@ public class SadhuCholitMixture implements Repository{
 		List<String> column_ = Arrays.asList(columns);
 		insert(sql, column_);
 	
+		sql = "SELECT pronoun, vice_versa ";
+		sql += " FROM purus " ;
+		String[] columns1 = {"pronoun", "vice_versa"};
+		column_ = Arrays.asList(columns1);
+		insertSadhuCholitPronoun(sql,column_);
 	}
 	
 

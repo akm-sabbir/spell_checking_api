@@ -29,17 +29,6 @@ public class ShadhuCholitMixureChecker implements BanglaGrammerChecker {
 				shadhuToCholit.insert(mixed.wordType, mixed.word);
 			}
 		}
-//		for (spell_checking_dto mixed : pronoun) {
-//			if (mixed == null)
-//				continue;
-//			boolean isValidCholito = (mixed.wordType != null && !mixed.wordType.equals("") && !mixed.wordType.equals("invalid"));
-//			boolean isValidSadhu = (mixed.word != null && !mixed.word.equals("") && !mixed.word.equals("invalid"));
-//			if (isValidSadhu && isValidCholito) {
-//				System.out.println(mixed.wordType + " " + mixed.word);
-//				cholitToShadhu.insert(mixed.wordType, mixed.word);
-//				shadhuToCholit.insert(mixed.word, mixed.wordType);
-//			}
-//		}
 	}
 
 	public GrammerCheckerDto hasError(List<String> words) {
