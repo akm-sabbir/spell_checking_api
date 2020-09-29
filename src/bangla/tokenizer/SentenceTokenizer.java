@@ -80,7 +80,7 @@ public class SentenceTokenizer {
 		//int index = size ;
 		List<String> words ;
 		int baseInd = 0;
-		List<BanglaGrammerChecker> grammarCheckers = GrammerCheckerFactory.getRegisteredCheckers();
+		Map<String,BanglaGrammerChecker> grammarCheckerMap = GrammerCheckerFactory.getRegisteredCheckers();
 		for (String each_sentence : sentences) {
 			
 			
@@ -92,9 +92,8 @@ public class SentenceTokenizer {
 			}
 			each_sentence = concatWithSpaces(words);
 			//ValidateNoSpaceBetweenWords.setDictionary(dictionaries.correctWords.getDictionary());
-			
-			for(BanglaGrammerChecker checker: grammarCheckers) {
-				res = checker.hasError(words);
+			for(BanglaGrammerChecker entry: grammarCheckerMap.values()) {
+				res = entry.hasError(words);
 				wordMapping = getCheckedWordsForSentencesUpdateMap(res, wordMapping ,baseInd);
 			}
 			

@@ -5,15 +5,16 @@ import java.util.Arrays;
 import java.util.List;
 
 public class NirdeshokErrorChecker implements BanglaGrammerChecker {
-	static List<String> nirdeshok = Arrays.asList("টার","টাকে","টির","টিকে","টুকুর","টুকুকে","খানার","খানাকে","খানির","জনকে","গুলির","গুলিকে","গুলার","গুলাকে","গুলোর","গুলোকে","টা", "টে", "টো", "টি", "টু", "টুকু", "টুকুন", "টাক", "খানা", "খানি",
-			"গাছা", "গাছি", "জন", "থান", "পাটি", "গুলি", "গুলা", "গুলো");
+	static List<String> nirdeshok = Arrays.asList("টার", "টাকে", "টির", "টিকে", "টুকুর", "টুকুকে", "খানার", "খানাকে",
+			"খানির", "জনকে", "গুলির", "গুলিকে", "গুলার", "গুলাকে", "গুলোর", "গুলোকে", "টা", "টে", "টো", "টি", "টু",
+			"টুকু", "টুকুন", "টাক", "খানা", "খানি", "গাছা", "গাছি", "জন", "থান", "পাটি", "গুলি", "গুলা", "গুলো");
 
 	public GrammerCheckerDto hasError(List<String> words) {
 		GrammerCheckerDto ret = new GrammerCheckerDto();
 		ret.wordSuggestion = new ArrayList<>();
 		for (int i = 0; i < words.size() - 1; i++) {
-			
-			if ((!words.get(i).equals("এই")) && (!words.get(i).equals("ঐ"))) 
+
+			if ((!words.get(i).equals("এই")) && (!words.get(i).equals("ঐ")))
 				continue;
 			String str = getNirdeshokWord(words.get(i + 1));
 			if (!str.equals("")) {

@@ -1,7 +1,7 @@
 package bangla.grammarchecker;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import config.GlobalConfigConstants;
 import config.GlobalConfigDTO;
@@ -12,7 +12,7 @@ public class GrammerCheckerFactory {
 	
 	private GrammerCheckerFactory() {
 	}
-	private static List<BanglaGrammerChecker> result = null;
+	private static Map<String,BanglaGrammerChecker> grammarCheckerMap = new HashMap<>();
 	private static BanglaGrammerChecker getGrammerChecker(String checkerType) {
 		if(checkerType==null) return null;
 		if(checkerType.equals(GrammerCheckerTypes.SHADHU_CHOLIT_ERROR.toString())) 
@@ -28,21 +28,33 @@ public class GrammerCheckerFactory {
 		return null;
 	}
 	public static void initializeRegisteredCheckers() {
-		result = new ArrayList<BanglaGrammerChecker>();
 		GlobalConfigDTO registerType = GlobalConfigurationRepository.getGlobalConfigDTOByID(GlobalConfigConstants.REGISTERED_GRAMMAR_CHECKER_TYPES);
 		if(registerType == null || registerType.value == null || registerType.value == "") return;
-		System.out.println(registerType.value);
+		
 		String[] splittedEnums = registerType.value.split(",");
 		
 		for(int index = 0; index < splittedEnums.length; index ++) {
 			BanglaGrammerChecker checker = getGrammerChecker(splittedEnums[index]);
 			if(checker == null) continue;
-			result.add(checker);
+			grammarCheckerMap.put(splittedEnums[index], checker);
 		}
 	}
-	public static List<BanglaGrammerChecker> getRegisteredCheckers() {
-		if(result==null) return new ArrayList<BanglaGrammerChecker>();
-		return result;
+	public static Map<String,BanglaGrammerChecker> getRegisteredCheckers() {
+		GlobalConfigDTO registerType = GlobalConfigurationRepository.getGlobalConfigDTOByID(GlobalConfigConstants.REGISTERED_GRAMMAR_CHECKER_TYPES);
+		if(registerType == null || registerType.value == null || registerType.value == "") return grammarCheckerMap;
+		
+		String[] splittedEnums = registerType.value.split(",");
+		
+		for(int index = 0; index < splittedEnums.length; index ++) {
+			if(!grammarCheckerMap.containsKey(splittedEnums[index])) {
+				BanglaGrammerChecker checker = getGrammerChecker(splittedEnums[index]);
+				if(checker != null) {
+					grammarCheckerMap.put(splittedEnums[index], checker);
+				}
+			}
+		}
+		
+		return grammarCheckerMap;
 	}
 
 }

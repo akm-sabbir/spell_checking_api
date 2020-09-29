@@ -109,9 +109,9 @@ public class Main {
 //		dictionaryInitializer di = new dictionaryInitializer();
 //		di.contextInitialized("");
 		System.out.println("++++++++++++++++++++++++++++");
-	//	checkSadhuCholitoMixure();
+		checkSadhuCholitoMixure();
 		System.out.println("++++++++++++++++++++++++++++");
-	//	checkSubjectVerb();
+		checkSubjectVerb();
 		System.out.println("++++++++++++++++++++++++++++");
 //		checkNoSpaceError();
 //		System.out.println("++++++++++++++++++++++++++++");
