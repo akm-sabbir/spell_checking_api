@@ -1,64 +1,42 @@
 package bangla.grammarchecker;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+import bangla.ErrorsInBanglaLanguage;
+import bangla.WithTrie.BitMasking;
 import bangla.WithTrie.TrieNodeWithList;
-import bangla.spellchecker.WordDto;
+import bangla.spellchecker.Pair;
+import bangla.spellchecker.SpellCheckingDto;
 
 
 public class SpaceErrorBetweenWordsChecker implements BanglaGrammerChecker{
-	static TrieNode dictionary ;
-	static List<TrieNode> dictionaries = new ArrayList<>();
-	public GrammerCheckerDto hasError(List<String> words) {
-		GrammerCheckerDto ret = new GrammerCheckerDto();
-		ret.wordSuggestion = new ArrayList<>();
+	static TrieNodeWithList dictionary ;
+	static List<TrieNodeWithList> dictionaries = new ArrayList<>();
+	public List<SpellCheckingDto> hasError(List<String> words) {
+		List<SpellCheckingDto> spellCheckerDtos = new ArrayList<>();
 		for(int i=0;i<words.size()-1;i++) {
 			if(findWord(words.get(i)+words.get(i+1))) {
-				WordSuggestion sugg = new WordSuggestion();
-				sugg.wordName = words.get(i) + " " + words.get(i+1);
-				sugg.suggestedWord = words.get(i) + words.get(i+1);
-				sugg.wordIndex = i;
-				ret.wordSuggestion.add(sugg);
+				SpellCheckingDto dto = new SpellCheckingDto();
+				int errorType = BitMasking.setBitAt(0, 1);
+				dto.word = words.get(i) + " " + words.get(i+1);
+				dto.errorType = BitMasking.setBitAt(errorType, ErrorsInBanglaLanguage.validspacemissing);
+				dto.suggestion = new ArrayList<Pair>();
+				dto.suggestion.add(new Pair(words.get(i) + words.get(i+1), -1));
+				spellCheckerDtos.add(dto);
 				i++;
+			} else {
+				spellCheckerDtos.add(new SpellCheckingDto());
 			}
 		}
-		if(ret.wordSuggestion.size()>0) {
-			ret.errorType = "invalid-space-in-word";
-			ret.isValidSentence = false;
-		} else {
-			ret.isValidSentence = true;
-		}
-		return ret;
-	}
-	
-	public static void setDictionary(TrieNode root) {
-		dictionary = root;
+		spellCheckerDtos.add(new SpellCheckingDto());
+		return spellCheckerDtos;
 	}
 	public static void registerDictionary(TrieNodeWithList dictionary) {
-		TrieNode dictionaryNode = TrieNode.prepare(dictionary);
-		dictionaries.add(dictionaryNode);
-		return;
-	}
-	public static void buildTrie(List<WordDto> words) {
-		/*
-		List<String> words = new ArrayList<>();
-		try {
-			words = ReadCsvFile.getDictionaryWordsFromCsvFile();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}*/
-		for(int i=0;i<words.size();i++) {
-			List<String> mixed = Arrays.asList(words.get(i).word.split(","));
-			if(mixed.size()>0) {
-				dictionary.insert(mixed.get(0));
-			}
-		}
+		dictionaries.add(dictionary);
 	}
 	public static boolean findWord(String word) {
-		for(TrieNode dictionary : dictionaries) {
+		for(TrieNodeWithList dictionary : dictionaries) {
 			if(dictionary.searchWord(word).isFound)
 				return true;
 		}

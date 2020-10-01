@@ -2,8 +2,10 @@ package bangla.grammarchecker;
 
 import java.util.List;
 
+import bangla.spellchecker.SpellCheckingDto;
+
 
 public interface BanglaGrammerChecker {
 	//GrammerCheckerDto hasError(String sentence);
-	GrammerCheckerDto hasError(List<String> words);
+	List<SpellCheckingDto> hasError(List<String> words);
 }
