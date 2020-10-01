@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 import bangla.spellchecker.WordDto;
 
-public class DictionaryIncorrectWord extends dictionary{
+public class DictionaryIncorrectWord extends Dictionary{
 	public DictionaryIncorrectWord() {
 		dict = new TrieNodeWithList();
 		inverseDict = new HashMap<Long, String>();

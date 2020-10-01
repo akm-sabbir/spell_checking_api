@@ -30,7 +30,7 @@ public class WordSuggestionV3 {
 			this.root = root;
 		}
 	}
-	public dictionary root;
+	public Dictionary root;
 	private static int maxMisMatch = 0;
 	private static String letter = "অআইঈউঊঋঌএঐওঔকখগঘঙচছজঝঞটঠডঢণতথদধনপফবভমযরলশষসহড়ঢ়য়";
 	private static int similarLetterWeight = 25;
@@ -41,7 +41,7 @@ public class WordSuggestionV3 {
 	private int[] costTracker = new int[101];
 	private Queue<encaptulator> Q = new LinkedList<encaptulator>(); 
 	private WordTokenizer WT = new WordTokenizer();
-	public void setDictionary(dictionary dict) {
+	public void setDictionary(Dictionary dict) {
 		this.root = dict;
 	}
 	public  void insert(String word, WordDto wto) {
@@ -338,7 +338,7 @@ public class WordSuggestionV3 {
 	
 	
 	List<String> arr = new ArrayList<>();
-	public  void init_dictionary(List<WordDto> words, dictionary dict) throws IOException {
+	public  void init_dictionary(List<WordDto> words, Dictionary dict) throws IOException {
 		this.root = dict; 
 		buildTrie(words);
 	}

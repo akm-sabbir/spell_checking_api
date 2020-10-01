@@ -2,7 +2,7 @@ package bangla.WithTrie;
 
 import java.util.HashMap;
 
-public class DictionaryNamedEntity extends dictionary{
+public class DictionaryNamedEntity extends Dictionary{
 
 	public DictionaryNamedEntity() {
 		dict = new TrieNodeWithList();

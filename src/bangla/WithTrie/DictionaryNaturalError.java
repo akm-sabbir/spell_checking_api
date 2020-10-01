@@ -3,7 +3,7 @@ package bangla.WithTrie;
 import java.util.HashMap;
 
 
-public class DictionaryNaturalError extends dictionary{
+public class DictionaryNaturalError extends Dictionary{
 	
 	public DictionaryNaturalError() {
 		dict = new TrieNodeWithList();

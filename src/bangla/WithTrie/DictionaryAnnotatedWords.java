@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 import bangla.spellchecker.WordDto;
 
-public class DictionaryAnnotatedWords extends dictionary {
+public class DictionaryAnnotatedWords extends Dictionary {
 
 	public DictionaryAnnotatedWords() {
 		dict = new TrieNodeWithList();
