@@ -18,7 +18,7 @@ public class NaturalErrorRepository implements Repository{
 	
 	static Logger logger = Logger.getLogger(NaturalErrorRepository.class);
 	static NaturalErrorRepository instance = null;
-	public dictionaryNaturalError root;
+	public DictionaryNaturalError root;
 	public static final String tableName="natural_error_word";
 	private final static int DICTIONARY_WORD = 1;
 	private final static int NAMED_ENTITY = 2;
@@ -29,7 +29,7 @@ public class NaturalErrorRepository implements Repository{
 	
 	private NaturalErrorRepository(){
 		
-		root = new dictionaryNaturalError();
+		root = new DictionaryNaturalError();
 		errorToCorrect = new HashMap();
 		wordSuggestionGenerator = new WordSuggestionV3();
 		if(DictionaryRepository.getInstance().root == null)

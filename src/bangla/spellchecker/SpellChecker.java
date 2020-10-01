@@ -20,9 +20,9 @@ public class SpellChecker {
 	}
 
 	
-	public spell_checking_dto copyDto(Map<Integer, spell_checking_dto> result_list, String data, Map<String, Integer> tracker,
-			spell_checking_dto suggested_word) {
-		spell_checking_dto temp_container  = result_list.get(tracker.get(data));
+	public SpellCheckingDto copyDto(Map<Integer, SpellCheckingDto> result_list, String data, Map<String, Integer> tracker,
+			SpellCheckingDto suggested_word) {
+		SpellCheckingDto temp_container  = result_list.get(tracker.get(data));
 		suggested_word.ID = temp_container.ID + 1;
 		suggested_word.isCorrect = temp_container.isCorrect;
 		suggested_word.langType = temp_container.langType;
@@ -31,7 +31,7 @@ public class SpellChecker {
 		suggested_word.wordType = temp_container.wordType;
 		return suggested_word;
 	}
-	public spell_checking_dto createSuggestion(spell_checking_dto suggested_word, String data, WordSuggestionV3 wordSuggestion) {
+	public SpellCheckingDto createSuggestion(SpellCheckingDto suggested_word, String data, WordSuggestionV3 wordSuggestion) {
 		suggested_word.isCorrect = 0;
 		if (suggested_word.suggestion == null)
 			suggested_word.suggestion = new ArrayList<Pair>();
@@ -59,7 +59,7 @@ public class SpellChecker {
 			return new ArrayList<Pair>();
 		return suggestion;
 	}
-	public spell_checking_dto getProcessedMap(spell_checking_dto suggested_word, String data, Map<Integer, spell_checking_dto> result_list, Map<String,Integer> tracker,
+	public SpellCheckingDto getProcessedMap(SpellCheckingDto suggested_word, String data, Map<Integer, SpellCheckingDto> result_list, Map<String,Integer> tracker,
 		 Map<Integer, TrieNodeWithList> table_query){
 		WordSuggestionV3 wordSuggestion = new WordSuggestionV3();
 		//String data = normalizeText(data_);
@@ -130,9 +130,9 @@ public class SpellChecker {
 		
 		return 0;
 	}
-	public HashMap<Integer, spell_checking_dto> getWordValidationInfo(String text_data, Map<Integer, String> tokenized_data) {
+	public HashMap<Integer, SpellCheckingDto> getWordValidationInfo(String text_data, Map<Integer, String> tokenized_data) {
 		//String encoded;
-		HashMap<Integer, spell_checking_dto> result_list = new HashMap<>();
+		HashMap<Integer, SpellCheckingDto> result_list = new HashMap<>();
 		HashMap<String, Integer> tracker = new HashMap<String, Integer>();
 		HashMap<Integer, TrieNodeWithList> table_query = new HashMap<>();
 		String data;
@@ -142,7 +142,7 @@ public class SpellChecker {
 			
 			data = eachWord.getValue();
 			key =  eachWord.getKey();
-			spell_checking_dto suggested_word = new spell_checking_dto();
+			SpellCheckingDto suggested_word = new SpellCheckingDto();
 			suggested_word.word = data;
 			suggested_word.ID = 0;
 			suggested_word.isCorrect = 0;

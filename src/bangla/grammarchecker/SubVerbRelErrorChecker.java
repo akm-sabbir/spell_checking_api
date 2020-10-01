@@ -11,7 +11,7 @@ import org.apache.log4j.Logger;
 
 
 import bangla.preprocessingUnit.*;
-import bangla.spellchecker.spell_checking_dto;
+import bangla.spellchecker.SpellCheckingDto;
 import bangla.tokenizer.WordTokenizer;
 
 public class SubVerbRelErrorChecker implements BanglaGrammerChecker{
@@ -160,9 +160,9 @@ public class SubVerbRelErrorChecker implements BanglaGrammerChecker{
 			} else return word;
 		} else return word;
 	}
-	public static void setPurushMap(List<spell_checking_dto> rows) {
+	public static void setPurushMap(List<SpellCheckingDto> rows) {
 		purushMap = new HashMap<>();
-		for(spell_checking_dto row: rows) {
+		for(SpellCheckingDto row: rows) {
 			purushMap.put(row.word, row.wordType);
 		}
 	}
@@ -173,8 +173,8 @@ public class SubVerbRelErrorChecker implements BanglaGrammerChecker{
 			return notFound;
 		}
 	}
-	public static void buildTrie(List<spell_checking_dto> words) {
-		spell_checking_dto mixed ;
+	public static void buildTrie(List<SpellCheckingDto> words) {
+		SpellCheckingDto mixed ;
 		for(int i=0;i<words.size();i++) {
 			mixed = words.get(i); 
 			if(mixed.word != null && !mixed.word.equals("invalid")) {

@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import bangla.WithTrie.TrieNodeWithList;
-import bangla.spellchecker.word_dto;
+import bangla.spellchecker.WordDto;
 
 
 public class SpaceErrorBetweenWordsChecker implements BanglaGrammerChecker{
@@ -42,7 +42,7 @@ public class SpaceErrorBetweenWordsChecker implements BanglaGrammerChecker{
 		dictionaries.add(dictionaryNode);
 		return;
 	}
-	public static void buildTrie(List<word_dto> words) {
+	public static void buildTrie(List<WordDto> words) {
 		/*
 		List<String> words = new ArrayList<>();
 		try {

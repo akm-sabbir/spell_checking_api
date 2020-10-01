@@ -2,8 +2,8 @@ package bangla.spellchecker;
 
 public class Pair {
 
-	String words;
-	Integer score;
+	public String words;
+	public Integer score;
 	public Pair() {}
 	public Pair(String word, Integer weight) {
 		this.words = word;

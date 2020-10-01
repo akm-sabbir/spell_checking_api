@@ -6,7 +6,7 @@ import org.apache.log4j.Logger;
 
 import bangla.WithTrie.TrieNodeWithList;
 import bangla.grammarchecker.SubVerbRelErrorChecker;
-import bangla.spellchecker.spell_checking_dto;
+import bangla.spellchecker.SpellCheckingDto;
 import dbm.DBMR;
 import repository.Repository;
 import repository.RepositoryManager;
@@ -20,11 +20,11 @@ public class SubjectVerbRepository implements Repository{
 	
 	static Logger logger = Logger.getLogger(SubjectVerbRepository.class);
 	static SubjectVerbRepository instance = null;
-	public dictionaryAnnotatedWords root;
+	public DictionaryAnnotatedWords root;
 	public static final String tableName="annotated_word";
 	
 	private SubjectVerbRepository(){
-		root = new dictionaryAnnotatedWords();
+		root = new DictionaryAnnotatedWords();
 		RepositoryManager.getInstance().addRepository(this);
 	}
 	
@@ -52,7 +52,7 @@ public class SubjectVerbRepository implements Repository{
 		Connection connection = null;
 		ResultSet rs = null;
 		Statement stmt = null;
-		spell_checking_dto  sp_dto= null;
+		SpellCheckingDto  sp_dto= null;
 		try{
 			connection = DBMR.getInstance().getConnection();
 			stmt = connection.createStatement();

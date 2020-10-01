@@ -15,11 +15,11 @@ public class DictionaryRepository implements Repository{
 	
 	static Logger logger = Logger.getLogger(DictionaryRepository.class);
 	static DictionaryRepository instance = null;
-	public dictionaryCorrectWords root = null;
+	public DictionaryCorrectWords root = null;
 	public static final String tableName="dictionary_words";
 	
 	private DictionaryRepository(){
-		root = new dictionaryCorrectWords();
+		root = new DictionaryCorrectWords();
 		RepositoryManager.getInstance().addRepository(this);
 	}
 	

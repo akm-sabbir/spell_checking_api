@@ -15,11 +15,11 @@ public class NamedEntityRepository implements Repository{
 	
 	static Logger logger = Logger.getLogger(NamedEntityRepository.class);
 	static NamedEntityRepository instance = null;
-	public dictionaryNamedEntity root = null;
+	public DictionaryNamedEntity root = null;
 	public static final String tableName="named_entity";
 	
 	private NamedEntityRepository(){
-		root = new dictionaryNamedEntity();
+		root = new DictionaryNamedEntity();
 		RepositoryManager.getInstance().addRepository(this);
 	}
 	

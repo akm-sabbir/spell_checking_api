@@ -29,7 +29,7 @@ import org.apache.log4j.Logger;
 import com.google.gson.Gson;
 
 import bangla.WithTrie.WordSuggestionV3;
-import bangla.spellchecker.spell_checking_dto;
+import bangla.spellchecker.SpellCheckingDto;
 import bangla.spellchecker.SpellChecker;
 import bangla.tokenizer.SentenceTokenizer;
 import bangla.tokenizer.TextNormalization;
@@ -44,7 +44,7 @@ public class SpellAndGrammarChecker {
     String tempTableName = "word_content_temp";
 	Word_contentDAO word_contentDAO;
 	int maxMissmatch=100;
-	spell_checking_dto suggested_word;
+	SpellCheckingDto suggested_word;
 	TextNormalization textNormalizer = new TextNormalization();
 	private SpellChecker spellChecker = new SpellChecker();
 	private SentenceTokenizer sentenceTokenizer = new SentenceTokenizer();
@@ -59,7 +59,7 @@ public class SpellAndGrammarChecker {
 			return null;
 		}
 		List<String> tokenized_sentence = null;
-		HashMap<Integer, spell_checking_dto> result_list = null;
+		HashMap<Integer, SpellCheckingDto> result_list = null;
 		try {
 			tokenized_sentence = sentenceTokenizer.getTokenizedSentence(text_data);
 			if(tokenized_sentence.size() <= 0 ) {

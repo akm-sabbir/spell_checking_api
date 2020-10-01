@@ -3,7 +3,7 @@ import java.util.List;
 import java.util.HashMap;
 
 import bangla.WithTrie.WordSuggestionV3;
-import bangla.spellchecker.spell_checking_dto;
+import bangla.spellchecker.SpellCheckingDto;
 import bangla.spellchecker.SpellChecker;
 import bangla.tokenizer.SentenceTokenizer;
 import bangla.tokenizer.TextNormalization;
@@ -15,7 +15,7 @@ public class Word_contentService
 	SpellChecker sp_checker;
 	SentenceTokenizer gr_checker;
 	
-	public HashMap<Integer, spell_checking_dto> executeSpellChecking(String text_data)
+	public HashMap<Integer, SpellCheckingDto> executeSpellChecking(String text_data)
 	{
 		TextNormalization textNormalizer = new TextNormalization();
 		sp_checker = new SpellChecker();
@@ -27,7 +27,7 @@ public class Word_contentService
 			return null;
 		}
 		List<String> tokenized_sentence = null;
-		HashMap<Integer, spell_checking_dto> result_list = null;
+		HashMap<Integer, SpellCheckingDto> result_list = null;
 		try {
 			tokenized_sentence = gr_checker.getTokenizedSentence(text_data);
 		}catch(Exception ex) {

@@ -13,7 +13,7 @@ import java.util.PriorityQueue;
 import java.util.Scanner;
 
 import bangla.spellchecker.Pair;
-import bangla.spellchecker.word_dto;
+import bangla.spellchecker.WordDto;
 import bangla.tokenizer.WordTokenizer;
 
 public class WordSuggestionV3 {
@@ -44,7 +44,7 @@ public class WordSuggestionV3 {
 	public void setDictionary(dictionary dict) {
 		this.root = dict;
 	}
-	public  void insert(String word, word_dto wto) {
+	public  void insert(String word, WordDto wto) {
 		if(root == null) {
 			System.out.println("dictionary can not null");
 			throw new NullPointerException("Trie dictionary is null");
@@ -338,7 +338,7 @@ public class WordSuggestionV3 {
 	
 	
 	List<String> arr = new ArrayList<>();
-	public  void init_dictionary(List<word_dto> words, dictionary dict) throws IOException {
+	public  void init_dictionary(List<WordDto> words, dictionary dict) throws IOException {
 		this.root = dict; 
 		buildTrie(words);
 	}
@@ -427,9 +427,9 @@ public class WordSuggestionV3 {
 		
 		return t;		
 	}
-	private  void buildTrie(List<word_dto> words) {
+	private  void buildTrie(List<WordDto> words) {
 		
-		for(word_dto s: words) {
+		for(WordDto s: words) {
 			insert(this.normalizeText(s.word), s);
 			this.root.inverseDict.put(s.ID, s.word);
 			}

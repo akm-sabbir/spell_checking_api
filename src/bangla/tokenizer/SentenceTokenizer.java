@@ -27,14 +27,14 @@ public class SentenceTokenizer {
 	    }
 	    return new String(wordList.deleteCharAt(wordList.length() - 1));
 	}
-	public Map<Integer, spell_checking_dto> getCheckedWordsForSentences(GrammerCheckerDto res, int baseIndex){
+	public Map<Integer, SpellCheckingDto> getCheckedWordsForSentences(GrammerCheckerDto res, int baseIndex){
 		String[] errType = null;
-		spell_checking_dto suggested_word=null;
-		Map<Integer, spell_checking_dto> result_list = new HashMap<>();
+		SpellCheckingDto suggested_word=null;
+		Map<Integer, SpellCheckingDto> result_list = new HashMap<>();
 		if(res.isValidSentence == false) {
 			errType = res.errorType.split(" ");
 			for (int i = 0; i < res.wordSuggestion.size(); i++) {
-				suggested_word = new spell_checking_dto();
+				suggested_word = new SpellCheckingDto();
 				suggested_word.word = res.wordSuggestion.get(i).wordName;
 				suggested_word.isCorrect = 1;
 				suggested_word.wordType = errType[i];
@@ -45,7 +45,7 @@ public class SentenceTokenizer {
 		}
 		return result_list;
 	}
-	public HashMap<Integer, spell_checking_dto> getCheckedWordsForSentencesUpdateMap(GrammerCheckerDto res, HashMap<Integer, spell_checking_dto> maps, int baseIndex){
+	public HashMap<Integer, SpellCheckingDto> getCheckedWordsForSentencesUpdateMap(GrammerCheckerDto res, HashMap<Integer, SpellCheckingDto> maps, int baseIndex){
 		int index;
 		String errType[];
 		if(res.isValidSentence == false) {
@@ -73,8 +73,8 @@ public class SentenceTokenizer {
 		}
 		return maps;
 	}
-	public HashMap<Integer, spell_checking_dto> getSentenceValidationInfo(List<String> sentences, HashMap<Integer, spell_checking_dto> wordMapping){
-		HashMap<Integer, spell_checking_dto> result_list = new HashMap<>();
+	public HashMap<Integer, SpellCheckingDto> getSentenceValidationInfo(List<String> sentences, HashMap<Integer, SpellCheckingDto> wordMapping){
+		HashMap<Integer, SpellCheckingDto> result_list = new HashMap<>();
 		//ArrayList<spell_c-hecking_dto> result_list = new ArrayList<>();
 		GrammerCheckerDto res;
 		//int index = size ;

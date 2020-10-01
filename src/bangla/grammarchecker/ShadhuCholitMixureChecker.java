@@ -7,7 +7,7 @@ import java.util.List;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
-import bangla.spellchecker.spell_checking_dto;
+import bangla.spellchecker.SpellCheckingDto;
 import bangla.tokenizer.WordTokenizer;
 
 
@@ -17,9 +17,9 @@ public class ShadhuCholitMixureChecker implements BanglaGrammerChecker {
 	static TrieNode shadhuToCholit = new TrieNode();
 	static WordTokenizer WT = new WordTokenizer();
 
-	public static void buildTrie(List<spell_checking_dto> words) {
+	public static void buildTrie(List<SpellCheckingDto> words) {
 
-		for (spell_checking_dto mixed : words) {
+		for (SpellCheckingDto mixed : words) {
 			if (mixed == null)
 				continue;
 			boolean isValidSadhu = (mixed.wordType != null && !mixed.wordType.equals("invalid"));

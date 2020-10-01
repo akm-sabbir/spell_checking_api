@@ -8,7 +8,7 @@ import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
 
-import bangla.spellchecker.spell_checking_dto;
+import bangla.spellchecker.SpellCheckingDto;
 import bangla.tokenizer.WordTokenizer;
 import repository.RepositoryManager;
 import word_content.Word_contentService;
@@ -59,7 +59,7 @@ public class Performance
 					
 					Word_contentService wcs = new Word_contentService();
 					time1 = System.currentTimeMillis();
-					Map<Integer, spell_checking_dto> original_result_list = wcs.executeSpellChecking(testin_dto.original_content);
+					Map<Integer, SpellCheckingDto> original_result_list = wcs.executeSpellChecking(testin_dto.original_content);
 					time2 = System.currentTimeMillis();
 					
 					List<Map<String, String>> detection_true_positive = calculate_detection_true_positive(corrected_tokens, original_result_list);
@@ -132,7 +132,7 @@ public class Performance
 		}
 	}
 	
-	public static List<Map<String, String>> calculate_detection_true_positive(List<String> corrected_tokens, Map<Integer, spell_checking_dto> original_result_list)
+	public static List<Map<String, String>> calculate_detection_true_positive(List<String> corrected_tokens, Map<Integer, SpellCheckingDto> original_result_list)
 	{
 		if(corrected_tokens == null || original_result_list == null) return null;
 		
@@ -141,7 +141,7 @@ public class Performance
 		
 		for(Integer index : original_result_list.keySet())
 		{
-			spell_checking_dto info = original_result_list.get(index);
+			SpellCheckingDto info = original_result_list.get(index);
 			
 			String corrected_word = null;
 			
@@ -164,7 +164,7 @@ public class Performance
 		return tp;
 	}
 	
-	public static List<Map<String, String>> calculate_detection_false_positive(List<String> corrected_tokens, Map<Integer, spell_checking_dto> original_result_list)
+	public static List<Map<String, String>> calculate_detection_false_positive(List<String> corrected_tokens, Map<Integer, SpellCheckingDto> original_result_list)
 	{
 		if(corrected_tokens == null || original_result_list == null) return null;
 		
@@ -173,7 +173,7 @@ public class Performance
 		
 		for(Integer index : original_result_list.keySet())
 		{
-			spell_checking_dto info = original_result_list.get(index);
+			SpellCheckingDto info = original_result_list.get(index);
 			
 			String corrected_word = null;
 			
@@ -196,7 +196,7 @@ public class Performance
 		return fp;		
 	}	
 	
-	public static List<Map<String, String>> calculate_detection_false_negative(List<String> corrected_tokens, Map<Integer, spell_checking_dto> original_result_list)
+	public static List<Map<String, String>> calculate_detection_false_negative(List<String> corrected_tokens, Map<Integer, SpellCheckingDto> original_result_list)
 	{
 		if(corrected_tokens == null || original_result_list == null) return null;
 		
@@ -205,7 +205,7 @@ public class Performance
 		
 		for(Integer index : original_result_list.keySet())
 		{
-			spell_checking_dto info = original_result_list.get(index);
+			SpellCheckingDto info = original_result_list.get(index);
 			
 			String corrected_word = null;
 			
@@ -228,7 +228,7 @@ public class Performance
 		return fn;
 	}
 	
-	public static List<Map<String, String>> calculate_correction_true_positive(List<String> corrected_tokens, Map<Integer, spell_checking_dto> original_result_list)
+	public static List<Map<String, String>> calculate_correction_true_positive(List<String> corrected_tokens, Map<Integer, SpellCheckingDto> original_result_list)
 	{
 		if(corrected_tokens == null || original_result_list == null) return null;
 		
@@ -236,7 +236,7 @@ public class Performance
 		return tp;
 	}
 	
-	public static List<Map<String, String>> calculate_correction_false_positive(List<String> corrected_tokens, Map<Integer, spell_checking_dto> original_result_list)
+	public static List<Map<String, String>> calculate_correction_false_positive(List<String> corrected_tokens, Map<Integer, SpellCheckingDto> original_result_list)
 	{
 		if(corrected_tokens == null || original_result_list == null) return null;
 		
@@ -244,7 +244,7 @@ public class Performance
 		return fp;
 	}	
 	
-	public static List<Map<String, String>> calculate_correction_false_negative(List<String> corrected_tokens, Map<Integer, spell_checking_dto> original_result_list)
+	public static List<Map<String, String>> calculate_correction_false_negative(List<String> corrected_tokens, Map<Integer, SpellCheckingDto> original_result_list)
 	{
 		if(corrected_tokens == null || original_result_list == null) return null;
 		
