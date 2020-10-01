@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import bangla.WithTrie.BitMasking;
 import bangla.grammarchecker.*;
 import bangla.spellchecker.*;
 
@@ -27,74 +28,37 @@ public class SentenceTokenizer {
 	    }
 	    return new String(wordList.deleteCharAt(wordList.length() - 1));
 	}
-	public Map<Integer, SpellCheckingDto> getCheckedWordsForSentences(GrammerCheckerDto res, int baseIndex){
-		String[] errType = null;
-		SpellCheckingDto suggested_word=null;
-		Map<Integer, SpellCheckingDto> result_list = new HashMap<>();
-		if(res.isValidSentence == false) {
-			errType = res.errorType.split(" ");
-			for (int i = 0; i < res.wordSuggestion.size(); i++) {
-				suggested_word = new SpellCheckingDto();
-				suggested_word.word = res.wordSuggestion.get(i).wordName;
-				suggested_word.isCorrect = 1;
-				suggested_word.wordType = errType[i];
-				suggested_word.suggestion = new ArrayList<Pair>();
-				suggested_word.suggestion.add(new Pair(res.wordSuggestion.get(i).suggestedWord, 0));
-				result_list.put(i, suggested_word);
-			}
-		}
-		return result_list;
-	}
-	public HashMap<Integer, SpellCheckingDto> getCheckedWordsForSentencesUpdateMap(GrammerCheckerDto res, HashMap<Integer, SpellCheckingDto> maps, int baseIndex){
+
+	public HashMap<Integer, SpellCheckingDto> getCheckedWordsForSentencesUpdateMap(List<SpellCheckingDto> res, HashMap<Integer, SpellCheckingDto> maps, int baseIndex){
 		int index;
-		String errType[];
-		if(res.isValidSentence == false) {
-			//errType = res.errorType.split(" ");			
-			for (int i = 0; i < res.wordSuggestion.size(); i++) {
-				index = baseIndex + res.wordSuggestion.get(i).wordIndex;
-				if(maps.get(index).isCorrect == 1 && (res.errorType == "invalid-space-in-word" || res.errorType == "no-space-between-words"))
-					continue;
-				//maps.get(index).isCorrect = 0;
+		
+		
+						
+		for (int i = 0; i < res.size(); i++) {
+			index = baseIndex + i;
+			if(BitMasking.extractNthBit(res.get(index).errorType, 1) != 0 ) {
 				if (maps.get(index).suggestion == null){
 					maps.get(index).suggestion = new ArrayList<Pair>();
 				}
-				if(res.errorType == "subject-verb-agreement-error")
-					for(String each_suggestion : res.wordSuggestion.get(i).suggestedWordList)
-						maps.get(index).suggestion.add(new Pair(each_suggestion, -1));
-				else
-					maps.get(index).suggestion.add(new Pair(res.wordSuggestion.get(i).suggestedWord, -1));/// null pointer exception here what is the reason
-				if(res.errorType == "invalid-space-in-word")
-					maps.get(index).word = res.wordSuggestion.get(i).wordName;
-				if (maps.get(index).wordType == null)
-					maps.get(index).wordType = res.errorType;
-				else
-					maps.get(index).wordType += " " + res.errorType;
+				maps.get(index).errorType = res.get(index).errorType;
+				for(Pair each_suggestion : res.get(index).suggestion)
+					maps.get(index).suggestion.add(each_suggestion);
 			}
 		}
 		return maps;
 	}
 	public HashMap<Integer, SpellCheckingDto> getSentenceValidationInfo(List<String> sentences, HashMap<Integer, SpellCheckingDto> wordMapping){
-		HashMap<Integer, SpellCheckingDto> result_list = new HashMap<>();
-		//ArrayList<spell_c-hecking_dto> result_list = new ArrayList<>();
-		GrammerCheckerDto res;
-		//int index = size ;
-		List<String> words ;
 		int baseInd = 0;
 		Map<String,BanglaGrammerChecker> grammarCheckerMap = GrammerCheckerFactory.getRegisteredCheckers();
 		for (String each_sentence : sentences) {
-			
-			
 			WT.set_text(each_sentence);
-			words = WT._tokenization();
-			if(words.size() < 2) {
-				baseInd += words.size();
-				continue;
-			}
-			each_sentence = concatWithSpaces(words);
-			//ValidateNoSpaceBetweenWords.setDictionary(dictionaries.correctWords.getDictionary());
-			for(BanglaGrammerChecker entry: grammarCheckerMap.values()) {
-				res = entry.hasError(words);
-				wordMapping = getCheckedWordsForSentencesUpdateMap(res, wordMapping ,baseInd);
+			List<String> words = WT._tokenization();
+			//////////////each_sentence = concatWithSpaces(words);//////////////////////
+			if(words.size() >= 2) {
+				for(BanglaGrammerChecker entry: grammarCheckerMap.values()) {
+					List<SpellCheckingDto> result = entry.hasError(words);
+					wordMapping = getCheckedWordsForSentencesUpdateMap(result, wordMapping ,baseInd);
+				}
 			}
 			
 			baseInd += words.size();
