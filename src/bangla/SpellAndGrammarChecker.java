@@ -50,7 +50,7 @@ public class SpellAndGrammarChecker {
 	private SentenceTokenizer sentenceTokenizer = new SentenceTokenizer();
     private Gson gson = new Gson();
 
-	public String check(String text_data) {
+	public String check(String text_data, int option) {
 		
 		
 		logger.info("Recieved a request to process: " );
@@ -74,13 +74,18 @@ public class SpellAndGrammarChecker {
 		
 		try {
 			Map<Integer, String> indexedWords = textNormalizer.getIndexedWords(tokenized_sentence);
-			for(Entry<Integer, String> entry: indexedWords.entrySet()) {
-				System.out.print(entry.getValue());
+			if(option == 3) {
+				result_list = spellChecker.getWordValidationInfo(text_data, indexedWords);
+				logger.debug("Total Tokenized words after validation process completion " + result_list.size());
+				result_list = sentenceTokenizer.getSentenceValidationInfo(tokenized_sentence, result_list);
+				logger.debug("Total Valided words after process completion" + result_list.size());
+			}else if(option == 2) {
+				result_list = spellChecker.getWordValidationInfo(text_data, indexedWords);
+				logger.debug("Total Tokenized words after validation process completion " + result_list.size());
+			}else {
+				
 			}
-			result_list = spellChecker.getWordValidationInfo(text_data, indexedWords);
-			logger.debug("Total Tokenized words after validation process completion " + result_list.size());
-			result_list = sentenceTokenizer.getSentenceValidationInfo(tokenized_sentence, result_list);
-			logger.debug("Total Valided words after process completion" + result_list.size());
+			
 		}catch(Exception ex ) {
 			logger.fatal(ex);
 		}
