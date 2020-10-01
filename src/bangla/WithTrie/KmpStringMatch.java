@@ -76,11 +76,12 @@ public class KmpStringMatch {
 	    } 
 	  
 	    // Driver program to test above function 
+	   /*
 	    public static void main(String args[]) 
 	    { 
 	        String txt = "ABABDABACDABABCABAB"; 
 	        String pat = "ABABCABAB"; 
 	        new KmpStringMatch().KMPSearch(pat, txt); 
-	    } 
+	    }*/ 
 	
 }

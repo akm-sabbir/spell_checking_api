@@ -24,7 +24,7 @@ public class BitMasking {
 			
 		return 0;
 	}
-	
+	/*
 	public  static void main(String[] args) {
 		int number = 0;
 		BitMasking bitM = new BitMasking();
@@ -36,5 +36,5 @@ public class BitMasking {
 		System.out.println(bitM.resetBitAt(4, 3));
 		System.out.println(bitM.extractNthBit(8, 3));
 		return;
-	}
+	}*/
 }

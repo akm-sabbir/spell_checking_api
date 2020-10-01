@@ -198,6 +198,7 @@ public class WordSuggestion {
 		
 	}
 	static List<String> arr = new ArrayList<>();
+	/*
 	public static void main(String[] args) throws IOException {
 		root = new TrieNode();
 		readCsvFile();
@@ -236,7 +237,7 @@ public class WordSuggestion {
 			}
 			word = in.next();
 		}
-	}
+	}*/
 	private static boolean isSimilarLetter(char a, char b) {
 		if((a=='শ'||a=='ষ'||a=='স') && (b=='শ'||b=='ষ'||b=='স')) return true;
 		
