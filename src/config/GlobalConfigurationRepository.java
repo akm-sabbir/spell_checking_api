@@ -3,11 +3,11 @@ package config;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
 import org.apache.log4j.Logger;
+import org.apache.log4j.jdbc.JDBCAppender;
 
 import dbm.*;
 import repository.Repository;
@@ -75,7 +75,10 @@ public class GlobalConfigurationRepository implements Repository{
 		String sql = null;
 		ResultSet resultSet = null;
 		try{
+			System.out.println("Just Before loading the driver");
+			
 			connection = DBMR.getInstance().getConnection();
+			System.out.println("Could not load.... the driver");
 			statement = connection.createStatement();
 			sql = "select * from global_config";
 			resultSet = statement.executeQuery(sql);
@@ -97,9 +100,12 @@ public class GlobalConfigurationRepository implements Repository{
 				GlobalConfigDTOByGroupID.put(globalConfigDTO.groupID, list);
 			}
 		}
+		catch(SQLException ex) {
+			System.out.print(ex.getMessage());
+		}
 		catch(Exception ex)
 		{
-			logger.fatal("",ex);
+			logger.fatal("GlobalConfiguration object: ",ex);
 		}
 		finally {
 			try {if(statement != null){statement.close();}}catch(Exception e) {}			

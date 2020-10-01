@@ -61,7 +61,7 @@ public class Word_contentServlet extends HttpServlet
     public void init(ServletConfig confit) {
     	
     	System.out.println("this is the start of the server");
-    	System.out.print("Start loading web servers and servlets");
+    	System.out.println("Start loading web servers and servlets");
     	GrammerCheckerFactory.initializeRegisteredCheckers();
     	RepositoryManager.getInstance().addRepository(AnnotatedWordRepository.getInstance(), true);
     	RepositoryManager.getInstance().addRepository(DictionaryRepository.getInstance(), true);
