@@ -6,11 +6,11 @@ import java.util.List;
 
 import bangla.dao.AnnotatedWordRepository;
 import bangla.dao.DictionaryRepository;
+import bangla.dao.GradedPronoun;
 import bangla.dao.NamedEntityRepository;
 import bangla.dao.NaturalErrorRepository;
 import bangla.dao.SadhuCholitMixture;
 import bangla.dao.SubjectVerbRepository;
-import bangla.dao.gradedPronoun;
 import bangla.grammarchecker.BanglaGrammerChecker;
 import bangla.grammarchecker.GrammerCheckerDto;
 import bangla.grammarchecker.GrammerCheckerFactory;
@@ -19,6 +19,7 @@ import bangla.grammarchecker.NoSpaceBetweenWordsChecker;
 import bangla.grammarchecker.ShadhuCholitMixureChecker;
 import bangla.grammarchecker.SpaceErrorBetweenWordsChecker;
 import bangla.grammarchecker.SubVerbRelErrorChecker;
+import bangla.spellchecker.SpellCheckingDto;
 import bangla.tokenizer.WordTokenizer;
 import repository.RepositoryManager;
 
@@ -105,7 +106,7 @@ public class Main {
     	RepositoryManager.getInstance().addRepository(NaturalErrorRepository.getInstance(), true);
     	RepositoryManager.getInstance().addRepository(SubjectVerbRepository.getInstance(),true);
     	RepositoryManager.getInstance().addRepository(SadhuCholitMixture.getInstance(),true);
-    	RepositoryManager.getInstance().addRepository(gradedPronoun.getInstance(),true);
+    	RepositoryManager.getInstance().addRepository(GradedPronoun.getInstance(),true);
 //		dictionaryInitializer di = new dictionaryInitializer();
 //		di.contextInitialized("");
 		System.out.println("++++++++++++++++++++++++++++");
@@ -169,19 +170,7 @@ public class Main {
 	private static void checkSentenece(BanglaGrammerChecker validator, String sentence) {
 		WT.set_text(sentence);
 		List<String> words = WT._tokenization();
-		GrammerCheckerDto result = validator.hasError(words);
-		System.out.println(sentence);
-		if(!result.isValidSentence) {
-			System.out.println("Incorrect sentence");
-			System.out.println(result.errorType);
-			for(int i=0;i<result.wordSuggestion.size();i++) {
-				System.out.println(result.wordSuggestion.get(i).wordName);
-				System.out.println(result.wordSuggestion.get(i).suggestedWord);
-				System.out.println(result.wordSuggestion.get(i).suggestedWordList);
-			}
-		} else {
-			System.out.println("Correct sentence");
-		}
+	
 	}
 
 }
