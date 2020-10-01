@@ -2,23 +2,23 @@ package bangla.WithTrie;
 
 public class BitMasking {
 
-	public int setBitAt(int source , int location) {
+	public static int setBitAt(int source , int location) {
 		source |= (1 << (location-1));
 		return source;
 	}
-	public int resetBitAt(int source, int location) {
+	public static int resetBitAt(int source, int location) {
 		source &= ~(1 << (location-1));
 		return source;
 	}
-	public int extractNthBit(int source, int location) {
+	public static int extractNthBit(int source, int location) {
 		if((source & (1 << (location-1)) )!=0) return 1;
 		return 0;
 	}
-	public int compareNthBit(int source, int dest, int location) {
-		if(this.extractNthBit(source, location) != 0 && this.extractNthBit(dest, location) != 0) {
+	public static int compareNthBit(int source, int dest, int location) {
+		if(extractNthBit(source, location) != 0 && extractNthBit(dest, location) != 0) {
 			return 1;
 		}
-		if(this.extractNthBit(source, location) == 0 && this.extractNthBit(dest, location) == 0) {
+		if(extractNthBit(source, location) == 0 && extractNthBit(dest, location) == 0) {
 			return 1;
 		}
 			

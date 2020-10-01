@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import bangla.WithTrie.*;
-import bangla.WithTrie.kmpStringMatch;
+import bangla.WithTrie.KmpStringMatch;
 import bangla.dao.AnnotatedWordRepository;
 import bangla.dao.DictionaryRepository;
 import bangla.dao.NamedEntityRepository;
@@ -23,16 +23,14 @@ public class SpellChecker {
 	public SpellCheckingDto copyDto(Map<Integer, SpellCheckingDto> result_list, String data, Map<String, Integer> tracker,
 			SpellCheckingDto suggested_word) {
 		SpellCheckingDto temp_container  = result_list.get(tracker.get(data));
-		suggested_word.ID = temp_container.ID + 1;
-		suggested_word.isCorrect = temp_container.isCorrect;
-		suggested_word.langType = temp_container.langType;
+		suggested_word.sequence = temp_container.sequence + 1;
+		suggested_word.errorType = temp_container.errorType;
 		if(temp_container.suggestion != null)
-			suggested_word.suggestion = (ArrayList<Pair>) temp_container.suggestion;
-		suggested_word.wordType = temp_container.wordType;
+			suggested_word.suggestion =  temp_container.suggestion;
 		return suggested_word;
 	}
+	
 	public SpellCheckingDto createSuggestion(SpellCheckingDto suggested_word, String data, WordSuggestionV3 wordSuggestion) {
-		suggested_word.isCorrect = 0;
 		if (suggested_word.suggestion == null)
 			suggested_word.suggestion = new ArrayList<Pair>();
 		Map<String, Integer> wordWithDistance = wordSuggestion.getSuggestedWord(data);
@@ -71,35 +69,43 @@ public class SpellChecker {
 			
 			wordSuggestion.setDictionary(NamedEntityRepository.getInstance().root);
 			if(wordSuggestion.searchWord(data) == true) {
-				suggested_word.isCorrect = 1;
-				suggested_word.wordType="named-entity";
+				suggested_word.errorType = BitMasking.resetBitAt(suggested_word.errorType, 1);
+			}else {
+				suggested_word.errorType = BitMasking.setBitAt(suggested_word.errorType, 1);
 			}
-			if (suggested_word.isCorrect == 0) {
+				
+			if (BitMasking.extractNthBit( suggested_word.errorType, 1) == 1) {
 				wordSuggestion.setDictionary(DictionaryRepository.getInstance().root);
 				System.out.println("suggesting words not found in named entity ");
 				if(wordSuggestion.searchWord(data) == true) {
-					suggested_word.isCorrect = 1;
+					suggested_word.errorType = BitMasking.resetBitAt(suggested_word.errorType, 1);
+				}else {
+					suggested_word.errorType = BitMasking.setBitAt(suggested_word.errorType, 1);
 				}
-				System.out.println("suggesting words not found in dictionary ");
-				wordSuggestion.setDictionary(AnnotatedWordRepository.getInstance().root);
-				if(wordSuggestion.searchWord(data) == true) {
-					suggested_word.isCorrect = 1;
+				if (BitMasking.extractNthBit( suggested_word.errorType, 1) == 1) {
+					System.out.println("suggesting words not found in dictionary ");
+					wordSuggestion.setDictionary(AnnotatedWordRepository.getInstance().root);
+					if(wordSuggestion.searchWord(data) == true) {
+						suggested_word.errorType = BitMasking.resetBitAt(suggested_word.errorType, 1);
+					}else {
+						suggested_word.errorType = BitMasking.setBitAt(suggested_word.errorType, 1);
+					}
 				}
-				System.out.println("suggesting words not found in annotatedWords ");
+				
 			}
 			
-			if (suggested_word.isCorrect == 0){
-				
+			if (BitMasking.extractNthBit( suggested_word.errorType, 1) == 1){
+				System.out.println("suggesting words not found in annotatedWords ");
 				wordSuggestion.setDictionary(NaturalErrorRepository.getInstance().root);
 				System.out.println("Start Searching error word dictionary");
 				if (wordSuggestion.searchWord(data)==true) {
-					System.out.println("I am searching natural error word dictionary and the word is: ");
-					suggested_word.wordType="error";
+					System.out.println("I have found word in natural error word dictionary and the word is: ");
+					suggested_word.errorType = BitMasking.setBitAt(suggested_word.errorType, 1);
 					try {
 					
 					if(NaturalErrorRepository.getInstance().errorToCorrect.containsKey(data)== true) {
 						String word = NaturalErrorRepository.getInstance().errorToCorrect.get(data);
-						System.out.println(word);
+						System.out.println("the correct form of error word: " + word);
 						suggested_word.suggestion = getSuggestionList(suggested_word.suggestion);
 						suggested_word.suggestion.add(new Pair(word,0));
 					}
@@ -109,7 +115,8 @@ public class SpellChecker {
 					}
 				}else {
 				
-					suggested_word.wordType="unknown";
+					suggested_word.errorType= BitMasking.setBitAt(suggested_word.errorType, 6);
+					suggested_word.errorType= BitMasking.resetBitAt(suggested_word.errorType, 1);
 					//wordSuggestion.setDictionary(dictionaries.dicWords);
 				}
 				// following piece of code is necessary for querying server
@@ -144,13 +151,12 @@ public class SpellChecker {
 			key =  eachWord.getKey();
 			SpellCheckingDto suggested_word = new SpellCheckingDto();
 			suggested_word.word = data;
-			suggested_word.ID = 0;
-			suggested_word.isCorrect = 0;
+			suggested_word.sequence = 0;
 			suggested_word = getProcessedMap(suggested_word, data, result_list, tracker, table_query);
 			result_list.put(key, suggested_word);
 			tracker.put(data, key);
-			suggested_word.startIndex = kmpStringMatch.KMPSearch(data, text_data);
-			suggested_word.endIndex =  suggested_word.startIndex + data.length() - 1;
+			suggested_word.startIndex = KmpStringMatch.KMPSearch(data, text_data);
+			suggested_word.length =  suggested_word.startIndex + data.length();
 		
 		}
 		
