@@ -22,11 +22,11 @@ import org.apache.log4j.Logger;
 
 import bangla.dao.AnnotatedWordRepository;
 import bangla.dao.DictionaryRepository;
+import bangla.dao.GradedPronoun;
 import bangla.dao.NamedEntityRepository;
 import bangla.dao.NaturalErrorRepository;
 import bangla.dao.SadhuCholitMixture;
 import bangla.dao.SubjectVerbRepository;
-import bangla.dao.gradedPronoun;
 import bangla.grammarchecker.GrammerCheckerFactory;
 import repository.RepositoryManager;
 
@@ -67,9 +67,10 @@ public class Word_contentServlet extends HttpServlet
     	RepositoryManager.getInstance().addRepository(DictionaryRepository.getInstance(), true);
     	RepositoryManager.getInstance().addRepository(NamedEntityRepository.getInstance(), true);
     	RepositoryManager.getInstance().addRepository(NaturalErrorRepository.getInstance(), true);
+    	RepositoryManager.getInstance().addRepository(GradedPronoun.getInstance(),true);
     	RepositoryManager.getInstance().addRepository(SubjectVerbRepository.getInstance(),true);
     	RepositoryManager.getInstance().addRepository(SadhuCholitMixture.getInstance(),true);
-    	RepositoryManager.getInstance().addRepository(gradedPronoun.getInstance(),true);
+    	
     	return;
     }
 		
@@ -92,7 +93,7 @@ public class Word_contentServlet extends HttpServlet
 		String results= null;
 		if(service.toLowerCase().equals("spellandgrammarchecking")) {
 			bangla.SpellAndGrammarChecker spgChecker = new bangla.SpellAndGrammarChecker();
-			results = spgChecker.check(text_data);
+			results = spgChecker.check(text_data,3);
 		}
 		
 		//List<String> tokenized_data = sp_checker.getTokenizedWord(text_data);
