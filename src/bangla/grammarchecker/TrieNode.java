@@ -3,6 +3,7 @@ package bangla.grammarchecker;
 import java.util.ArrayList;
 import java.util.List;
 
+import bangla.WithTrie.TrieNodeSearchResult;
 import bangla.WithTrie.TrieNodeWithList;
 
 public class TrieNode {

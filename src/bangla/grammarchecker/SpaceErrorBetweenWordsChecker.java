@@ -20,7 +20,7 @@ public class SpaceErrorBetweenWordsChecker implements BanglaGrammerChecker{
 				SpellCheckingDto dto = new SpellCheckingDto();
 				int errorType = BitMasking.setBitAt(0, 1);
 				dto.word = words.get(i) + " " + words.get(i+1);
-				dto.errorType = BitMasking.setBitAt(errorType, ErrorsInBanglaLanguage.validspacemissing);
+				dto.errorType = BitMasking.setBitAt(errorType, ErrorsInBanglaLanguage.validspacemissingChecker);
 				dto.suggestion = new ArrayList<Pair>();
 				dto.suggestion.add(new Pair(words.get(i) + words.get(i+1), -1));
 				spellCheckerDtos.add(dto);

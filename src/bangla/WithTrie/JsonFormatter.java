@@ -25,7 +25,7 @@ public class JsonFormatter {
 		result += "\"sequence\":" + value.sequence;
 		result += "\"errorType\":" + value.errorType;
 		result += "\"startIndex\":" + value.startIndex;
-		result += "\"length\":" + value.endIndex;
+		result += "\"length\":" + value.length;
 		result += value.suggestion != null ? "suggestion:["+ getSuggestion(value.suggestion) +"]":"";
 		return result;
 	}

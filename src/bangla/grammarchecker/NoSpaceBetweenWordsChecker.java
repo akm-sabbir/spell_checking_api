@@ -38,7 +38,7 @@ public class NoSpaceBetweenWordsChecker implements BanglaGrammerChecker {
 				SpellCheckingDto dto = new SpellCheckingDto();
 				int errorType = BitMasking.setBitAt(0, 1);
 				dto.word = str;
-				dto.errorType = BitMasking.setBitAt(errorType, ErrorsInBanglaLanguage.nospace);
+				dto.errorType = BitMasking.setBitAt(errorType, ErrorsInBanglaLanguage.nospaceNeededChecker);
 				dto.suggestion = new ArrayList<Pair>();
 				String suggWord = str.substring(0, pos + 1) + " " + str.substring(pos + 1, str.length());
 				dto.suggestion.add(new Pair(suggWord, -1));

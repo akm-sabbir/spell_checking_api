@@ -50,7 +50,7 @@ public class ShadhuCholitMixureChecker implements BanglaGrammerChecker {
 				SpellCheckingDto dto = new SpellCheckingDto();
 				int errorType = BitMasking.setBitAt(0, 1);
 				dto.word = word;
-				dto.errorType = BitMasking.setBitAt(errorType, ErrorsInBanglaLanguage.sadhu);
+				dto.errorType = BitMasking.setBitAt(errorType, ErrorsInBanglaLanguage.sadhuCholitChecker);
 				dto.suggestion = new ArrayList<Pair>();
 				dto.suggestion.add(new Pair(res.viceVersaWord, -1));
 				spellCheckerDtos.add(dto);
@@ -66,7 +66,7 @@ public class ShadhuCholitMixureChecker implements BanglaGrammerChecker {
 				SpellCheckingDto dto = new SpellCheckingDto();
 				int errorType = BitMasking.setBitAt(0, 1);
 				dto.word = word;
-				dto.errorType = BitMasking.setBitAt(errorType, ErrorsInBanglaLanguage.sadhu);
+				dto.errorType = BitMasking.setBitAt(errorType, ErrorsInBanglaLanguage.sadhuCholitChecker);
 				dto.suggestion = new ArrayList<Pair>();
 				dto.suggestion.add(new Pair(res.viceVersaWord, -1));
 				spellCheckerDtos.add(dto);

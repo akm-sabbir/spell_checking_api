@@ -69,7 +69,7 @@ public class SubVerbRelErrorChecker implements BanglaGrammerChecker {
 			SpellCheckingDto subjectDto = new SpellCheckingDto();
 			int errorType = BitMasking.setBitAt(0, 1);
 			subjectDto.word = subject;
-			subjectDto.errorType = BitMasking.setBitAt(errorType, ErrorsInBanglaLanguage.subject);
+			subjectDto.errorType = BitMasking.setBitAt(errorType, ErrorsInBanglaLanguage.subjectVerbChecker);
 			subjectDto.suggestion = new ArrayList<Pair>();
 			
 			List<String> alternativ_subjects = getSuggestedSubject(verb);

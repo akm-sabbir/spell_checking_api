@@ -42,32 +42,23 @@ public class SadhuCholitMixture implements Repository{
 	
 	
 	public  void insert(long ID, String word) {
-		
-	
-		//ValidateSubVerbRelError.buildSubVerbMap(subVerbMap);		
 		return;
 	}
 	public void insert(String sql, List<String> columns){
-		List<SpellCheckingDto> data_DTO = new ArrayList<>();
+		List<GrammarDto> data_DTO = new ArrayList<>();
 		Connection connection = null;
 		ResultSet rs = null;
 		Statement stmt = null;
-		SpellCheckingDto  sp_dto= null;
+		GrammarDto  sp_dto= null;
 		try{
-			//System.out.println(sql);
-			//logger.debug("sql " + sql);
-			//Class.forName("com.mysql.jdbc.Driver");
 			connection = DBMR.getInstance().getConnection();
 			stmt = connection.createStatement();
 			stmt.setQueryTimeout(20);
 			rs = stmt.executeQuery(sql);
 			while(rs.next()){
-				sp_dto = new SpellCheckingDto();
-				sp_dto.word = rs.getString(columns.get(0));// column names should be explicit
-				sp_dto.wordType = rs.getString(columns.get(1));
-				//wordDto.word_type = rs.getInt("service_id");
-				//wordDto.lang_type = rs.getInt("service_type");
-				//System.out.println("got this DTO: " + word_dto.word);
+				sp_dto = new GrammarDto();
+				sp_dto.cholit = rs.getString(columns.get(0));// column names should be explicit
+				sp_dto.shadhu = rs.getString(columns.get(1));
 				data_DTO.add(sp_dto);
 
 			}				
@@ -91,22 +82,22 @@ public class SadhuCholitMixture implements Repository{
 		return ;
 	}
 	public void insertSadhuCholitPronoun(String sql, List<String> columns){
-		List<SpellCheckingDto> data_DTO = new ArrayList<>();
+		List<GrammarDto> data_DTO = new ArrayList<>();
 		Connection connection = null;
 		ResultSet rs = null;
 		Statement stmt = null;
-		SpellCheckingDto  sp_dto= null;
+		GrammarDto  sp_dto= null;
 		try{
 			connection = DBMR.getInstance().getConnection();
 			stmt = connection.createStatement();
 			stmt.setQueryTimeout(20);
 			rs = stmt.executeQuery(sql);
 			while(rs.next()){
-				sp_dto = new SpellCheckingDto();
+				sp_dto = new GrammarDto();
 				// as column 0 is pronoun which is shadhu so we put it into wordType
-				sp_dto.wordType = rs.getString(columns.get(0));// column names should be explicit
-				// as column 1 is vice_versa which is cholito so we put it into word
-				sp_dto.word = rs.getString(columns.get(1));
+				sp_dto.shadhu = rs.getString(columns.get(0));// column names should be explicit
+				// as column 1 is vice_versa which is cholit so we put it into word
+				sp_dto.cholit = rs.getString(columns.get(1));
 				data_DTO.add(sp_dto);
 
 			}				

@@ -1,10 +1,10 @@
-package bangla.grammarchecker;
+package bangla.WithTrie;
 
 public class TrieNodeSearchResult {
 	
-	boolean isFound;
-	String viceVersaWord;
-	int position;
+	public boolean isFound;
+	public String viceVersaWord;
+	public int position;
 	
 	public TrieNodeSearchResult(boolean isFound, String viceVersaWord,int position) {
 		this.isFound=isFound;
