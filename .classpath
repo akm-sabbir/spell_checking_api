@@ -167,7 +167,11 @@
 			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="D:/d/SD14_codebase/spell_checking_api/lib/servlet-api.jar"/>
+	<classpathentry kind="lib" path="D:/d/SD14_codebase/spell_checking_api/lib/servlet-api.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="D:/d/SD14_codebase/spell_checking_api/lib/simplecaptcha-1.2.1.jar">
 		<attributes>
 			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>

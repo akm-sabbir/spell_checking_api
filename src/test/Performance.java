@@ -9,6 +9,14 @@ import org.apache.log4j.Logger;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import bangla.dao.AnnotatedWordRepository;
+import bangla.dao.DictionaryRepository;
+import bangla.dao.GradedPronoun;
+import bangla.dao.NamedEntityRepository;
+import bangla.dao.NaturalErrorRepository;
+import bangla.dao.SadhuCholitMixture;
+import bangla.dao.SubjectVerbRepository;
+import bangla.grammarchecker.GrammerCheckerFactory;
 import bangla.tokenizer.WordTokenizer;
 import repository.RepositoryManager;
 import test.metrics.PerformanceMetricCalculator;
@@ -21,14 +29,24 @@ public class Performance
 	
 	public static void main(String[] args) throws Exception
 	{
-//		dictionaryInitializer di = new dictionaryInitializer();
-//		di.contextInitialized("");
-		
+		initializeData();
 		calculateBatchPerformance();
 	}
 	
 	
-	public static void calculateBatchPerformance() throws Exception
+	private static void initializeData()
+	{
+    	GrammerCheckerFactory.initializeRegisteredCheckers();
+    	RepositoryManager.getInstance().addRepository(AnnotatedWordRepository.getInstance(), true);
+    	RepositoryManager.getInstance().addRepository(DictionaryRepository.getInstance(), true);
+    	RepositoryManager.getInstance().addRepository(NamedEntityRepository.getInstance(), true);
+    	RepositoryManager.getInstance().addRepository(NaturalErrorRepository.getInstance(), true);
+    	RepositoryManager.getInstance().addRepository(GradedPronoun.getInstance(),true);
+    	RepositoryManager.getInstance().addRepository(SubjectVerbRepository.getInstance(),true);
+    	RepositoryManager.getInstance().addRepository(SadhuCholitMixture.getInstance(),true);		
+	}
+	
+	private static void calculateBatchPerformance() throws Exception
 	{
 		TestinDAO testin_dao = new TestinDAO();
 		

@@ -22,14 +22,18 @@ import org.apache.log4j.Logger;
 
 import bangla.dao.AnnotatedWordRepository;
 import bangla.dao.DictionaryRepository;
+import bangla.dao.GradedPronoun;
 import bangla.dao.NamedEntityRepository;
 import bangla.dao.NaturalErrorRepository;
+import bangla.dao.SadhuCholitMixture;
+import bangla.dao.SubjectVerbRepository;
+import bangla.grammarchecker.GrammerCheckerFactory;
 import repository.RepositoryManager;
 
 /**
  * Servlet implementation class Word_contentServlet
  */
-@WebServlet("/api/wordcontent")
+@WebServlet("/bangla_spell_and_grammar")
 @MultipartConfig
 public class Word_contentServlet extends HttpServlet 
 {
@@ -53,14 +57,20 @@ public class Word_contentServlet extends HttpServlet
 			e.printStackTrace();
 		}
     }   
+    
     public void init(ServletConfig confit) {
     	
     	System.out.println("this is the start of the server");
-    	System.out.print("Start loading web servers and servlets");
+    	System.out.println("Start loading web servers and servlets");
+    	GrammerCheckerFactory.initializeRegisteredCheckers();
     	RepositoryManager.getInstance().addRepository(AnnotatedWordRepository.getInstance(), true);
     	RepositoryManager.getInstance().addRepository(DictionaryRepository.getInstance(), true);
     	RepositoryManager.getInstance().addRepository(NamedEntityRepository.getInstance(), true);
     	RepositoryManager.getInstance().addRepository(NaturalErrorRepository.getInstance(), true);
+    	RepositoryManager.getInstance().addRepository(GradedPronoun.getInstance(),true);
+    	RepositoryManager.getInstance().addRepository(SubjectVerbRepository.getInstance(),true);
+    	RepositoryManager.getInstance().addRepository(SadhuCholitMixture.getInstance(),true);
+    	
     	return;
     }
 		
@@ -72,15 +82,19 @@ public class Word_contentServlet extends HttpServlet
 		//System.out.println(" calling the doPost operation");
 		String URL = "word_content/word_contentInPlaceEdit.jsp";
 		logger.info("Recieved a request to process: " );
-		String text_data = request.getParameter("identity");
-		if (text_data.length() == 0) {
+		String text_data = request.getParameter("content");
+		//String permission = request.getParameter("PermissionToStoreData");
+		String service = request.getParameter("Service");
+		if (text_data.length() == 0 || text_data.length() > 15000) {
 			logger.debug("End of request processing: " );
 			response.sendError(400, "could not understand input request text is either empty or noninterpretable");
 			return;
 		}
-		bangla.SpellAndGrammarChecker spgChecker = new bangla.SpellAndGrammarChecker();
-//		String results = spgChecker.check(text_data);
-		String results = spgChecker.check(text_data, 3);		//	3: both option
+		String results= null;
+		if(service.toLowerCase().equals("spellandgrammarchecking")) {
+			bangla.SpellAndGrammarChecker spgChecker = new bangla.SpellAndGrammarChecker();
+			results = spgChecker.check(text_data,3);
+		}
 		
 		//List<String> tokenized_data = sp_checker.getTokenizedWord(text_data);
 		if(results == null ) {

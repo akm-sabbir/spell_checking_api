@@ -4,6 +4,10 @@ public class Word_contentService
 {
 	public String executeSpellChecking(String text_data, int option)
 	{
+		
+		
+		
+		
 		if (text_data.length() == 0) 
 		{
 			return null;

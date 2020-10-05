@@ -367,9 +367,6 @@ public class PerformanceMetricCalculatorImpl implements PerformanceMetricCalcula
 		if(BitMasking.extractNthBit(errorType, 5) == 1)		//	non-word
 			return true;
 		
-		if(BitMasking.extractNthBit(errorType, 6) == 1)		//	unknown
-			return true;		
-		
 		return false;
 	}
 	

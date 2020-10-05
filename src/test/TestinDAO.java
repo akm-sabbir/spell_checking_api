@@ -54,7 +54,7 @@ public class TestinDAO
             
             ResultSet rs = stmt.executeQuery("SELECT * FROM test_in limit " + offset + " , " + row_count);
 //            ResultSet rs = stmt.executeQuery("SELECT * FROM test_in where id=4 limit " + offset + " , " + row_count);
-//            ResultSet rs = stmt.executeQuery("SELECT * FROM test_in where id=147 limit " + offset + " , " + row_count);
+//            ResultSet rs = stmt.executeQuery("SELECT * FROM test_in where id=146 limit " + offset + " , " + row_count);
             
 			while(rs.next())
 			{
