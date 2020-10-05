@@ -25,9 +25,9 @@ public class TestinDAO
 			{
 				testin_dto = new TestinDTO();
 
-				testin_dto.ID = rs.getLong("ID");
-				testin_dto.original_content = rs.getString("original_content");
-				testin_dto.corrected_content = rs.getString("corrected_content");
+				testin_dto.id = rs.getLong("ID");
+				testin_dto.originalContent = rs.getString("original_content");
+				testin_dto.correctedContent = rs.getString("corrected_content");
 			}
 			
         } 
@@ -53,14 +53,16 @@ public class TestinDAO
             int row_count = page_size;
             
             ResultSet rs = stmt.executeQuery("SELECT * FROM test_in limit " + offset + " , " + row_count);
+//            ResultSet rs = stmt.executeQuery("SELECT * FROM test_in where id=4 limit " + offset + " , " + row_count);
+//            ResultSet rs = stmt.executeQuery("SELECT * FROM test_in where id=147 limit " + offset + " , " + row_count);
             
 			while(rs.next())
 			{
 				testin_dto = new TestinDTO();
 
-				testin_dto.ID = rs.getLong("ID");
-				testin_dto.original_content = rs.getString("original_content");
-				testin_dto.corrected_content = rs.getString("corrected_content");
+				testin_dto.id = rs.getLong("ID");
+				testin_dto.originalContent = rs.getString("original_content");
+				testin_dto.correctedContent = rs.getString("corrected_content");
 				
 				testin_dto_list.add(testin_dto);
 			}
@@ -89,9 +91,9 @@ public class TestinDAO
 			{
 				testin_dto = new TestinDTO();
 
-				testin_dto.ID = rs.getLong("ID");
-				testin_dto.original_content = rs.getString("original_content");
-				testin_dto.corrected_content = rs.getString("corrected_content");
+				testin_dto.id = rs.getLong("ID");
+				testin_dto.originalContent = rs.getString("original_content");
+				testin_dto.correctedContent = rs.getString("corrected_content");
 				
 				testin_dto_list.add(testin_dto);
 			}

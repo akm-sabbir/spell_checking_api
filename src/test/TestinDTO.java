@@ -5,8 +5,9 @@ import util.*;
 
 public class TestinDTO
 {
-	long ID;
-	String original_content;
-	String corrected_content;
+	public long id;
+	public String originalContent;
+	public String correctedContent;
 	
+	public List<ExpectedErrorSuggestion> expectedErrorSuggestions;
 }

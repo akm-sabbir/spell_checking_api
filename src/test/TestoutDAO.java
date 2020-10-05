@@ -16,19 +16,24 @@ public class TestoutDAO
 	{
 	    try 
 	    {
+//	        PreparedStatement ps = DBMW.getInstance().getConnection().prepareStatement(
+//	        						"INSERT INTO test_out(content_id, detailed_log, word_error_type, detection_precision, detection_recall, correction_precision, correction_recall, request_time, execution_time, word_count) "
+//	        					  + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
 	        PreparedStatement ps = DBMW.getInstance().getConnection().prepareStatement(
-	        						"INSERT INTO test_out(content_id, detailed_log, word_error_type, detection_precision, detection_recall, correction_precision, correction_recall, request_time, execution_time) "
-	        					  + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-	        
-	        ps.setLong(1, testout_dto.content_id);
-	        ps.setString(2, testout_dto.detailed_log);
-	        ps.setString(3, testout_dto.word_error_type);
-	        ps.setFloat(4, testout_dto.detection_precision);
-	        ps.setFloat(5, testout_dto.detection_recall);
-	        ps.setFloat(6, testout_dto.correction_precision);
-	        ps.setFloat(7, testout_dto.correction_recall);
-	        ps.setLong(8, testout_dto.request_time);
-	        ps.setLong(9, testout_dto.execution_time);
+					"INSERT INTO test_out_iftekhar(content_id, detailed_log, word_error_type, detection_precision, detection_recall, correction_precision, correction_recall, request_time, execution_time, word_count) "
+				  + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");	    	
+	    	
+	        ps.setLong(1, testout_dto.contentId);
+	        ps.setString(2, testout_dto.detailedLog);
+	        ps.setString(3, testout_dto.wordErrorType);
+	        ps.setFloat(4, testout_dto.detectionPrecision);
+	        ps.setFloat(5, testout_dto.detectionRecall);
+	        ps.setFloat(6, testout_dto.correctionPrecision);
+	        ps.setFloat(7, testout_dto.correctionRecall);
+	        ps.setLong(8, testout_dto.requestTime);
+	        ps.setLong(9, testout_dto.executionTime);
+	        ps.setLong(10, testout_dto.wordCount);
 	        
 	        ps.executeUpdate();
 	    } 
@@ -52,17 +57,19 @@ public class TestoutDAO
 	        						+ " correction_recall = ? "
 	        						+ " request_time = ? "
 	        						+ " execution_time = ? "
+	        						+ " word_count = ? "
 	        						+ " where content_id = ?");
 	        
-	        ps.setString(1, testout_dto.detailed_log);
-	        ps.setString(2, testout_dto.word_error_type);
-	        ps.setFloat(3, testout_dto.detection_precision);
-	        ps.setFloat(4, testout_dto.detection_recall);
-	        ps.setFloat(5, testout_dto.correction_precision);
-	        ps.setFloat(6, testout_dto.correction_recall);
-	        ps.setLong(7, testout_dto.request_time);
-	        ps.setLong(8, testout_dto.execution_time);
-	        ps.setLong(9, testout_dto.content_id);
+	        ps.setString(1, testout_dto.detailedLog);
+	        ps.setString(2, testout_dto.wordErrorType);
+	        ps.setFloat(3, testout_dto.detectionPrecision);
+	        ps.setFloat(4, testout_dto.detectionRecall);
+	        ps.setFloat(5, testout_dto.correctionPrecision);
+	        ps.setFloat(6, testout_dto.correctionRecall);
+	        ps.setLong(7, testout_dto.requestTime);
+	        ps.setLong(8, testout_dto.executionTime);
+	        ps.setLong(9, testout_dto.wordCount);
+	        ps.setLong(10, testout_dto.contentId);
 	        
 	        ps.executeUpdate();
 	    } 
