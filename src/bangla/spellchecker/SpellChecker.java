@@ -101,6 +101,7 @@ public class SpellChecker {
 				if (wordSuggestion.searchWord(data)==true) {
 					System.out.println("I have found word in natural error word dictionary and the word is: ");
 					suggested_word.errorType = BitMasking.setBitAt(suggested_word.errorType, 1);
+					suggested_word.errorType = BitMasking.setBitAt(suggested_word.errorType, 5);
 					try {
 					
 					if(NaturalErrorRepository.getInstance().errorToCorrect.containsKey(data)== true) {
