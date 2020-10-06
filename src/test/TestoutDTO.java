@@ -5,6 +5,7 @@ import util.*;
 
 public class TestoutDTO
 {
+	public String guid;
 	public long id;
 	public long contentId;
 	

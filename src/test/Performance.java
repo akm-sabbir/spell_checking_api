@@ -19,8 +19,10 @@ import bangla.dao.SubjectVerbRepository;
 import bangla.grammarchecker.GrammerCheckerFactory;
 import bangla.tokenizer.WordTokenizer;
 import repository.RepositoryManager;
+import test.metrics.BatchMetricInformation;
 import test.metrics.PerformanceMetricCalculator;
 import test.metrics.PerformanceMetricCalculatorImpl;
+import test.metrics.PrecisionRecallPair;
 import word_content.Word_contentService;
 
 public class Performance 
@@ -55,6 +57,13 @@ public class Performance
 		
 		int page_no = 0;
 		
+		BatchTestDto batchDto = new BatchTestDto();
+		batchDto.guid = UUID.randomUUID().toString();
+		BatchMetricInformation batchMetricInformation = new BatchMetricInformation();
+		PerformanceMetricCalculator performanceMetricCalculator = new PerformanceMetricCalculatorImpl();
+		TestoutDAO testoutDAO = new TestoutDAO();
+		BatchTestDAO batchTestDAO = new BatchTestDAO();
+		
 		while(true)
 		{
 			List<TestinDTO> testinDTOList = testin_dao.get_paginated_Testin(page_no, 50);
@@ -69,8 +78,8 @@ public class Performance
 				long wc = 0;
 				
 				TestoutDTO testoutDTO = new TestoutDTO();
+				testoutDTO.guid = batchDto.guid;
 				
-				PerformanceMetricCalculator performanceMetricCalculator = new PerformanceMetricCalculatorImpl();
 				
 				try
 				{
@@ -90,8 +99,8 @@ public class Performance
 					log += "Total Alignment: " + System.lineSeparator();
 					log += gson.toJson(alignment) + System.lineSeparator() + System.lineSeparator();					
 					
-					log += performanceMetricCalculator.populateDetectionMetricsAndGetLog(alignment, testoutDTO);
-					log += performanceMetricCalculator.populateCorrectionMetricsAndGetLog(alignment, testoutDTO);
+					log += performanceMetricCalculator.populateDetectionMetricsAndGetLog(alignment, testoutDTO, batchMetricInformation);
+					log += performanceMetricCalculator.populateCorrectionMetricsAndGetLog(alignment, testoutDTO, batchMetricInformation);
 					
 //					log += performanceMetricCalculator.executeTestCases(testinDTO, originalResultList);
 				}
@@ -115,7 +124,6 @@ public class Performance
 					
 					testoutDTO.detailedLog = log;
 					
-					TestoutDAO testoutDAO = new TestoutDAO();
 					testoutDAO.insertTestout(testoutDTO);
 					
 					logger.info(gson.toJson(testoutDTO));
@@ -123,7 +131,30 @@ public class Performance
 				}
 			}
 			
+//			PrecisionRecallPair batchDetectionPrecision = performanceMetricCalculator.calculateMetrics(batchMetricInformation.detectionCalculationInformation.truePositive, batchMetricInformation.detectionCalculationInformation.falsePositive, batchMetricInformation.detectionCalculationInformation.falseNegative);
+//			PrecisionRecallPair batchCorretionPrecision = performanceMetricCalculator.calculateMetrics(batchMetricInformation.correctionCalculationInformation.truePositive, batchMetricInformation.correctionCalculationInformation.falsePositive, batchMetricInformation.correctionCalculationInformation.falseNegative);
+//			
+//			batchDto.detectionPrecesion = batchDetectionPrecision.precision;
+//			batchDto.detectionRecall = batchDetectionPrecision.recall;
+//			
+//			batchDto.correctionPrecision = batchCorretionPrecision.precision;
+//			batchDto.correctionRecall = batchCorretionPrecision.recall;
+//			
+//			batchTestDAO.insert(batchDto);
+
 			page_no++;
 		}
+		
+		PrecisionRecallPair batchDetectionPrecision = performanceMetricCalculator.calculateMetrics(batchMetricInformation.detectionCalculationInformation.truePositive, batchMetricInformation.detectionCalculationInformation.falsePositive, batchMetricInformation.detectionCalculationInformation.falseNegative);
+		PrecisionRecallPair batchCorretionPrecision = performanceMetricCalculator.calculateMetrics(batchMetricInformation.correctionCalculationInformation.truePositive, batchMetricInformation.correctionCalculationInformation.falsePositive, batchMetricInformation.correctionCalculationInformation.falseNegative);
+		
+		batchDto.detectionPrecesion = batchDetectionPrecision.precision;
+		batchDto.detectionRecall = batchDetectionPrecision.recall;
+		
+		batchDto.correctionPrecision = batchCorretionPrecision.precision;
+		batchDto.correctionRecall = batchCorretionPrecision.recall;
+		
+		batchTestDAO.insert(batchDto);
+		
 	}
 }
