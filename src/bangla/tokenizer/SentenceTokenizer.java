@@ -36,12 +36,12 @@ public class SentenceTokenizer {
 						
 		for (int i = 0; i < res.size(); i++) {
 			index = baseIndex + i;
-			if(BitMasking.extractNthBit(res.get(index).errorType, 1) != 0 ) {
+			if(BitMasking.extractNthBit(res.get(i).errorType, 1) != 0 ) {
 				if (maps.get(index).suggestion == null){
 					maps.get(index).suggestion = new ArrayList<Pair>();
 				}
-				maps.get(index).errorType = res.get(index).errorType;
-				for(Pair each_suggestion : res.get(index).suggestion)
+				maps.get(index).errorType = res.get(i).errorType;
+				for(Pair each_suggestion : res.get(i).suggestion)
 					maps.get(index).suggestion.add(each_suggestion);
 			}
 		}
