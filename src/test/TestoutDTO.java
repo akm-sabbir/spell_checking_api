@@ -11,6 +11,7 @@ public class TestoutDTO
 	
 	public String detailedLog;
 	public String wordErrorType;
+	public String complexity;
 	
 	public float detectionPrecision;
 	public float detectionRecall;
