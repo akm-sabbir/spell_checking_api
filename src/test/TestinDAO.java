@@ -53,8 +53,29 @@ public class TestinDAO
             int offset = page_no * page_size;
             int row_count = page_size;
             
+            
 //            ResultSet rs = stmt.executeQuery("SELECT * FROM test_in limit " + offset + " , " + row_count);
-            ResultSet rs = stmt.executeQuery("SELECT * FROM test_in where complexity='" + complexity + "' limit " + offset + " , " + row_count);
+            
+            ResultSet rs = null;
+            
+            if(!complexity.equalsIgnoreCase("all"))
+            {
+            	String[] sa = complexity.split("[ ,]");
+            	
+            	String filter = "";
+            	
+            	for(int i = 0 ; i < sa.length; i++)
+            	{
+            		filter += "'" + sa[i] + "'";
+            		
+            		if(i < sa.length -1)
+            			filter += " , ";
+            	}
+            	
+            	rs = stmt.executeQuery("SELECT * FROM test_in where complexity in (" + filter + ") limit " + offset + " , " + row_count);
+            }
+            else
+            	rs = stmt.executeQuery("SELECT * FROM test_in limit " + offset + " , " + row_count);
             
 			while(rs.next())
 			{

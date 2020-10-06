@@ -32,7 +32,11 @@ public class Performance
 	public static void main(String[] args) throws Exception
 	{
 		initializeData();
-		calculateBatchPerformance();
+
+		String[] sa = {"all", "easy", "moderate", "complex", "easy, moderate", "moderate, complex"};
+		
+		for(String s : sa)
+			calculateBatchPerformance(s);
 	}
 	
 	
@@ -48,19 +52,78 @@ public class Performance
     	RepositoryManager.getInstance().addRepository(SadhuCholitMixture.getInstance(),true);		
 	}
 	
-	private static void calculateBatchPerformance() throws Exception
+	private static String listToString(List<String> sl)
+	{
+        String cs = " ";
+        
+        String[] sa = sl.toArray(new String[0]);
+        
+        
+        for(int i = 0 ; i < sa.length ; i++)
+        {
+        	if(sa[i].equalsIgnoreCase("all"))
+        	{
+        		cs += "'easy', 'moderate', 'difficult'";
+        	}
+        	else
+        	{
+        		cs += " '" + sa[i] + "' ";
+        	}
+        	
+        	if(i < sa.length - 1)
+        		cs += ", ";
+
+        }
+        
+        cs += " ";
+        
+        return cs;
+	}
+	
+	private static List<List<String>> generateCombination(String[] complexity)
+	{
+		List<List<String>> batch = new LinkedList<List<String>>();
+
+		List<String> list = new LinkedList<String>();
+		list.add("all");
+		batch.add(list);
+		
+		for(int i = 0; i < complexity.length; i++)
+		{
+			list = new LinkedList<String>();
+			list.add(complexity[i]);
+			batch.add(list);
+			
+			for(int j = i+1; j < complexity.length; j++)
+			{
+				list = new LinkedList<String>();
+				list.add(complexity[i]);
+				list.add(complexity[j]);
+				
+				batch.add(list);
+			}
+		}		
+		
+		return batch;
+	}
+	
+	private static void calculateBatchPerformance(String comp) throws Exception
 	{
 		TestinDAO testin_dao = new TestinDAO();
 		TestoutDAO testoutDAO = new TestoutDAO();
 		BatchTestDAO batchTestDAO = new BatchTestDAO();
 		String guid = UUID.randomUUID().toString();
 		
-		Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-		
-		String[] complexity = {"easy", "moderate", "complex"};
 		String wordErrorType = "NON_WORD_ERROR";
 		
-		for(String comp : complexity)
+		Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+		
+//		String[] complexity = {"easy", "moderate", "complex"};
+		
+//		List<List<String>> batch = generateCombination(complexity);
+
+//		for(List<String> comp : batch)
+//		for(String comp : complexity)
 		{
 			int page_no = 0;			
 			PerformanceMetricCalculator performanceMetricCalculator = new PerformanceMetricCalculatorImpl();
@@ -70,6 +133,7 @@ public class Performance
 					
 			while(true)
 			{
+//				List<TestinDTO> testinDTOList = testin_dao.get_paginated_Testin(page_no, 50, listToString(comp));
 				List<TestinDTO> testinDTOList = testin_dao.get_paginated_Testin(page_no, 50, comp);
 				
 				if(testinDTOList.size() <= 0) break;
@@ -144,6 +208,7 @@ public class Performance
 			batchDto.correctionPrecision = batchCorretionPrecision.precision;
 			batchDto.correctionRecall = batchCorretionPrecision.recall;
 			
+//			batchDto.complexity = listToString(comp);
 			batchDto.complexity = comp;
 			batchDto.wordErrorType = wordErrorType;
 			
