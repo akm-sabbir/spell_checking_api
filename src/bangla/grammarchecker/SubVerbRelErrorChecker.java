@@ -33,23 +33,6 @@ public class SubVerbRelErrorChecker implements BanglaGrammerChecker {
 	static List<List<String>> subVerbMatrix = new ArrayList<>();
 	static TrieNodeWithList verbList = new TrieNodeWithList();
 
-	public GrammerCheckerDto generateNgramSentences(String sentence) {
-		WT.set_text(sentence);
-		List<String> words = WT._tokenization();
-		List<String> sentences;
-		GrammerCheckerDto retDto = null;
-		for (int ngram = 3; ngram < 5; ngram += 1) {
-			sentences = nGramGenerator.ngramGenerator(words, ngram);
-
-			for (int each_sentence = 0; each_sentence < sentences.size(); each_sentence += 1) {
-				retDto = generateNgramSentences(sentences.get(each_sentence));
-				retDto.wordSuggestion.get(0).wordIndex = nGramGenerator.getWordIndex(each_sentence, ngram,
-						retDto.wordSuggestion.get(0).wordIndex);
-			}
-		}
-		return retDto;
-	}
-
 	public List<SpellCheckingDto> hasError(List<String> words) {
 		List<SpellCheckingDto> spellCheckerDtos = new ArrayList<>();
 
