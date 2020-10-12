@@ -34,12 +34,24 @@ public abstract class PerformanceMetricCalculator
 			
 			JsonObject predictedAttributes = (JsonObject) m.get("predictedAttributes");
 			
-			if(!original.equalsIgnoreCase(corrected) && predictedAsError(predictedAttributes))
+			
+			if(original.equalsIgnoreCase(corrected) && predictVerdict(predictedAttributes) == Verdict.CORRECT)
 			{
 				Map<Object, Object> token = new LinkedHashMap<>();
 				
 				token.put("original", (String) m.get("original"));
 				token.put("corrected", (String) m.get("corrected"));
+				token.put("predictedVerdict", "CORRECT");
+				
+				tp.add(token);				
+			}
+			else if(!original.equalsIgnoreCase(corrected) && predictVerdict(predictedAttributes) == Verdict.ERROR)
+			{
+				Map<Object, Object> token = new LinkedHashMap<>();
+				
+				token.put("original", (String) m.get("original"));
+				token.put("corrected", (String) m.get("corrected"));
+				token.put("predictedVerdict", "ERROR");
 				
 				tp.add(token);
 			}
@@ -64,12 +76,13 @@ public abstract class PerformanceMetricCalculator
 			
 			JsonObject predictedAttributes = (JsonObject) m.get("predictedAttributes");
 			
-			if(original.equalsIgnoreCase(corrected) && predictedAsError(predictedAttributes))
+			if(original.equalsIgnoreCase(corrected) && predictVerdict(predictedAttributes) == Verdict.ERROR)
 			{
 				Map<Object, Object> token = new LinkedHashMap<>();
 				
 				token.put("original", (String) m.get("original"));
 				token.put("corrected", (String) m.get("corrected"));
+				token.put("predictedVerdict", "ERROR");
 				
 				tp.add(token);
 			}
@@ -94,12 +107,13 @@ public abstract class PerformanceMetricCalculator
 			
 			JsonObject predictedAttributes = (JsonObject) m.get("predictedAttributes");
 			
-			if(!original.equalsIgnoreCase(corrected) && !predictedAsError(predictedAttributes))
+			if(!original.equalsIgnoreCase(corrected) && predictVerdict(predictedAttributes) == Verdict.CORRECT)
 			{
 				Map<Object, Object> token = new LinkedHashMap<>();
 				
 				token.put("original", (String) m.get("original"));
 				token.put("corrected", (String) m.get("corrected"));
+				token.put("predictedVerdict", "CORRECT");
 				
 				tp.add(token);
 			}
@@ -124,14 +138,25 @@ public abstract class PerformanceMetricCalculator
 			
 			JsonObject predictedAttributes = (JsonObject) m.get("predictedAttributes");
 			
-			if(!original.equalsIgnoreCase(corrected) 
-					&& checkCorrectionAttempt(predictedAttributes) 
+			if(original.equalsIgnoreCase(corrected) && predictVerdict(predictedAttributes) == Verdict.CORRECT)
+			{
+				Map<Object, Object> token = new LinkedHashMap<>();
+				
+				token.put("original", m.get("original"));
+				token.put("corrected", m.get("corrected"));
+				token.put("predictedVerdict", "CORRECT");
+				
+				tp.add(token);				
+			}
+				
+			else if(!original.equalsIgnoreCase(corrected) && predictVerdict(predictedAttributes) == Verdict.ERROR 
 					&& checkPredictedSuggestions(predictedAttributes, corrected))
 			{
 				Map<Object, Object> token = new LinkedHashMap<>();
 				
 				token.put("original", m.get("original"));
 				token.put("corrected", m.get("corrected"));
+				token.put("predictedVerdict", "ERROR");
 				token.put("suggested", predictedAttributes.getAsJsonArray("suggestion"));
 				
 				tp.add(token);
@@ -157,14 +182,14 @@ public abstract class PerformanceMetricCalculator
 			
 			JsonObject predictedAttributes = (JsonObject) m.get("predictedAttributes");
 			
-			if(!original.equalsIgnoreCase(corrected) 
-					&& checkCorrectionAttempt(predictedAttributes) 
+			if(!original.equalsIgnoreCase(corrected) && predictVerdict(predictedAttributes) == Verdict.ERROR
 					&& !checkPredictedSuggestions(predictedAttributes, corrected))
 			{
 				Map<Object, Object> token = new LinkedHashMap<>();
 				
 				token.put("original", m.get("original"));
 				token.put("corrected", m.get("corrected"));
+				token.put("predictedVerdict", "ERROR");
 				token.put("suggested", predictedAttributes.getAsJsonArray("suggestion"));
 				
 				tp.add(token);
@@ -205,7 +230,6 @@ public abstract class PerformanceMetricCalculator
 		
 		return tp;
 	}	
-	
 
 	public String populateDetectionMetricsAndGetLog(List<Object> alignment, TestoutDTO testoutDTO, BatchMetricInformation batchMetricInformation) 
 	{
@@ -354,17 +378,23 @@ public abstract class PerformanceMetricCalculator
 		return alignment;
 	}	
 	
-	private boolean predictedAsError(JsonObject predictedAttributes)
+	private Verdict predictVerdict(JsonObject predictedAttributes)
 	{
-		if(predictedAttributes == null) return false;
+		if(predictedAttributes == null) return Verdict.UNKNOWN;
 		
 		JsonObject jo = predictedAttributes;
 		int errorType = jo.getAsJsonPrimitive("errorType").getAsInt();
 		
 		if(BitMasking.extractNthBit(errorType, 5) == 1)		//	non-word
-			return true;
+			return Verdict.ERROR;
+
+		if(BitMasking.extractNthBit(errorType, 1) == 1)		//	correct
+			return Verdict.CORRECT;		
 		
-		return false;
+		if(BitMasking.extractNthBit(errorType, 6) == 1)		//	unknown
+			return Verdict.UNKNOWN;
+		
+		return Verdict.UNKNOWN;
 	}
 	
 	private boolean checkPredictedSuggestions(JsonObject predictedAttributes, String corrected)
@@ -403,4 +433,10 @@ public abstract class PerformanceMetricCalculator
 	}	
 	
 	public abstract PrecisionRecallPair calculateMetrics(int truePositive, int falsePositive, int falseNegative);
+	
+	
+	enum Verdict
+	{
+		ERROR, CORRECT, UNKNOWN;
+	}
 }
