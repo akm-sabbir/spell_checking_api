@@ -5,7 +5,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import dbm.DBMW;
 
@@ -41,6 +44,53 @@ public class BatchTestDAO {
 	    	//Close the connection here
 	    }
 	}
+	
+	public static Map<Object, Object> get_batch_statistics(String guid) throws Exception
+	{
+		Map<Object, Object> map = new LinkedHashMap<Object, Object>();
+//		List<Object> list = new LinkedList<Object>();
+		
+		Map<Object, Object> m = new LinkedHashMap<Object, Object>();
+		
+        try 
+        {
+            Statement stmt = DBMW.getInstance().getConnection().createStatement();
+            ResultSet rs = stmt.executeQuery("select detection_precision DP, detection_recall DR, correction_precision CP, correction_recall CR, complexity, word_error_type from batch_test_out where guid in ('" + guid + "') ");
+            
+//			while(rs.next())
+//			{
+//				m = new LinkedHashMap<Object, Object>();	
+//				m.put("DP", rs.getInt("DP"));
+//				m.put("DR", rs.getInt("DR"));
+//				m.put("CP", rs.getInt("CP"));
+//				m.put("CR", rs.getInt("CR"));
+//				m.put("complexity", rs.getInt("complexity"));
+//				m.put("wordErrorType", rs.getInt("word_error_type"));
+//				
+//				list.add(m);
+//			}
+			
+			if(rs.next())
+			{
+				m = new LinkedHashMap<Object, Object>();	
+				m.put("DP", rs.getInt("DP"));
+				m.put("DR", rs.getInt("DR"));
+				m.put("CP", rs.getInt("CP"));
+				m.put("CR", rs.getInt("CR"));
+				m.put("complexity", rs.getInt("complexity"));
+				m.put("wordErrorType", rs.getInt("word_error_type"));
+			}            
+            
+			map.put("batchStatistics", m);
+			
+        } 
+        catch (SQLException ex) 
+        {
+            ex.printStackTrace();
+        }
+        
+        return map;		
+	}	
 	
 	public List<BatchTestDTO> get_paginated_BatchTest(int page_no, int page_size) throws Exception
 	{

@@ -187,7 +187,8 @@ public class DiffText
 				
 				wi = originalContent.indexOf(t, wi);
 
-				map.put("index", wi);
+//				map.put("index", wi);
+				map.put("startIndex", wi);
 				map.put("original", t);
 				map.put("corrected", "");
 				map.put("operation", "delete");
@@ -203,7 +204,8 @@ public class DiffText
 				map = new LinkedHashMap<>();
 				String t = d.text;
 				
-				map.put("index", -1);
+//				map.put("index", -1);
+				map.put("startIndex", -1);
 				map.put("original", "");
 				map.put("corrected", t);				
 				map.put("operation", "insert");
@@ -225,7 +227,8 @@ public class DiffText
 					
 					wi = originalContent.indexOf(ws[i], wi);
 	
-					map.put("index", wi);
+//					map.put("index", wi);
+					map.put("startIndex", wi);
 					map.put("original", ws[i]);
 					map.put("corrected", ws[i]);
 					map.put("operation", "equal");
@@ -267,7 +270,8 @@ public class DiffText
 			if(operation.equalsIgnoreCase("delete"))
 			{
 				originalContent += (String)map.get("original");
-				index = (int) map.get("index");
+//				index = (int) map.get("index");
+				index = (int) map.get("startIndex");
 				
 				prevEqual = false;
 			}
@@ -284,7 +288,8 @@ public class DiffText
 				if(!prevEqual)
 				{
 					token = new LinkedHashMap<Object, Object>();
-					token.put("index", index);
+//					token.put("index", index);
+					token.put("startIndex", index);
 					token.put("original", originalContent);
 					token.put("corrected", correctedContent);
 					token.put("mergeable", "none");
@@ -304,7 +309,8 @@ public class DiffText
 		if(!prevEqual)
 		{
 			token = new LinkedHashMap<Object, Object>();
-			token.put("index", index);
+//			token.put("index", index);
+			token.put("startIndex", index);
 			token.put("original", originalContent);
 			token.put("corrected", correctedContent);
 			token.put("mergeable", "none");
@@ -343,7 +349,8 @@ public class DiffText
 					if(((String) top.get("mergeable")).equalsIgnoreCase("next"))
 					{
 						Map<Object, Object> elem = new LinkedHashMap<>();
-						elem.put("index", (int)top.get("index"));
+//						elem.put("index", (int)top.get("index"));
+						elem.put("startIndex", (int)top.get("startIndex"));
 						elem.put("original", (String)top.get("original") + (String)element.get("original"));
 						elem.put("corrected", (String)top.get("corrected") + (String)element.get("corrected"));
 						elem.put("mergeable", "none");
@@ -363,7 +370,8 @@ public class DiffText
 				if(top != null)
 				{
 					Map<Object, Object> elem = new LinkedHashMap<>();
-					elem.put("index", (int)top.get("index"));
+//					elem.put("index", (int)top.get("index"));
+					elem.put("startIndex", (int)top.get("startIndex"));
 					elem.put("original", (String)top.get("original") + (String)element.get("original"));
 					elem.put("corrected", (String)top.get("corrected") + (String)element.get("corrected"));
 					elem.put("mergeable", "none");

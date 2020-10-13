@@ -6,7 +6,10 @@ import java.sql.SQLException;
 import java.sql.SQLType;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import dbm.DBMR;
 import dbm.DBMW;
@@ -49,6 +52,107 @@ public class TestoutDAO
 	    	//Close the connection here
 	    }
 	}
+	
+	public static Map<Object, Object> get_guid_list(long from, long to) throws Exception
+	{
+		Map<Object, Object> map = new LinkedHashMap<Object, Object>();
+		List<Object> list = new LinkedList<Object>();
+		
+		Map<Object, Object> m = null;
+		
+        try 
+        {
+            Statement stmt = DBMW.getInstance().getConnection().createStatement();
+            ResultSet rs = stmt.executeQuery("select distinct guid from test_out where request_time >= " + from + " and request_time <= " + to + " ");
+            
+			while(rs.next())
+			{
+				m = new LinkedHashMap<Object, Object>();	
+				m.put("guid", rs.getString("guid"));
+
+				list.add(m);
+			}
+			
+			map.put("guidList", list);
+			
+        } 
+        catch (SQLException ex) 
+        {
+            ex.printStackTrace();
+        }
+        
+        return map;		
+	}	
+	
+	public static Map<Object, Object> get_id_list(String guid) throws Exception
+	{
+		Map<Object, Object> map = new LinkedHashMap<Object, Object>();
+		List<Object> list = new LinkedList<Object>();
+		
+		Map<Object, Object> m = null;
+		
+        try 
+        {
+            Statement stmt = DBMW.getInstance().getConnection().createStatement();
+            ResultSet rs = stmt.executeQuery("select distinct content_id id from test_out where guid in ('" + guid + "') order by id asc ");
+            
+			while(rs.next())
+			{
+				m = new LinkedHashMap<Object, Object>();	
+				m.put("id", rs.getInt("id"));
+
+				list.add(m);
+			}
+			
+			map.put("idList", list);
+			
+        } 
+        catch (SQLException ex) 
+        {
+            ex.printStackTrace();
+        }
+        
+        return map;		
+	}	
+	
+	
+	public static Map<Object, Object> get_test_result(String guid, long id) throws Exception
+	{
+//		Map<Object, Object> map = new LinkedHashMap<Object, Object>();
+//		List<Object> list = new LinkedList<Object>();
+		
+		Map<Object, Object> m = new LinkedHashMap<Object, Object>();
+		
+        try 
+        {
+            Statement stmt = DBMW.getInstance().getConnection().createStatement();
+            ResultSet rs = stmt.executeQuery("select distinct detailed_log log from test_out where content_id = " + id + " and guid in ('" + guid + "') ");
+            
+//			while(rs.next())
+//			{
+//				m = new LinkedHashMap<Object, Object>();	
+//				m.put("log", rs.getInt("log"));
+//
+//				list.add(m);
+//			}
+			
+			if(rs.next())
+			{
+				m = new LinkedHashMap<Object, Object>();	
+				m.put("log", rs.getString("log"));
+			}            
+            
+//			map.put("idList", list);
+			
+        } 
+        catch (SQLException ex) 
+        {
+            ex.printStackTrace();
+        }
+        
+//        return map;
+        return m;
+	}	
 	
 //	public void updateTestout(TestoutDTO testout_dto) throws Exception
 //	{

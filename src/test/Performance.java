@@ -8,6 +8,8 @@ import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import bangla.dao.AnnotatedWordRepository;
 import bangla.dao.DictionaryRepository;
@@ -33,7 +35,9 @@ public class Performance
 	{
 		initializeData();
 
-		String[] sa = {"all", "easy", "moderate", "complex", "easy, moderate", "moderate, complex"};
+//		String[] sa = {"all", "easy", "moderate", "complex", "easy, moderate", "moderate, complex"};
+		
+		String[] sa = {"all"};
 		
 		for(String s : sa)
 			calculateBatchPerformance(s);
@@ -118,101 +122,89 @@ public class Performance
 		
 		Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 		
-//		String[] complexity = {"easy", "moderate", "complex"};
-		
-//		List<List<String>> batch = generateCombination(complexity);
-
-//		for(List<String> comp : batch)
-//		for(String comp : complexity)
+		int page_no = 0;			
+		PerformanceMetricCalculator performanceMetricCalculator = new PerformanceMetricCalculatorImpl();
+		BatchMetricInformation batchMetricInformation = new BatchMetricInformation();
+		BatchTestDTO batchDto = new BatchTestDTO();
+		batchDto.guid = guid;
+				
+		while(true)
 		{
-			int page_no = 0;			
-			PerformanceMetricCalculator performanceMetricCalculator = new PerformanceMetricCalculatorImpl();
-			BatchMetricInformation batchMetricInformation = new BatchMetricInformation();
-			BatchTestDTO batchDto = new BatchTestDTO();
-			batchDto.guid = guid;
-					
-			while(true)
+			List<TestinDTO> testinDTOList = testin_dao.get_paginated_Testin(page_no, 50, comp);
+			
+			if(testinDTOList.size() <= 0) break;
+			
+			for(TestinDTO testinDTO : testinDTOList)
 			{
-//				List<TestinDTO> testinDTOList = testin_dao.get_paginated_Testin(page_no, 50, listToString(comp));
-				List<TestinDTO> testinDTOList = testin_dao.get_paginated_Testin(page_no, 50, comp);
+				Map<Object, Object> log = new LinkedHashMap<Object, Object>();;
+				long time1 = System.currentTimeMillis();
+				long time2 = System.currentTimeMillis();
+				long wc = 0;
 				
-				if(testinDTOList.size() <= 0) break;
+				TestoutDTO testoutDTO = new TestoutDTO();
+				testoutDTO.guid = batchDto.guid;
 				
-				for(TestinDTO testinDTO : testinDTOList)
+				try
 				{
-					String log = "";
-					long time1 = System.currentTimeMillis();
-					long time2 = System.currentTimeMillis();
-					long wc = 0;
+					Word_contentService wcs = new Word_contentService();
+					time1 = System.currentTimeMillis();
+					String predictedContent = wcs.executeSpellChecking(testinDTO.originalContent, 3);	//	3: both option
+					time2 = System.currentTimeMillis();
 					
-					TestoutDTO testoutDTO = new TestoutDTO();
-					testoutDTO.guid = batchDto.guid;
+//					wc = originalResultList.size();
 					
-					try
-					{
-						Word_contentService wcs = new Word_contentService();
-						time1 = System.currentTimeMillis();
-						String predictedContent = wcs.executeSpellChecking(testinDTO.originalContent, 3);	//	3: both option
-						time2 = System.currentTimeMillis();
-						
-	//					wc = originalResultList.size();
-						
-						log += "Predicted Content: " + System.lineSeparator();
-						log += predictedContent + System.lineSeparator() + System.lineSeparator();
-	
-						List<Object> alignment = performanceMetricCalculator.formAlignment(testinDTO, predictedContent);
-						
-						log += "Total Alignment: " + System.lineSeparator();
-						log += gson.toJson(alignment) + System.lineSeparator() + System.lineSeparator();					
-						
-						log += performanceMetricCalculator.populateDetectionMetricsAndGetLog(alignment, testoutDTO, batchMetricInformation);
-						log += performanceMetricCalculator.populateCorrectionMetricsAndGetLog(alignment, testoutDTO, batchMetricInformation);
-						
-	//					log += performanceMetricCalculator.executeTestCases(testinDTO, originalResultList);
-					}
-					catch(Exception e)
-					{
-						StringWriter sw = new StringWriter();
-						e.printStackTrace(new PrintWriter(sw));
-						log += sw.toString();
-					}
-					finally
-					{
-						//TestoutDTO testout_dto = new TestoutDTO();
-						
-						testoutDTO.contentId = testinDTO.id;
-						testoutDTO.complexity = testinDTO.complexity;
-						testoutDTO.wordErrorType = wordErrorType;
-						testoutDTO.requestTime = time1;
-						testoutDTO.executionTime = (time2-time1);
-						testoutDTO.wordCount = wc;
-						
-						testoutDTO.detailedLog = log;
-						
-						testoutDAO.insertTestout(testoutDTO);
-						
-						logger.info(gson.toJson(testoutDTO));
-						System.out.println(gson.toJson(testoutDTO));
-					}
+					log.put("predictedContent", new JsonParser().parse(predictedContent).getAsJsonObject());
+					
+					List<Object> alignment = performanceMetricCalculator.formAlignment(testinDTO, predictedContent);
+					
+					log.put("totalAlignmentMap", performanceMetricCalculator.listToMap(alignment));
+					
+					Map<Object, Object> m1 = performanceMetricCalculator.populateDetectionMetricsAndGetLog(alignment, testoutDTO, batchMetricInformation); 
+					Map<Object, Object> m2 = performanceMetricCalculator.populateCorrectionMetricsAndGetLog(alignment, testoutDTO, batchMetricInformation);
+
+					log.putAll(m1);
+					log.putAll(m2);
+
 				}
-				
-				page_no++;
+				catch(Exception e)
+				{
+					StringWriter sw = new StringWriter();
+					e.printStackTrace(new PrintWriter(sw));
+					log.put("exception", sw.toString());
+				}
+				finally
+				{
+					testoutDTO.contentId = testinDTO.id;
+					testoutDTO.complexity = testinDTO.complexity;
+					testoutDTO.wordErrorType = wordErrorType;
+					testoutDTO.requestTime = time1;
+					testoutDTO.executionTime = (time2-time1);
+					testoutDTO.wordCount = wc;
+					
+					testoutDTO.detailedLog = gson.toJson(log);
+					
+					testoutDAO.insertTestout(testoutDTO);
+					
+					logger.info(gson.toJson(testoutDTO));
+					System.out.println(gson.toJson(testoutDTO));
+				}
 			}
 			
-			PrecisionRecallPair batchDetectionPrecision = performanceMetricCalculator.calculateMetrics(batchMetricInformation.detectionCalculationInformation.truePositive, batchMetricInformation.detectionCalculationInformation.falsePositive, batchMetricInformation.detectionCalculationInformation.falseNegative);
-			PrecisionRecallPair batchCorretionPrecision = performanceMetricCalculator.calculateMetrics(batchMetricInformation.correctionCalculationInformation.truePositive, batchMetricInformation.correctionCalculationInformation.falsePositive, batchMetricInformation.correctionCalculationInformation.falseNegative);
-			
-			batchDto.detectionPrecesion = batchDetectionPrecision.precision;
-			batchDto.detectionRecall = batchDetectionPrecision.recall;
-			
-			batchDto.correctionPrecision = batchCorretionPrecision.precision;
-			batchDto.correctionRecall = batchCorretionPrecision.recall;
-			
-//			batchDto.complexity = listToString(comp);
-			batchDto.complexity = comp;
-			batchDto.wordErrorType = wordErrorType;
-			
-			batchTestDAO.insert(batchDto);
+			page_no++;
 		}
+		
+		PrecisionRecallPair batchDetectionPrecision = performanceMetricCalculator.calculateMetrics(batchMetricInformation.detectionCalculationInformation.truePositive, batchMetricInformation.detectionCalculationInformation.falsePositive, batchMetricInformation.detectionCalculationInformation.falseNegative);
+		PrecisionRecallPair batchCorretionPrecision = performanceMetricCalculator.calculateMetrics(batchMetricInformation.correctionCalculationInformation.truePositive, batchMetricInformation.correctionCalculationInformation.falsePositive, batchMetricInformation.correctionCalculationInformation.falseNegative);
+		
+		batchDto.detectionPrecesion = batchDetectionPrecision.precision;
+		batchDto.detectionRecall = batchDetectionPrecision.recall;
+		
+		batchDto.correctionPrecision = batchCorretionPrecision.precision;
+		batchDto.correctionRecall = batchCorretionPrecision.recall;
+		
+		batchDto.complexity = comp;
+		batchDto.wordErrorType = wordErrorType;
+		
+		batchTestDAO.insert(batchDto);
 	}
 }
