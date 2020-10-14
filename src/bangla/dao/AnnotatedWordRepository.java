@@ -74,7 +74,7 @@ public class AnnotatedWordRepository implements Repository{
 		ResultSet rs = null;
 		Statement stmt = null;
 		
-		String sql = "select ID, content from annotated_word where isDeleted=0";
+		String sql = "select ID, content from annotated_word where isDeleted = 0";
 		try{
 			connection = DBMR.getInstance().getConnection();
 			stmt = connection.createStatement();

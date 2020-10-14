@@ -138,7 +138,7 @@ public class SpellChecker {
 		
 		return 0;
 	}
-	public HashMap<Integer, SpellCheckingDto> getWordValidationInfo(String text_data, Map<Integer, String> tokenized_data) {
+	public HashMap<Integer, SpellCheckingDto> getWordValidationInfo(StringBuilder text_data, Map<Integer, String> tokenized_data) {
 		//String encoded;
 		HashMap<Integer, SpellCheckingDto> result_list = new HashMap<>();
 		HashMap<String, Integer> tracker = new HashMap<String, Integer>();
@@ -157,7 +157,7 @@ public class SpellChecker {
 			result_list.put(key, suggested_word);
 			tracker.put(data, key);
 			suggested_word.startIndex = KmpStringMatch.KMPSearch(data, text_data);
-			suggested_word.length =  suggested_word.startIndex + data.length();
+			suggested_word.length =  data.length();
 		
 		}
 		
