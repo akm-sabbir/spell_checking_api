@@ -1,7 +1,7 @@
 package bangla.WithTrie;
 
 public class KmpStringMatch { 
-	    public static int KMPSearch(String pat, String txt) 
+	    public static int KMPSearch(String pat, StringBuilder txt) 
 	    { 
 	        int M = pat.length(); 
 	        int N = txt.length(); 
@@ -24,6 +24,9 @@ public class KmpStringMatch {
 	            if (j == M) { 
 	                System.out.println("Found pattern "
 	                                   + "at index " + (i - j));
+	                for(int at = i-j; at < i; at++) {
+	                	txt = txt.replace(at, at+1, " ");
+	                }
 	                return (i - j);
 	               // j = lps[j - 1]; 
 	            } 
@@ -76,12 +79,15 @@ public class KmpStringMatch {
 	    } 
 	  
 	    // Driver program to test above function 
-	   /*
+	   
 	    public static void main(String args[]) 
 	    { 
-	        String txt = "ABABDABACDABABCABAB"; 
-	        String pat = "ABABCABAB"; 
-	        new KmpStringMatch().KMPSearch(pat, txt); 
-	    }*/ 
+	        StringBuilder txt = new StringBuilder("ABABDABACDABABCABAB"); 
+	        String pat = "ABA";
+	        for (int i = 0; i < 3;i++) {
+	        	KmpStringMatch.KMPSearch(pat, txt);
+	        	System.out.println(txt);
+	        }
+	    } 
 	
 }

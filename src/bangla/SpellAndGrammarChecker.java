@@ -75,12 +75,14 @@ public class SpellAndGrammarChecker {
 		try {
 			Map<Integer, String> indexedWords = textNormalizer.getIndexedWords(tokenized_sentence);
 			if(option == 3) {
-				result_list = spellChecker.getWordValidationInfo(text_data, indexedWords);
+//				result_list = spellChecker.getWordValidationInfo(text_data, indexedWords);
+				result_list = spellChecker.getWordValidationInfo(new StringBuilder(text_data), indexedWords);
 				logger.debug("Total Tokenized words after validation process completion " + result_list.size());
 				result_list = sentenceTokenizer.getSentenceValidationInfo(tokenized_sentence, result_list);
 				logger.debug("Total Valided words after process completion" + result_list.size());
 			}else if(option == 2) {
-				result_list = spellChecker.getWordValidationInfo(text_data, indexedWords);
+//				result_list = spellChecker.getWordValidationInfo(text_data, indexedWords);
+				result_list = spellChecker.getWordValidationInfo(new StringBuilder(text_data), indexedWords);
 				logger.debug("Total Tokenized words after validation process completion " + result_list.size());
 			}else {
 				

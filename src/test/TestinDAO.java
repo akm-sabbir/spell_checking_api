@@ -122,6 +122,7 @@ public class TestinDAO
             }
             else
             	rs = stmt.executeQuery("SELECT * FROM test_in limit " + offset + " , " + row_count);
+//            	rs = stmt.executeQuery("SELECT * FROM test_in where ID = 19 limit " + offset + " , " + row_count);
             
 			while(rs.next())
 			{

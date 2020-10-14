@@ -2,7 +2,7 @@ package bangla.spellchecker;
 
 import java.util.ArrayList;
 
-import bangla.grammarchecker.WordSuggestion;
+//import bangla.grammarchecker.WordSuggestion;
 
 public class SpellCheckingDto {
 

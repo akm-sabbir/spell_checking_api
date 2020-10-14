@@ -39,8 +39,13 @@ public class Performance
 		
 		String[] sa = {"all"};
 		
+		String[] eta = {"NON_WORD_ERROR", "REAL_WORD_ERROR"};
+		
+		String v = "2.0.0";
+		
 		for(String s : sa)
-			calculateBatchPerformance(s);
+			for(String et : eta)
+				calculateBatchPerformance(s, v, et);
 	}
 	
 	
@@ -111,14 +116,12 @@ public class Performance
 		return batch;
 	}
 	
-	private static void calculateBatchPerformance(String comp) throws Exception
+	private static void calculateBatchPerformance(String comp, String version, String wordErrorType) throws Exception
 	{
 		TestinDAO testin_dao = new TestinDAO();
 		TestoutDAO testoutDAO = new TestoutDAO();
 		BatchTestDAO batchTestDAO = new BatchTestDAO();
 		String guid = UUID.randomUUID().toString();
-		
-		String wordErrorType = "NON_WORD_ERROR";
 		
 		Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 		
@@ -127,6 +130,7 @@ public class Performance
 		BatchMetricInformation batchMetricInformation = new BatchMetricInformation();
 		BatchTestDTO batchDto = new BatchTestDTO();
 		batchDto.guid = guid;
+		batchDto.version = version;
 				
 		while(true)
 		{
@@ -143,6 +147,8 @@ public class Performance
 				
 				TestoutDTO testoutDTO = new TestoutDTO();
 				testoutDTO.guid = batchDto.guid;
+				testoutDTO.version = batchDto.version;
+				testoutDTO.wordErrorType = wordErrorType;
 				
 				try
 				{
@@ -176,7 +182,6 @@ public class Performance
 				{
 					testoutDTO.contentId = testinDTO.id;
 					testoutDTO.complexity = testinDTO.complexity;
-					testoutDTO.wordErrorType = wordErrorType;
 					testoutDTO.requestTime = time1;
 					testoutDTO.executionTime = (time2-time1);
 					testoutDTO.wordCount = wc;

@@ -12,7 +12,7 @@ import bangla.dao.NaturalErrorRepository;
 import bangla.dao.SadhuCholitMixture;
 import bangla.dao.SubjectVerbRepository;
 import bangla.grammarchecker.BanglaGrammerChecker;
-import bangla.grammarchecker.GrammerCheckerDto;
+//import bangla.grammarchecker.GrammerCheckerDto;
 import bangla.grammarchecker.GrammerCheckerFactory;
 import bangla.grammarchecker.NirdeshokErrorChecker;
 import bangla.grammarchecker.NoSpaceBetweenWordsChecker;

@@ -17,21 +17,18 @@ public class BatchTestDAO {
 	{
 		try 
 	    {
-//	        PreparedStatement ps = DBMW.getInstance().getConnection().prepareStatement(
-//	        						"INSERT INTO test_out(content_id, detailed_log, word_error_type, detection_precision, detection_recall, correction_precision, correction_recall, request_time, execution_time, word_count) "
-//	        					  + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-
 	        PreparedStatement ps = DBMW.getInstance().getConnection().prepareStatement(
-					"INSERT INTO batch_test_out(detection_precision, detection_recall, correction_precision, correction_recall, guid, complexity, word_error_type) "
-				  + "VALUES (?, ?, ?, ?, ?, ?, ?)");	    	
+					"INSERT INTO batch_test_out(detection_precision, detection_recall, correction_precision, correction_recall, guid, version, complexity, word_error_type) "
+				  + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)");	    	
 	    	
 	        ps.setFloat(1, dto.detectionPrecesion);
 	        ps.setFloat(2, dto.detectionRecall);
 	        ps.setFloat(3, dto.correctionPrecision);
 	        ps.setFloat(4, dto.correctionRecall);
 	        ps.setString(5, dto.guid);
-	        ps.setString(6, dto.complexity);
-	        ps.setString(7,  dto.wordErrorType);
+	        ps.setString(6, dto.version);
+	        ps.setString(7, dto.complexity);
+	        ps.setString(8,  dto.wordErrorType);
 	        
 	        ps.executeUpdate();
 	    } 
@@ -55,7 +52,7 @@ public class BatchTestDAO {
         try 
         {
             Statement stmt = DBMW.getInstance().getConnection().createStatement();
-            ResultSet rs = stmt.executeQuery("select detection_precision DP, detection_recall DR, correction_precision CP, correction_recall CR, complexity, word_error_type from batch_test_out where guid in ('" + guid + "') ");
+            ResultSet rs = stmt.executeQuery("select detection_precision DP, detection_recall DR, correction_precision CP, correction_recall CR, complexity, word_error_type, version from batch_test_out where guid in ('" + guid + "') ");
             
 //			while(rs.next())
 //			{
@@ -73,12 +70,13 @@ public class BatchTestDAO {
 			if(rs.next())
 			{
 				m = new LinkedHashMap<Object, Object>();	
-				m.put("DP", rs.getInt("DP"));
-				m.put("DR", rs.getInt("DR"));
-				m.put("CP", rs.getInt("CP"));
-				m.put("CR", rs.getInt("CR"));
-				m.put("complexity", rs.getInt("complexity"));
-				m.put("wordErrorType", rs.getInt("word_error_type"));
+				m.put("DP", rs.getFloat("DP"));
+				m.put("DR", rs.getFloat("DR"));
+				m.put("CP", rs.getFloat("CP"));
+				m.put("CR", rs.getFloat("CR"));
+				m.put("complexity", rs.getString("complexity"));
+				m.put("wordErrorType", rs.getString("word_error_type"));
+				m.put("version", rs.getString("version"));
 			}            
             
 			map.put("batchStatistics", m);
@@ -113,6 +111,7 @@ public class BatchTestDAO {
 
 				batchtest_dto.id = rs.getInt("ID");
 				batchtest_dto.guid = rs.getString("guid");
+				batchtest_dto.version = rs.getString("version");
 				
 				batchtest_dto.detectionPrecesion = rs.getFloat("detection_precision");
 				batchtest_dto.detectionRecall = rs.getFloat("detection_recall");
