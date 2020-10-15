@@ -30,7 +30,9 @@ public class NirdeshokErrorChecker implements BanglaGrammerChecker {
 				dto.errorType = BitMasking.setBitAt(errorType, ErrorsInBanglaLanguage.nirdeshokChecker);
 				dto.suggestion = new ArrayList<Pair>();
 				dto.suggestion.add(new Pair(str,-1));
+				spellCheckerDtos.add(new SpellCheckingDto());
 				spellCheckerDtos.add(dto);
+				i++;
 				continue;
 			}
 			if (i + 2 >= words.size())
@@ -43,7 +45,10 @@ public class NirdeshokErrorChecker implements BanglaGrammerChecker {
 				dto.errorType = BitMasking.setBitAt(errorType, ErrorsInBanglaLanguage.nirdeshokChecker);
 				dto.suggestion = new ArrayList<Pair>();
 				dto.suggestion.add(new Pair(str,-1));
+				spellCheckerDtos.add(new SpellCheckingDto());
+				spellCheckerDtos.add(new SpellCheckingDto());
 				spellCheckerDtos.add(dto);
+				i+=2;
 				continue;
 			}
 			spellCheckerDtos.add(new SpellCheckingDto());
