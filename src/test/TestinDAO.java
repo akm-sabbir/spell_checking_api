@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import dbm.DBMR;
 import dbm.DBMW;
@@ -106,7 +107,7 @@ public class TestinDAO
             
             if(!complexity.equalsIgnoreCase("all"))
             {
-            	String[] sa = complexity.split("[ ,]");
+            	/*String[] sa = complexity.split("[ ,]");
             	
             	String filter = "";
             	
@@ -116,7 +117,12 @@ public class TestinDAO
             		
             		if(i < sa.length -1)
             			filter += " , ";
-            	}
+            	}*/
+            	/*String result = complexity.stream()
+            			  .map(s -> "'" + s + "'")
+            			  .collect(Collectors.joining(", "));*/
+            	
+            	String filter = "'" + String.join("','", complexity.split(",")) + "'";
             	
             	rs = stmt.executeQuery("SELECT * FROM test_in where complexity in (" + filter + ") limit " + offset + " , " + row_count);
             }

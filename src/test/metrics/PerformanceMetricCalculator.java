@@ -12,21 +12,25 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import bangla.ErrorsInBanglaLanguage;
 import bangla.WithTrie.BitMasking;
+import test.ErrorChecker;
+import test.Performance;
 import test.TestinDTO;
 import test.TestoutDTO;
 
 
 public abstract class PerformanceMetricCalculator 
 {
-	private List<Object> calculateDetectionTruePositive(List<Object> alignment, TestoutDTO testoutDTO) 
+	private List<Object> calculateDetectionTruePositive(List<Object> alignment, TestoutDTO testoutDTO, String wordErrorType) 
 	{
 		if(alignment == null) return null;
 		
 		List<Object> tp = new LinkedList<>();
 
-		if(testoutDTO.wordErrorType.equalsIgnoreCase("NON_WORD_ERROR"))
+		if(Performance.supportedVerdicts.contains(wordErrorType)/*.equalsIgnoreCase("NON_WORD_ERROR") || wordErrorType.equalsIgnoreCase("REAL_WORD_ERROR")*/)
 		{
+			int checkingTypes = ErrorChecker.getErrors(wordErrorType);
 			for(Object o : alignment)
 			{
 				Map<Object, Object> m = (Map<Object, Object>) o;
@@ -35,9 +39,9 @@ public abstract class PerformanceMetricCalculator
 				String corrected = (String) m.get("corrected");
 				
 				JsonObject predictedAttributes = (JsonObject) m.get("predictedAttributes");
+				int errorType = predictedAttributes.getAsJsonPrimitive("errorType").getAsInt();
 				
-				
-				if(original.equalsIgnoreCase(corrected) && predictVerdict(predictedAttributes) == Verdict.CORRECT)
+				if(original.equalsIgnoreCase(corrected) && !ErrorChecker.hasError(errorType) /*predictVerdict(predictedAttributes) == Verdict.CORRECT*/)
 				{
 					Map<Object, Object> token = new LinkedHashMap<>();
 					
@@ -48,69 +52,72 @@ public abstract class PerformanceMetricCalculator
 					
 					tp.add(token);				
 				}
-				else if(!original.equalsIgnoreCase(corrected) && predictVerdict(predictedAttributes) == Verdict.NON_WORD_ERROR)
+				else if(!original.equalsIgnoreCase(corrected) && ErrorChecker.isErrorMatched(errorType, checkingTypes) /*predictVerdict(predictedAttributes) == Verdict.NON_WORD_ERROR*/)
 				{
 					Map<Object, Object> token = new LinkedHashMap<>();
 					
 					token.put("startIndex", (int) m.get("startIndex"));
 					token.put("original", (String) m.get("original"));
 					token.put("corrected", (String) m.get("corrected"));
-					token.put("predictedVerdict", "NON_WORD_ERROR");
+					token.put("predictedVerdict", wordErrorType);
 					
 					tp.add(token);
 				}
 					
 			}
 		}
-		else if(testoutDTO.wordErrorType.equalsIgnoreCase("REAL_WORD_ERROR"))
-		{
-			for(Object o : alignment)
-			{
-				Map<Object, Object> m = (Map<Object, Object>) o;
-				
-				String original = (String) m.get("original");
-				String corrected = (String) m.get("corrected");
-				
-				JsonObject predictedAttributes = (JsonObject) m.get("predictedAttributes");
-				
-				
-				if(original.equalsIgnoreCase(corrected) && predictVerdict(predictedAttributes) == Verdict.CORRECT)
-				{
-					Map<Object, Object> token = new LinkedHashMap<>();
-					
-					token.put("startIndex", (int) m.get("startIndex"));
-					token.put("original", (String) m.get("original"));
-					token.put("corrected", (String) m.get("corrected"));
-					token.put("predictedVerdict", "CORRECT");
-					
-					tp.add(token);				
-				}
-				else if(!original.equalsIgnoreCase(corrected) && predictVerdict(predictedAttributes) == Verdict.REAL_WORD_ERROR)
-				{
-					Map<Object, Object> token = new LinkedHashMap<>();
-					
-					token.put("startIndex", (int) m.get("startIndex"));
-					token.put("original", (String) m.get("original"));
-					token.put("corrected", (String) m.get("corrected"));
-					token.put("predictedVerdict", "REAL_WORD_ERROR");
-					
-					tp.add(token);
-				}
-					
-			}			
-		}
+//		else if(testoutDTO.wordErrorType.equalsIgnoreCase("REAL_WORD_ERROR"))
+//		{
+//			for(Object o : alignment)
+//			{
+//				Map<Object, Object> m = (Map<Object, Object>) o;
+//				
+//				String original = (String) m.get("original");
+//				String corrected = (String) m.get("corrected");
+//				
+//				JsonObject predictedAttributes = (JsonObject) m.get("predictedAttributes");
+//				
+//				
+//				if(original.equalsIgnoreCase(corrected) && predictVerdict(predictedAttributes) == Verdict.CORRECT)
+//				{
+//					Map<Object, Object> token = new LinkedHashMap<>();
+//					
+//					token.put("startIndex", (int) m.get("startIndex"));
+//					token.put("original", (String) m.get("original"));
+//					token.put("corrected", (String) m.get("corrected"));
+//					token.put("predictedVerdict", "CORRECT");
+//					
+//					tp.add(token);				
+//				}
+//				else if(!original.equalsIgnoreCase(corrected) && predictVerdict(predictedAttributes) == Verdict.REAL_WORD_ERROR)
+//				{
+//					Map<Object, Object> token = new LinkedHashMap<>();
+//					
+//					token.put("startIndex", (int) m.get("startIndex"));
+//					token.put("original", (String) m.get("original"));
+//					token.put("corrected", (String) m.get("corrected"));
+//					token.put("predictedVerdict", "REAL_WORD_ERROR");
+//					
+//					tp.add(token);
+//				}
+//					
+//			}			
+//		}
 		
 		return tp;
 }	
 
-	private List<Object> calculateDetectionFalsePositive(List<Object> alignment, TestoutDTO testoutDTO) 
+	private List<Object> calculateDetectionFalsePositive(List<Object> alignment, TestoutDTO testoutDTO, String wordErrorType) 
 	{
 		if(alignment == null) return null;
 		
 		List<Object> tp = new LinkedList<>();
 		
-		if(testoutDTO.wordErrorType.equalsIgnoreCase("NON_WORD_ERROR"))
+		
+		if(Performance.supportedVerdicts.contains(wordErrorType)/*wordErrorType.equalsIgnoreCase("NON_WORD_ERROR")||wordErrorType.equalsIgnoreCase("REAL_WORD_ERROR")*/)
 		{
+			int checkingTypes = ErrorChecker.getErrors(wordErrorType);
+			
 			for(Object o : alignment)
 			{
 				Map<Object, Object> m = (Map<Object, Object>) o;
@@ -119,57 +126,58 @@ public abstract class PerformanceMetricCalculator
 				String corrected = (String) m.get("corrected");
 				
 				JsonObject predictedAttributes = (JsonObject) m.get("predictedAttributes");
+				int errorType = predictedAttributes.getAsJsonPrimitive("errorType").getAsInt();
 				
-				if(original.equalsIgnoreCase(corrected) && predictVerdict(predictedAttributes) == Verdict.NON_WORD_ERROR)
+				if(original.equalsIgnoreCase(corrected) && ErrorChecker.isErrorMatched(errorType, checkingTypes)/* predictVerdict(predictedAttributes) == Verdict.NON_WORD_ERROR*/)
 				{
 					Map<Object, Object> token = new LinkedHashMap<>();
 					
 					token.put("startIndex", (int) m.get("startIndex"));
 					token.put("original", (String) m.get("original"));
 					token.put("corrected", (String) m.get("corrected"));
-					token.put("predictedVerdict", "NON_WORD_ERROR");
+					token.put("predictedVerdict", wordErrorType);
 					
 					tp.add(token);
 				}
 					
 			}
 		}
-		else if(testoutDTO.wordErrorType.equalsIgnoreCase("REAL_WORD_ERROR"))
-		{
-			for(Object o : alignment)
-			{
-				Map<Object, Object> m = (Map<Object, Object>) o;
-				
-				String original = (String) m.get("original");
-				String corrected = (String) m.get("corrected");
-				
-				JsonObject predictedAttributes = (JsonObject) m.get("predictedAttributes");
-				
-				if(original.equalsIgnoreCase(corrected) && predictVerdict(predictedAttributes) == Verdict.REAL_WORD_ERROR)
-				{
-					Map<Object, Object> token = new LinkedHashMap<>();
-					
-					token.put("startIndex", (int) m.get("startIndex"));
-					token.put("original", (String) m.get("original"));
-					token.put("corrected", (String) m.get("corrected"));
-					token.put("predictedVerdict", "REAL_WORD_ERROR");
-					
-					tp.add(token);
-				}
-					
-			}			
-		}
-		
+//		else if(testoutDTO.wordErrorType.equalsIgnoreCase("REAL_WORD_ERROR"))
+//		{
+//			for(Object o : alignment)
+//			{
+//				Map<Object, Object> m = (Map<Object, Object>) o;
+//				
+//				String original = (String) m.get("original");
+//				String corrected = (String) m.get("corrected");
+//				
+//				JsonObject predictedAttributes = (JsonObject) m.get("predictedAttributes");
+//				
+//				if(original.equalsIgnoreCase(corrected) && predictVerdict(predictedAttributes) == Verdict.REAL_WORD_ERROR)
+//				{
+//					Map<Object, Object> token = new LinkedHashMap<>();
+//					
+//					token.put("startIndex", (int) m.get("startIndex"));
+//					token.put("original", (String) m.get("original"));
+//					token.put("corrected", (String) m.get("corrected"));
+//					token.put("predictedVerdict", "REAL_WORD_ERROR");
+//					
+//					tp.add(token);
+//				}
+//					
+//			}			
+//		}
+//		
 		return tp;
 	}	
 	
-	private List<Object> calculateDetectionFalseNegative(List<Object> alignment, TestoutDTO testoutDTO) 
+	private List<Object> calculateDetectionFalseNegative(List<Object> alignment, TestoutDTO testoutDTO, String wordErrorType) 
 	{
 		if(alignment == null) return null;
 		
 		List<Object> tp = new LinkedList<>();
 
-		if(testoutDTO.wordErrorType.equalsIgnoreCase("NON_WORD_ERROR"))
+		if(Performance.supportedVerdicts.contains(wordErrorType)/*wordErrorType.equalsIgnoreCase("NON_WORD_ERROR") || wordErrorType.equalsIgnoreCase("REAL_WORD_ERROR")*/)
 		{
 			for(Object o : alignment)
 			{
@@ -180,7 +188,9 @@ public abstract class PerformanceMetricCalculator
 				
 				JsonObject predictedAttributes = (JsonObject) m.get("predictedAttributes");
 				
-				if(!original.equalsIgnoreCase(corrected) && predictVerdict(predictedAttributes) == Verdict.CORRECT)
+				int errorType = predictedAttributes.getAsJsonPrimitive("errorType").getAsInt();
+				
+				if(!original.equalsIgnoreCase(corrected) && !ErrorChecker.hasError(errorType)/* predictVerdict(predictedAttributes) == Verdict.CORRECT*/)
 				{
 					Map<Object, Object> token = new LinkedHashMap<>();
 					
@@ -194,43 +204,44 @@ public abstract class PerformanceMetricCalculator
 					
 			}
 		}
-		else if(testoutDTO.wordErrorType.equalsIgnoreCase("REAL_WORD_ERROR"))
-		{
-			for(Object o : alignment)
-			{
-				Map<Object, Object> m = (Map<Object, Object>) o;
-				
-				String original = (String) m.get("original");
-				String corrected = (String) m.get("corrected");
-				
-				JsonObject predictedAttributes = (JsonObject) m.get("predictedAttributes");
-				
-				if(!original.equalsIgnoreCase(corrected) && predictVerdict(predictedAttributes) == Verdict.CORRECT)
-				{
-					Map<Object, Object> token = new LinkedHashMap<>();
-					
-					token.put("startIndex", (int) m.get("startIndex"));
-					token.put("original", (String) m.get("original"));
-					token.put("corrected", (String) m.get("corrected"));
-					token.put("predictedVerdict", "CORRECT");
-					
-					tp.add(token);
-				}
-					
-			}			
-		}
-		
+//		else if(testoutDTO.wordErrorType.equalsIgnoreCase("REAL_WORD_ERROR"))
+//		{
+//			for(Object o : alignment)
+//			{
+//				Map<Object, Object> m = (Map<Object, Object>) o;
+//				
+//				String original = (String) m.get("original");
+//				String corrected = (String) m.get("corrected");
+//				
+//				JsonObject predictedAttributes = (JsonObject) m.get("predictedAttributes");
+//				
+//				if(!original.equalsIgnoreCase(corrected) && predictVerdict(predictedAttributes) == Verdict.CORRECT)
+//				{
+//					Map<Object, Object> token = new LinkedHashMap<>();
+//					
+//					token.put("startIndex", (int) m.get("startIndex"));
+//					token.put("original", (String) m.get("original"));
+//					token.put("corrected", (String) m.get("corrected"));
+//					token.put("predictedVerdict", "CORRECT");
+//					
+//					tp.add(token);
+//				}
+//					
+//			}			
+//		}
+//		
 		return tp;
 	}	
 	
-	private List<Object> calculateCorrectionTruePositive(List<Object> alignment, TestoutDTO testoutDTO) 
+	private List<Object> calculateCorrectionTruePositive(List<Object> alignment, TestoutDTO testoutDTO, String wordErrorType) 
 	{
 		if(alignment == null) return null;
 		
 		List<Object> tp = new LinkedList<>();
 
-		if(testoutDTO.wordErrorType.equalsIgnoreCase("NON_WORD_ERROR"))
+		if(Performance.supportedVerdicts.contains(wordErrorType)/*wordErrorType.equalsIgnoreCase("NON_WORD_ERROR") || wordErrorType.equalsIgnoreCase("REAL_WORD_ERROR")*/)
 		{
+			int checkingTypes = ErrorChecker.getErrors(wordErrorType);
 			for(Object o : alignment)
 			{
 				Map<Object, Object> m = (Map<Object, Object>) o;
@@ -240,7 +251,9 @@ public abstract class PerformanceMetricCalculator
 				
 				JsonObject predictedAttributes = (JsonObject) m.get("predictedAttributes");
 				
-				if(original.equalsIgnoreCase(corrected) && predictVerdict(predictedAttributes) == Verdict.CORRECT)
+				int errorType = predictedAttributes.getAsJsonPrimitive("errorType").getAsInt();
+				
+				if(original.equalsIgnoreCase(corrected) && !ErrorChecker.hasError(errorType)/* predictVerdict(predictedAttributes) == Verdict.CORRECT*/)
 				{
 					Map<Object, Object> token = new LinkedHashMap<>();
 					
@@ -252,7 +265,7 @@ public abstract class PerformanceMetricCalculator
 					tp.add(token);				
 				}
 					
-				else if(!original.equalsIgnoreCase(corrected) && predictVerdict(predictedAttributes) == Verdict.NON_WORD_ERROR 
+				else if(!original.equalsIgnoreCase(corrected) && ErrorChecker.isErrorMatched(errorType, checkingTypes) /*predictVerdict(predictedAttributes) == Verdict.NON_WORD_ERROR*/ 
 						&& checkPredictedSuggestions(predictedAttributes, corrected))
 				{
 					Map<Object, Object> token = new LinkedHashMap<>();
@@ -260,7 +273,7 @@ public abstract class PerformanceMetricCalculator
 					token.put("startIndex", (int) m.get("startIndex"));
 					token.put("original", m.get("original"));
 					token.put("corrected", m.get("corrected"));
-					token.put("predictedVerdict", "NON_WORD_ERROR");
+					token.put("predictedVerdict", wordErrorType);
 					token.put("suggested", predictedAttributes.getAsJsonArray("suggestion"));
 					
 					tp.add(token);
@@ -268,57 +281,58 @@ public abstract class PerformanceMetricCalculator
 					
 			}
 		}
-		else if(testoutDTO.wordErrorType.equalsIgnoreCase("REAL_WORD_ERROR"))
-		{
-			for(Object o : alignment)
-			{
-				Map<Object, Object> m = (Map<Object, Object>) o;
-				
-				String original = (String) m.get("original");
-				String corrected = (String) m.get("corrected");
-				
-				JsonObject predictedAttributes = (JsonObject) m.get("predictedAttributes");
-				
-				if(original.equalsIgnoreCase(corrected) && predictVerdict(predictedAttributes) == Verdict.CORRECT)
-				{
-					Map<Object, Object> token = new LinkedHashMap<>();
-					
-					token.put("startIndex", (int) m.get("startIndex"));
-					token.put("original", m.get("original"));
-					token.put("corrected", m.get("corrected"));
-					token.put("predictedVerdict", "CORRECT");
-					
-					tp.add(token);				
-				}
-					
-				else if(!original.equalsIgnoreCase(corrected) && predictVerdict(predictedAttributes) == Verdict.REAL_WORD_ERROR 
-						&& checkPredictedSuggestions(predictedAttributes, corrected))
-				{
-					Map<Object, Object> token = new LinkedHashMap<>();
-					
-					token.put("startIndex", (int) m.get("startIndex"));
-					token.put("original", m.get("original"));
-					token.put("corrected", m.get("corrected"));
-					token.put("predictedVerdict", "REAL_WORD_ERROR");
-					token.put("suggested", predictedAttributes.getAsJsonArray("suggestion"));
-					
-					tp.add(token);
-				}
-					
-			}			
-		}
+//		else if(testoutDTO.wordErrorType.equalsIgnoreCase("REAL_WORD_ERROR"))
+//		{
+//			for(Object o : alignment)
+//			{
+//				Map<Object, Object> m = (Map<Object, Object>) o;
+//				
+//				String original = (String) m.get("original");
+//				String corrected = (String) m.get("corrected");
+//				
+//				JsonObject predictedAttributes = (JsonObject) m.get("predictedAttributes");
+//				
+//				if(original.equalsIgnoreCase(corrected) && predictVerdict(predictedAttributes) == Verdict.CORRECT)
+//				{
+//					Map<Object, Object> token = new LinkedHashMap<>();
+//					
+//					token.put("startIndex", (int) m.get("startIndex"));
+//					token.put("original", m.get("original"));
+//					token.put("corrected", m.get("corrected"));
+//					token.put("predictedVerdict", "CORRECT");
+//					
+//					tp.add(token);				
+//				}
+//					
+//				else if(!original.equalsIgnoreCase(corrected) && predictVerdict(predictedAttributes) == Verdict.REAL_WORD_ERROR 
+//						&& checkPredictedSuggestions(predictedAttributes, corrected))
+//				{
+//					Map<Object, Object> token = new LinkedHashMap<>();
+//					
+//					token.put("startIndex", (int) m.get("startIndex"));
+//					token.put("original", m.get("original"));
+//					token.put("corrected", m.get("corrected"));
+//					token.put("predictedVerdict", "REAL_WORD_ERROR");
+//					token.put("suggested", predictedAttributes.getAsJsonArray("suggestion"));
+//					
+//					tp.add(token);
+//				}
+//					
+//			}			
+//		}
 		
 		return tp;
 	}
 	
-	private List<Object> calculateCorrectionFalsePositive(List<Object> alignment, TestoutDTO testoutDTO) 
+	private List<Object> calculateCorrectionFalsePositive(List<Object> alignment, TestoutDTO testoutDTO, String wordErrorType) 
 	{
 		if(alignment == null) return null;
 		
 		List<Object> tp = new LinkedList<>();
 
-		if(testoutDTO.wordErrorType.equalsIgnoreCase("NON_WORD_ERROR"))
+		if(Performance.supportedVerdicts.contains(wordErrorType)/*wordErrorType.equalsIgnoreCase("NON_WORD_ERROR") || wordErrorType.equalsIgnoreCase("REAL_WORD_ERROR")*/)
 		{
+			int checkingTypes = ErrorChecker.getErrors(wordErrorType);
 			for(Object o : alignment)
 			{
 				Map<Object, Object> m = (Map<Object, Object>) o;
@@ -327,8 +341,9 @@ public abstract class PerformanceMetricCalculator
 				String corrected = (String) m.get("corrected");
 				
 				JsonObject predictedAttributes = (JsonObject) m.get("predictedAttributes");
+				int errorType = predictedAttributes.getAsJsonPrimitive("errorType").getAsInt();
 				
-				if(!original.equalsIgnoreCase(corrected) && predictVerdict(predictedAttributes) == Verdict.NON_WORD_ERROR
+				if(!original.equalsIgnoreCase(corrected) && ErrorChecker.isErrorMatched(errorType, checkingTypes) /*predictVerdict(predictedAttributes) == Verdict.NON_WORD_ERROR*/
 						&& !checkPredictedSuggestions(predictedAttributes, corrected))
 				{
 					Map<Object, Object> token = new LinkedHashMap<>();
@@ -336,50 +351,50 @@ public abstract class PerformanceMetricCalculator
 					token.put("startIndex", (int) m.get("startIndex"));
 					token.put("original", m.get("original"));
 					token.put("corrected", m.get("corrected"));
-					token.put("predictedVerdict", "NON_WORD_ERROR");
+					token.put("predictedVerdict", wordErrorType);
 					token.put("suggested", predictedAttributes.getAsJsonArray("suggestion"));
 					
 					tp.add(token);
 				}
 			}
 		}
-		else if(testoutDTO.wordErrorType.equalsIgnoreCase("REAL_WORD_ERROR"))
-		{
-			for(Object o : alignment)
-			{
-				Map<Object, Object> m = (Map<Object, Object>) o;
-				
-				String original = (String) m.get("original");
-				String corrected = (String) m.get("corrected");
-				
-				JsonObject predictedAttributes = (JsonObject) m.get("predictedAttributes");
-				
-				if(!original.equalsIgnoreCase(corrected) && predictVerdict(predictedAttributes) == Verdict.REAL_WORD_ERROR
-						&& !checkPredictedSuggestions(predictedAttributes, corrected))
-				{
-					Map<Object, Object> token = new LinkedHashMap<>();
-					
-					token.put("startIndex", (int) m.get("startIndex"));
-					token.put("original", m.get("original"));
-					token.put("corrected", m.get("corrected"));
-					token.put("predictedVerdict", "REAL_WORD_ERROR");
-					token.put("suggested", predictedAttributes.getAsJsonArray("suggestion"));
-					
-					tp.add(token);
-				}
-			}			
-		}
+//		else if(testoutDTO.wordErrorType.equalsIgnoreCase("REAL_WORD_ERROR"))
+//		{
+//			for(Object o : alignment)
+//			{
+//				Map<Object, Object> m = (Map<Object, Object>) o;
+//				
+//				String original = (String) m.get("original");
+//				String corrected = (String) m.get("corrected");
+//				
+//				JsonObject predictedAttributes = (JsonObject) m.get("predictedAttributes");
+//				
+//				if(!original.equalsIgnoreCase(corrected) && predictVerdict(predictedAttributes) == Verdict.REAL_WORD_ERROR
+//						&& !checkPredictedSuggestions(predictedAttributes, corrected))
+//				{
+//					Map<Object, Object> token = new LinkedHashMap<>();
+//					
+//					token.put("startIndex", (int) m.get("startIndex"));
+//					token.put("original", m.get("original"));
+//					token.put("corrected", m.get("corrected"));
+//					token.put("predictedVerdict", "REAL_WORD_ERROR");
+//					token.put("suggested", predictedAttributes.getAsJsonArray("suggestion"));
+//					
+//					tp.add(token);
+//				}
+//			}			
+//		}
 		
 		return tp;
 	}	
 	
-	private List<Object> calculateCorrectionFalseNegative(List<Object> alignment, TestoutDTO testoutDTO) 
+	private List<Object> calculateCorrectionFalseNegative(List<Object> alignment, TestoutDTO testoutDTO, String wordErrorType) 
 	{
 		if(alignment == null) return null;
 		
 		List<Object> tp = new LinkedList<>();
 
-		if(testoutDTO.wordErrorType.equalsIgnoreCase("NON_WORD_ERROR"))
+		if(Performance.supportedVerdicts.contains(wordErrorType)/*wordErrorType.equalsIgnoreCase("NON_WORD_ERROR") || wordErrorType.equalsIgnoreCase("REAL_WORD_ERROR")*/)
 		{
 			for(Object o : alignment)
 			{
@@ -390,30 +405,6 @@ public abstract class PerformanceMetricCalculator
 				
 				JsonObject predictedAttributes = (JsonObject) m.get("predictedAttributes");
 				
-				if(!original.equalsIgnoreCase(corrected) 
-						&& !checkCorrectionAttempt(predictedAttributes))
-				{
-					Map<Object, Object> token = new LinkedHashMap<>();
-					
-					token.put("startIndex", (int) m.get("startIndex"));
-					token.put("original", m.get("original"));
-					token.put("corrected", m.get("corrected"));
-					
-					tp.add(token);
-				}
-			}
-		}
-		else if(testoutDTO.wordErrorType.equalsIgnoreCase("REAL_WORD_ERROR"))
-		{
-			for(Object o : alignment)
-			{
-				Map<Object, Object> m = (Map<Object, Object>) o;
-				
-				String original = (String) m.get("original");
-				String corrected = (String) m.get("corrected");
-				
-				JsonObject predictedAttributes = (JsonObject) m.get("predictedAttributes");
-			
 				if(!original.equalsIgnoreCase(corrected) 
 						&& !checkCorrectionAttempt(predictedAttributes))
 				{
@@ -431,7 +422,7 @@ public abstract class PerformanceMetricCalculator
 		return tp;
 	}	
 
-	public Map<Object, Object> populateDetectionMetricsAndGetLog(List<Object> alignment, TestoutDTO testoutDTO, BatchMetricInformation batchMetricInformation) 
+	public Map<Object, Object> populateDetectionMetricsAndGetLog(List<Object> alignment, TestoutDTO testoutDTO, BatchMetricInformation batchMetricInformation, String wordErrorType) 
 	{
 		float detectionPrecision = -1;
 		float detectionRecall = -1;
@@ -440,9 +431,9 @@ public abstract class PerformanceMetricCalculator
 //		List<Object> detectionFalsePositive = calculateDetectionFalsePositive(alignment);
 //		List<Object> detectionFalseNegative = calculateDetectionFalseNegative(alignment);
 		
-		Map<Object, Object> detectionTruePositive = listToMap(calculateDetectionTruePositive(alignment, testoutDTO));
-		Map<Object, Object> detectionFalsePositive = listToMap(calculateDetectionFalsePositive(alignment, testoutDTO));
-		Map<Object, Object> detectionFalseNegative = listToMap(calculateDetectionFalseNegative(alignment, testoutDTO));
+		Map<Object, Object> detectionTruePositive = listToMap(calculateDetectionTruePositive(alignment, testoutDTO, wordErrorType));
+		Map<Object, Object> detectionFalsePositive = listToMap(calculateDetectionFalsePositive(alignment, testoutDTO, wordErrorType));
+		Map<Object, Object> detectionFalseNegative = listToMap(calculateDetectionFalseNegative(alignment, testoutDTO, wordErrorType));
 		
 		int truePositive = detectionTruePositive.size();
 		batchMetricInformation.detectionCalculationInformation.truePositive += truePositive;
@@ -474,15 +465,15 @@ public abstract class PerformanceMetricCalculator
 		return log;
 	}
 	
-	public Map<Object, Object> populateCorrectionMetricsAndGetLog(List<Object> alignment, TestoutDTO testoutDTO, BatchMetricInformation batchMetricInformation) 
+	public Map<Object, Object> populateCorrectionMetricsAndGetLog(List<Object> alignment, TestoutDTO testoutDTO, BatchMetricInformation batchMetricInformation, String wordErrorType) 
 	{
 //		List<Object> correctionTruePositive = calculateCorrectionTruePositive(alignment);
 //		List<Object> correctionFalsePositive = calculateCorrectionFalsePositive(alignment);
 //		List<Object> correctionFalseNegative = calculateCorrectionFalseNegative(alignment);
 		
-		Map<Object, Object> correctionTruePositive = listToMap(calculateCorrectionTruePositive(alignment, testoutDTO));
-		Map<Object, Object> correctionFalsePositive = listToMap(calculateCorrectionFalsePositive(alignment, testoutDTO));
-		Map<Object, Object> correctionFalseNegative = listToMap(calculateCorrectionFalseNegative(alignment, testoutDTO));
+		Map<Object, Object> correctionTruePositive = listToMap(calculateCorrectionTruePositive(alignment, testoutDTO, wordErrorType));
+		Map<Object, Object> correctionFalsePositive = listToMap(calculateCorrectionFalsePositive(alignment, testoutDTO, wordErrorType));
+		Map<Object, Object> correctionFalseNegative = listToMap(calculateCorrectionFalseNegative(alignment, testoutDTO, wordErrorType));
 		
 		int truePositive = correctionTruePositive.size();
 		batchMetricInformation.correctionCalculationInformation.truePositive += truePositive;
@@ -608,34 +599,64 @@ public abstract class PerformanceMetricCalculator
 		}
 		
 		return alignment;
-	}	
-	
-	private Verdict predictVerdict(JsonObject predictedAttributes)
-	{
-		if(predictedAttributes == null) return Verdict.UNKNOWN;
-		
-		JsonObject jo = predictedAttributes;
-		int errorType = jo.getAsJsonPrimitive("errorType").getAsInt();
+	}
 
-		if(BitMasking.extractNthBit(errorType, 1) == 0 
-				&& BitMasking.extractNthBit(errorType, 6) == 0)
-			return Verdict.CORRECT;		
+//	private boolean predictVerdict(JsonObject predictedAttributes, int verdict)
+//	{
+//		if(predictedAttributes == null) false;
+//		
+//		JsonObject jo = predictedAttributes;
+//		int errorType = jo.getAsJsonPrimitive("errorType").getAsInt();
+//		
 		
-		if(BitMasking.extractNthBit(errorType, 1) == 1 
-				&& BitMasking.extractNthBit(errorType, 5) == 1)
-			return Verdict.NON_WORD_ERROR;		
-		
-		if(BitMasking.extractNthBit(errorType, 1) == 0 
-				&& BitMasking.extractNthBit(errorType, 6) == 1)
-			return Verdict.UNKNOWN;		
-		
-		if(BitMasking.extractNthBit(errorType, 1) == 1 
-				&& BitMasking.extractNthBit(errorType, 5) == 0
-					&& BitMasking.extractNthBit(errorType, 6) == 0)
-			return Verdict.REAL_WORD_ERROR;		
-		
-		return Verdict.UNKNOWN;
-	}	
+
+//		if(BitMasking.extractNthBit(errorType, 1) == 0 
+//				&& BitMasking.extractNthBit(errorType, 6) == 0)
+//			return Verdict.CORRECT;		
+//		
+//		if(BitMasking.extractNthBit(errorType, 1) == 1 
+//				&& BitMasking.extractNthBit(errorType, 5) == 1)
+//			return Verdict.NON_WORD_ERROR;		
+//		
+//		if(BitMasking.extractNthBit(errorType, 1) == 0 
+//				&& BitMasking.extractNthBit(errorType, 6) == 1)
+//			return Verdict.UNKNOWN;		
+//		
+//		if(BitMasking.extractNthBit(errorType, 1) == 1 
+//				&& BitMasking.extractNthBit(errorType, 5) == 0
+//					&& BitMasking.extractNthBit(errorType, 6) == 0)
+//			return Verdict.REAL_WORD_ERROR;		
+//		
+//		return Verdict.UNKNOWN;
+//	}	
+
+	
+//	private Verdict predictVerdict(JsonObject predictedAttributes)
+//	{
+//		if(predictedAttributes == null) return Verdict.UNKNOWN;
+//		
+//		JsonObject jo = predictedAttributes;
+//		int errorType = jo.getAsJsonPrimitive("errorType").getAsInt();
+//
+//		if(BitMasking.extractNthBit(errorType, 1) == 0 
+//				&& BitMasking.extractNthBit(errorType, 6) == 0)
+//			return Verdict.CORRECT;		
+//		
+//		if(BitMasking.extractNthBit(errorType, 1) == 1 
+//				&& BitMasking.extractNthBit(errorType, 5) == 1)
+//			return Verdict.NON_WORD_ERROR;		
+//		
+//		if(BitMasking.extractNthBit(errorType, 1) == 0 
+//				&& BitMasking.extractNthBit(errorType, 6) == 1)
+//			return Verdict.UNKNOWN;		
+//		
+//		if(BitMasking.extractNthBit(errorType, 1) == 1 
+//				&& BitMasking.extractNthBit(errorType, 5) == 0
+//					&& BitMasking.extractNthBit(errorType, 6) == 0)
+//			return Verdict.REAL_WORD_ERROR;		
+//		
+//		return Verdict.UNKNOWN;
+//	}	
 	
 //	private Verdict predictVerdict(JsonObject predictedAttributes)
 //	{
@@ -721,8 +742,8 @@ public abstract class PerformanceMetricCalculator
 	public abstract PrecisionRecallPair calculateMetrics(int truePositive, int falsePositive, int falseNegative);
 	
 	
-	enum Verdict
-	{
-		NON_WORD_ERROR, REAL_WORD_ERROR, CORRECT, UNKNOWN;
-	}
+//	enum Verdict
+//	{
+//		NON_WORD_ERROR, REAL_WORD_ERROR, CORRECT, UNKNOWN;
+//	}
 }

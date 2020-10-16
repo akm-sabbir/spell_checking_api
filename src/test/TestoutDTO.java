@@ -11,7 +11,7 @@ public class TestoutDTO
 	public long contentId;
 	
 	public String detailedLog;
-	public String wordErrorType;
+	//public String wordErrorType;
 	public String complexity;
 	
 	public float detectionPrecision;

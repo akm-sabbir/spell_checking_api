@@ -8,7 +8,6 @@ import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import bangla.dao.AnnotatedWordRepository;
@@ -19,7 +18,6 @@ import bangla.dao.NaturalErrorRepository;
 import bangla.dao.SadhuCholitMixture;
 import bangla.dao.SubjectVerbRepository;
 import bangla.grammarchecker.GrammerCheckerFactory;
-import bangla.tokenizer.WordTokenizer;
 import repository.RepositoryManager;
 import test.metrics.BatchMetricInformation;
 import test.metrics.PerformanceMetricCalculator;
@@ -31,6 +29,8 @@ public class Performance
 {
 	public static Logger logger = Logger.getLogger(Performance.class);
 	
+	public static List<String> supportedVerdicts = new ArrayList<String>(){{add("NON_WORD_ERROR"); add("REAL_WORD_ERROR");}};
+	
 	public static void main(String[] args) throws Exception
 	{
 		initializeData();
@@ -39,12 +39,12 @@ public class Performance
 		
 		String[] sa = {"all"};
 		
-		String[] eta = {"NON_WORD_ERROR", "REAL_WORD_ERROR"};
+		//String[] eta = {"NON_WORD_ERROR", "REAL_WORD_ERROR"};
 		
 		String v = "2.0.0";
 		
 		for(String s : sa)
-			for(String et : eta)
+			for(String et : supportedVerdicts)
 				calculateBatchPerformance(s, v, et);
 	}
 	
@@ -150,7 +150,7 @@ public class Performance
 				TestoutDTO testoutDTO = new TestoutDTO();
 				testoutDTO.guid = batchDto.guid;
 				testoutDTO.version = batchDto.version;
-				testoutDTO.wordErrorType = batchDto.wordErrorType;
+				//testoutDTO.wordErrorType = batchDto.wordErrorType;
 				
 				try
 				{
@@ -167,8 +167,8 @@ public class Performance
 					
 					log.put("totalAlignmentMap", performanceMetricCalculator.listToMap(alignment));
 					
-					Map<Object, Object> m1 = performanceMetricCalculator.populateDetectionMetricsAndGetLog(alignment, testoutDTO, batchMetricInformation); 
-					Map<Object, Object> m2 = performanceMetricCalculator.populateCorrectionMetricsAndGetLog(alignment, testoutDTO, batchMetricInformation);
+					Map<Object, Object> m1 = performanceMetricCalculator.populateDetectionMetricsAndGetLog(alignment, testoutDTO, batchMetricInformation, wordErrorType); 
+					Map<Object, Object> m2 = performanceMetricCalculator.populateCorrectionMetricsAndGetLog(alignment, testoutDTO, batchMetricInformation, wordErrorType);
 
 					log.putAll(m1);
 					log.putAll(m2);
