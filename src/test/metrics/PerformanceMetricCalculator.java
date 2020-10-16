@@ -413,7 +413,7 @@ public abstract class PerformanceMetricCalculator
 				String corrected = (String) m.get("corrected");
 				
 				JsonObject predictedAttributes = (JsonObject) m.get("predictedAttributes");
-				
+			
 				if(!original.equalsIgnoreCase(corrected) 
 						&& !checkCorrectionAttempt(predictedAttributes))
 				{
