@@ -617,35 +617,71 @@ public abstract class PerformanceMetricCalculator
 		JsonObject jo = predictedAttributes;
 		int errorType = jo.getAsJsonPrimitive("errorType").getAsInt();
 
-		if(BitMasking.extractNthBit(errorType, 1) == 1)		//	correct
+		if(BitMasking.extractNthBit(errorType, 1) == 0 
+				&& BitMasking.extractNthBit(errorType, 6) == 0)
 			return Verdict.CORRECT;		
-
-		if(BitMasking.extractNthBit(errorType, 2) == 1)		//	real-word
-			return Verdict.REAL_WORD_ERROR;		
 		
-		if(BitMasking.extractNthBit(errorType, 3) == 1)		//	real-word
-			return Verdict.REAL_WORD_ERROR;		
+		if(BitMasking.extractNthBit(errorType, 1) == 1 
+				&& BitMasking.extractNthBit(errorType, 5) == 1)
+			return Verdict.NON_WORD_ERROR;		
 		
-		if(BitMasking.extractNthBit(errorType, 4) == 1)		//	real-word
-			return Verdict.REAL_WORD_ERROR;		
+		if(BitMasking.extractNthBit(errorType, 1) == 0 
+				&& BitMasking.extractNthBit(errorType, 6) == 1)
+			return Verdict.UNKNOWN;		
 		
-		if(BitMasking.extractNthBit(errorType, 5) == 1)		//	non-word
-			return Verdict.NON_WORD_ERROR;
-		
-		if(BitMasking.extractNthBit(errorType, 6) == 1)		//	unknown
-			return Verdict.UNKNOWN;
-
-		if(BitMasking.extractNthBit(errorType, 7) == 1)		//	real-word
-			return Verdict.REAL_WORD_ERROR;		
-		
-		if(BitMasking.extractNthBit(errorType, 8) == 1)		//	real-word
-			return Verdict.REAL_WORD_ERROR;		
-		
-		if(BitMasking.extractNthBit(errorType, 9) == 1)		//	real-word
+		if(BitMasking.extractNthBit(errorType, 1) == 1 
+				&& BitMasking.extractNthBit(errorType, 5) == 0
+					&& BitMasking.extractNthBit(errorType, 6) == 0)
 			return Verdict.REAL_WORD_ERROR;		
 		
 		return Verdict.UNKNOWN;
-	}
+	}	
+	
+//	private Verdict predictVerdict(JsonObject predictedAttributes)
+//	{
+//		if(predictedAttributes == null) return Verdict.UNKNOWN;
+//		
+//		JsonObject jo = predictedAttributes;
+//		int errorType = jo.getAsJsonPrimitive("errorType").getAsInt();
+//
+//		if(BitMasking.extractNthBit(errorType, 5) == 1)		//	non-word
+//			return Verdict.NON_WORD_ERROR;		
+//		
+////		if(BitMasking.extractNthBit(errorType, 1) == 1)		//	correct
+////			return Verdict.CORRECT;	
+//
+//		if(BitMasking.extractNthBit(errorType, 2) == 1)		//	real-word
+//			return Verdict.REAL_WORD_ERROR;		
+//		
+//		if(BitMasking.extractNthBit(errorType, 3) == 1)		//	real-word
+//			return Verdict.REAL_WORD_ERROR;		
+//		
+//		if(BitMasking.extractNthBit(errorType, 4) == 1)		//	real-word
+//			return Verdict.REAL_WORD_ERROR;		
+//		
+////		if(BitMasking.extractNthBit(errorType, 5) == 1)		//	non-word
+////			return Verdict.NON_WORD_ERROR;
+//		
+////		if(BitMasking.extractNthBit(errorType, 6) == 1)		//	unknown
+////			return Verdict.UNKNOWN;
+//
+//		if(BitMasking.extractNthBit(errorType, 7) == 1)		//	real-word
+//			return Verdict.REAL_WORD_ERROR;		
+//		
+//		if(BitMasking.extractNthBit(errorType, 8) == 1)		//	real-word
+//			return Verdict.REAL_WORD_ERROR;		
+//		
+//		if(BitMasking.extractNthBit(errorType, 9) == 1)		//	real-word
+//			return Verdict.REAL_WORD_ERROR;		
+//		
+//		if(BitMasking.extractNthBit(errorType, 1) == 1)		//	correct
+//			return Verdict.CORRECT;			
+//		
+//		if(BitMasking.extractNthBit(errorType, 6) == 1)		//	unknown
+//			return Verdict.UNKNOWN;		
+//		
+//		return Verdict.UNKNOWN;
+//	}
 	
 	private boolean checkPredictedSuggestions(JsonObject predictedAttributes, String corrected)
 	{
