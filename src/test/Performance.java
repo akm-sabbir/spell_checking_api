@@ -61,60 +61,60 @@ public class Performance
     	RepositoryManager.getInstance().addRepository(SadhuCholitMixture.getInstance(),true);		
 	}
 	
-	private static String listToString(List<String> sl)
-	{
-        String cs = " ";
-        
-        String[] sa = sl.toArray(new String[0]);
-        
-        
-        for(int i = 0 ; i < sa.length ; i++)
-        {
-        	if(sa[i].equalsIgnoreCase("all"))
-        	{
-        		cs += "'easy', 'moderate', 'difficult'";
-        	}
-        	else
-        	{
-        		cs += " '" + sa[i] + "' ";
-        	}
-        	
-        	if(i < sa.length - 1)
-        		cs += ", ";
-
-        }
-        
-        cs += " ";
-        
-        return cs;
-	}
-	
-	private static List<List<String>> generateCombination(String[] complexity)
-	{
-		List<List<String>> batch = new LinkedList<List<String>>();
-
-		List<String> list = new LinkedList<String>();
-		list.add("all");
-		batch.add(list);
-		
-		for(int i = 0; i < complexity.length; i++)
-		{
-			list = new LinkedList<String>();
-			list.add(complexity[i]);
-			batch.add(list);
-			
-			for(int j = i+1; j < complexity.length; j++)
-			{
-				list = new LinkedList<String>();
-				list.add(complexity[i]);
-				list.add(complexity[j]);
-				
-				batch.add(list);
-			}
-		}		
-		
-		return batch;
-	}
+//	private static String listToString(List<String> sl)
+//	{
+//        String cs = " ";
+//        
+//        String[] sa = sl.toArray(new String[0]);
+//        
+//        
+//        for(int i = 0 ; i < sa.length ; i++)
+//        {
+//        	if(sa[i].equalsIgnoreCase("all"))
+//        	{
+//        		cs += "'easy', 'moderate', 'difficult'";
+//        	}
+//        	else
+//        	{
+//        		cs += " '" + sa[i] + "' ";
+//        	}
+//        	
+//        	if(i < sa.length - 1)
+//        		cs += ", ";
+//
+//        }
+//        
+//        cs += " ";
+//        
+//        return cs;
+//	}
+//	
+//	private static List<List<String>> generateCombination(String[] complexity)
+//	{
+//		List<List<String>> batch = new LinkedList<List<String>>();
+//
+//		List<String> list = new LinkedList<String>();
+//		list.add("all");
+//		batch.add(list);
+//		
+//		for(int i = 0; i < complexity.length; i++)
+//		{
+//			list = new LinkedList<String>();
+//			list.add(complexity[i]);
+//			batch.add(list);
+//			
+//			for(int j = i+1; j < complexity.length; j++)
+//			{
+//				list = new LinkedList<String>();
+//				list.add(complexity[i]);
+//				list.add(complexity[j]);	
+//				
+//				batch.add(list);
+//			}
+//		}		
+//		
+//		return batch;
+//	}
 	
 	private static void calculateBatchPerformance(String comp, String version, String wordErrorType) throws Exception
 	{
@@ -131,6 +131,8 @@ public class Performance
 		BatchTestDTO batchDto = new BatchTestDTO();
 		batchDto.guid = guid;
 		batchDto.version = version;
+		batchDto.wordErrorType = wordErrorType;
+		batchDto.complexity = comp;
 				
 		while(true)
 		{
@@ -148,7 +150,7 @@ public class Performance
 				TestoutDTO testoutDTO = new TestoutDTO();
 				testoutDTO.guid = batchDto.guid;
 				testoutDTO.version = batchDto.version;
-				testoutDTO.wordErrorType = wordErrorType;
+				testoutDTO.wordErrorType = batchDto.wordErrorType;
 				
 				try
 				{
@@ -207,8 +209,8 @@ public class Performance
 		batchDto.correctionPrecision = batchCorretionPrecision.precision;
 		batchDto.correctionRecall = batchCorretionPrecision.recall;
 		
-		batchDto.complexity = comp;
-		batchDto.wordErrorType = wordErrorType;
+//		batchDto.complexity = comp;
+//		batchDto.wordErrorType = wordErrorType;
 		
 		batchTestDAO.insert(batchDto);
 	}

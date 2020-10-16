@@ -121,8 +121,9 @@ public class TestinDAO
             	rs = stmt.executeQuery("SELECT * FROM test_in where complexity in (" + filter + ") limit " + offset + " , " + row_count);
             }
             else
-            	rs = stmt.executeQuery("SELECT * FROM test_in limit " + offset + " , " + row_count);
-//            	rs = stmt.executeQuery("SELECT * FROM test_in where ID = 19 limit " + offset + " , " + row_count);
+//            	rs = stmt.executeQuery("SELECT * FROM test_in limit " + offset + " , " + row_count);
+//            	rs = stmt.executeQuery("SELECT * FROM test_in where ID = 10 limit " + offset + " , " + row_count);
+            	rs = stmt.executeQuery("SELECT * FROM test_in where ID in (8,12,16,19,21,25,26,28,33,101,136,137,1398,12,16,19,21,25,26,28,33,101,136,137,139) limit " + offset + " , " + row_count);
             
 			while(rs.next())
 			{
