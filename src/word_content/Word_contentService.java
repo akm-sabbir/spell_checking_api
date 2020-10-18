@@ -44,8 +44,9 @@ public class Word_contentService
 		}
 		
 		try {
+			StringBuilder sbData = new StringBuilder(text_data);
 			HashMap<Integer, String> indexedWords = textNormalizer.getIndexedWords(tokenized_sentence);
-			result_list = sp_checker.getWordValidationInfo(text_data, indexedWords);
+			result_list = sp_checker.getWordValidationInfo(sbData, indexedWords);
 			System.out.println("Total Tokenized words after validation process completion " + result_list.size());
 			result_list = gr_checker.getSentenceValidationInfo(tokenized_sentence, result_list);
 			System.out.println("Total Valided words after process completion" + result_list.size());

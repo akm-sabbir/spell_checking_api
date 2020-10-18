@@ -1,6 +1,7 @@
 package bangla.WithTrie;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class TrieNodeWithList implements Comparable<TrieNodeWithList> {
@@ -13,6 +14,12 @@ public class TrieNodeWithList implements Comparable<TrieNodeWithList> {
 	public String viceVersaWord;
 	public TrieNodeWithList parent;
 	public int freq;
+	/*following are the new attributes require for aho-coarisck algorithm*/
+	public HashMap<String, Integer> child = new HashMap<String, Integer>();            
+	public int wordID = -1;
+	public char parentChar;
+	/*aho coarisck parameter list ended here*/
+	
 	public List<TrieNodeWithList> children = new ArrayList<>();
 
 	public TrieNodeWithList() {

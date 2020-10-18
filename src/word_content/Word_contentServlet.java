@@ -103,7 +103,6 @@ public class Word_contentServlet extends HttpServlet
 			return;
 		}
 		
-		
 		PrintWriter out = response.getWriter();
 		response.setContentType("application/json;charset=UTF-8");
 		//response.setCharacterEncoding("UTF-8");
