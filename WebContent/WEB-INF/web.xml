@@ -5,11 +5,6 @@
     <welcome-file>home/login.jsp</welcome-file>
   </welcome-file-list>
 	
- <servlet>  
-   <servlet-name>Word_contentServlet</servlet-name>  
-   <servlet-class>word_content.Word_contentServlet</servlet-class>  
-   <load-on-startup>0</load-on-startup>  
- </servlet>
   <filter>
 		<filter-name>CharsetFilter</filter-name>
 		<filter-class>filter.CharsetFilter</filter-class>
