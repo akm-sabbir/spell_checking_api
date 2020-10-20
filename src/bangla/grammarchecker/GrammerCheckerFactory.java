@@ -32,6 +32,8 @@ public class GrammerCheckerFactory {
 			return new SpaceErrorBetweenWordsChecker();
 		else if (checkerType.equals(GrammerCheckerTypes.WRONG_NIRDESHOK_ERROR.toString()))
 			return new NirdeshokErrorChecker();
+		else if(checkerType.equals(GrammerCheckerTypes.NEGATIVE_TYPE_WORD_ERROR.toString()))
+			return new NegativeTypeWordErrorChecker();
 		return null;
 	}
 

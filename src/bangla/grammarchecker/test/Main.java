@@ -13,6 +13,7 @@ import bangla.dao.SadhuCholitMixture;
 import bangla.dao.SubjectVerbRepository;
 import bangla.grammarchecker.BanglaGrammerChecker;
 import bangla.grammarchecker.GrammerCheckerFactory;
+import bangla.grammarchecker.NegativeTypeWordErrorChecker;
 import bangla.grammarchecker.NirdeshokErrorChecker;
 import bangla.grammarchecker.NoSpaceBetweenWordsChecker;
 import bangla.grammarchecker.ShadhuCholitMixureChecker;
@@ -106,18 +107,13 @@ public class Main {
     	RepositoryManager.getInstance().addRepository(SubjectVerbRepository.getInstance(),true);
     	RepositoryManager.getInstance().addRepository(SadhuCholitMixture.getInstance(),true);
     	RepositoryManager.getInstance().addRepository(GradedPronoun.getInstance(),true);
-//		dictionaryInitializer di = new dictionaryInitializer();
-//		di.contextInitialized("");
-		System.out.println("++++++++++++++++++++++++++++");
-		checkSadhuCholitoMixure();
-		System.out.println("++++++++++++++++++++++++++++");
-		checkSubjectVerb();
-		System.out.println("++++++++++++++++++++++++++++");
-//		checkNoSpaceError();
-//		System.out.println("++++++++++++++++++++++++++++");
-//		checkInvalidSpaceError();
-		System.out.println("++++++++++++++++++++++++++++");
-		checkNirdeshokError();
+    	
+//		checkSadhuCholitoMixure();
+//		checkSubjectVerb();
+		checkNoSpaceError();
+		checkInvalidSpaceError();
+//		checkNirdeshokError();
+    	checkNegativeWordError();
 	}
 	static WordTokenizer WT = new WordTokenizer();
 	private static void checkSadhuCholitoMixure() {
@@ -145,6 +141,16 @@ public class Main {
 		sentences.add("এবসতি গুলো একসাথে একই রাস্তার মধ্যে দেখা যায়");
 		sentences.add("সারি সারি গাছগুলো দেখা  যায় ");
 		sentences.add("বাইরে বাতাসহচ্ছে ");
+		sentences.add("আমার ভয়নেই");
+		sentences.add("সে বলেনাই");
+		sentences.add("তার মানাই");
+		sentences.add("আমার নাইভয় ");
+		sentences.add("নাচাইতে দানের কোনো মর্যাদা নেই");
+		sentences.add(" নিভুল যার");
+		sentences.add("নেইবুঝ যার");
+		sentences.add("সে তো এমন কাজ করেনা");
+		sentences.add("তুমি নাহয় ঘুরে এসো।");
+		
 		for(String sentence: sentences)
 		   checkSentenece(validator,sentence);
 	}
@@ -154,6 +160,8 @@ public class Main {
 		sentences.add("এত ধন দৌলত দিয়ে আপনি কী করবেন?");
 		sentences.add("মাস্টার মশাই কি আমাকে ডেকেছেন? ");
 		sentences.add("আহমদ ছফা ১৯৪৩ সালের ৩০ জুন জন্ম গ্রহণ করেন। ");
+		sentences.add("আমি যাই নি");
+		sentences.add("এই কাজ করি নি আমি");
 		for(String sentence: sentences)
 		   checkSentenece(validator,sentence);
 	}
@@ -166,10 +174,36 @@ public class Main {
 		for(String sentence: sentences)
 		   checkSentenece(validator,sentence);
 	}
+	private static void checkNegativeWordError() {
+		NegativeTypeWordErrorChecker validator = new NegativeTypeWordErrorChecker();
+		List<String> sentences = new ArrayList<>();
+		sentences.add("আমার ভয়নেই");
+		sentences.add("সে বলেনাই");
+		sentences.add("আমার নাইভয় ");
+		sentences.add("আমি যাই নি");
+		sentences.add("আমি যাই নি বাড়িতে");
+		sentences.add("নাচাইতে দানের কোনো মর্যাদা নেই");
+		sentences.add("তুমি নাহয় ঘুরে এসো।");
+		for(String sentence: sentences)
+		   checkSentenece(validator,sentence);
+	}
 	private static void checkSentenece(BanglaGrammerChecker validator, String sentence) {
 		WT.set_text(sentence);
 		List<String> words = WT._tokenization();
-	
+		List<SpellCheckingDto> res = validator.hasError(words);
+		int pass = 0;
+		for(int i=0;i<res.size();i++) {
+			System.out.println(res.get(i).errorType);
+			if(res.get(i).errorType > 0) {
+				pass = 1;
+				for(int j=0;j<res.get(i).suggestion.size();j++) {
+					System.out.println(res.get(i).suggestion.get(j).words);
+				}
+			}
+		}
+		System.out.println(sentence);
+		if(pass==1) System.out.println("Test passed");
+		else System.out.println("Test failed");
 	}
 
 }

@@ -5,6 +5,7 @@ package bangla.dao;
 import org.apache.log4j.Logger;
 
 import bangla.WithTrie.TrieNodeWithList;
+import bangla.grammarchecker.NegativeTypeWordErrorChecker;
 import bangla.grammarchecker.NoSpaceBetweenWordsChecker;
 import bangla.grammarchecker.SpaceErrorBetweenWordsChecker;
 import dbm.DBMR;
@@ -93,7 +94,7 @@ public class NamedEntityRepository implements Repository{
 		}
 		NoSpaceBetweenWordsChecker.registerDictionary(root.dict);
 		SpaceErrorBetweenWordsChecker.registerDictionary(root.dict);
-		
+		NegativeTypeWordErrorChecker.registerDictionary(root.dict);
 	}
 	
 

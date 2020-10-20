@@ -5,6 +5,7 @@ package bangla.dao;
 import org.apache.log4j.Logger;
 
 import bangla.WithTrie.TrieNodeWithList;
+import bangla.grammarchecker.NegativeTypeWordErrorChecker;
 import bangla.grammarchecker.ShadhuCholitMixureChecker;
 import bangla.grammarchecker.SubVerbRelErrorChecker;
 import bangla.spellchecker.SpellCheckingDto;
@@ -79,6 +80,7 @@ public class SadhuCholitMixture implements Repository{
 		}
 		ShadhuCholitMixureChecker.buildTrie(data_DTO);
 		SubVerbRelErrorChecker.buildTrie(data_DTO);
+		NegativeTypeWordErrorChecker.buildTrie(data_DTO);
 		return ;
 	}
 	public void insertSadhuCholitPronoun(String sql, List<String> columns){
