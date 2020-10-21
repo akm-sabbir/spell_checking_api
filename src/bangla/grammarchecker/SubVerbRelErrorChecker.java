@@ -13,6 +13,7 @@ import bangla.ErrorsInBanglaLanguage;
 import bangla.WithTrie.BitMasking;
 import bangla.WithTrie.TrieNodeWithList;
 import bangla.dao.GrammarDto;
+import bangla.dao.NamedEntityRepository;
 import bangla.preprocessingUnit.*;
 import bangla.spellchecker.Pair;
 import bangla.spellchecker.SpellCheckingDto;
@@ -32,6 +33,7 @@ public class SubVerbRelErrorChecker implements BanglaGrammerChecker {
 	static Map<String, Integer> sadhuCholitMap = new HashMap<>();
 	static List<List<String>> subVerbMatrix = new ArrayList<>();
 	static TrieNodeWithList verbList = new TrieNodeWithList();
+	static TrieNodeWithList namedEntity = new TrieNodeWithList();
 
 	public List<SpellCheckingDto> hasError(List<String> words) {
 		List<SpellCheckingDto> spellCheckerDtos = new ArrayList<>();
@@ -41,7 +43,10 @@ public class SubVerbRelErrorChecker implements BanglaGrammerChecker {
 		}
 		String subject = findSubject(words);
 		String verb = findVerb(words);
-		
+		System.out.println("subject is "  +  subject);
+	    if(isIndividualOrOrganism(subject)) {
+	    	System.out.println("individual or organism");
+	    }
 		if (subject.equals(notFound) || verb.equals(notFound)) {
 			return getDtosWithoutError(words.size());
 		}
@@ -54,7 +59,6 @@ public class SubVerbRelErrorChecker implements BanglaGrammerChecker {
 			subjectDto.word = subject;
 			subjectDto.errorType = BitMasking.setBitAt(errorType, ErrorsInBanglaLanguage.subjectVerbChecker);
 			subjectDto.suggestion = new ArrayList<Pair>();
-			
 			List<String> alternativ_subjects = getSuggestedSubject(verb);
 			int indicator = 0;
 			if (sadhuCholitMap.containsKey(verb)) {
@@ -112,6 +116,9 @@ public class SubVerbRelErrorChecker implements BanglaGrammerChecker {
 		List<String> allSubject = new ArrayList<>();
 		for (String word : words) {
 			if (purushMap.containsKey(word)) {
+				allSubject.add(word);
+			}
+			if(isNamedEntity(word)) {
 				allSubject.add(word);
 			}
 		}
@@ -176,6 +183,19 @@ public class SubVerbRelErrorChecker implements BanglaGrammerChecker {
 				verbList.insert(mixed.shadhu);
 			}
 		}
+	}
+	
+	public static void addNamedEntity(TrieNodeWithList dictionary) {
+		namedEntity = dictionary;
+	}
+	private static boolean isNamedEntity(String word) {
+		return namedEntity.searchWord(word).isFound;
+	}
+	private static boolean isIndividualOrOrganism(String word) {
+		Map<String,String> additional = namedEntity.searchWord(word).additional;
+		int category = (additional.containsKey(GrammarCheckerConstant.NAMED_ENTITY_CATEGORY) ? Integer.valueOf(additional.get(GrammarCheckerConstant.NAMED_ENTITY_CATEGORY)) : 0);
+		if(category == 3 || category == 5) return true;
+		return false;
 	}
 
 	public static void buildSubVerbMap(List<ArrayList<String>> subVerbMap) {

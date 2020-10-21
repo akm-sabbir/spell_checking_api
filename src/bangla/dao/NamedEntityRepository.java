@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import bangla.WithTrie.TrieNodeWithList;
 import bangla.grammarchecker.NoSpaceBetweenWordsChecker;
 import bangla.grammarchecker.SpaceErrorBetweenWordsChecker;
+import bangla.grammarchecker.SubVerbRelErrorChecker;
 import dbm.DBMR;
 import repository.Repository;
 import repository.RepositoryManager;
@@ -37,7 +38,7 @@ public class NamedEntityRepository implements Repository{
 	}
 	
 	
-	public  void insert(long ID, String word) {
+	public  void insert(long ID, String word,int category) {
 		
 	
 		TrieNodeWithList recurseRoot = root.dict;
@@ -62,6 +63,7 @@ public class NamedEntityRepository implements Repository{
 				temp.isWord = true;
 				temp.createTime = System.currentTimeMillis();
 				this.root.inverseDict.put(ID, word);
+				temp.namedEntityCategory = category;
 			
 			}
 			recurseRoot = temp;
@@ -76,13 +78,13 @@ public class NamedEntityRepository implements Repository{
 		ResultSet rs = null;
 		Statement stmt = null;
 		
-		String sql = "select ID, content from named_entity where isDeleted=0";
+		String sql = "select ID, content, type_cat from named_entity where isDeleted=0";
 		try{
 			connection = DBMR.getInstance().getConnection();
 			stmt = connection.createStatement();
 			rs = stmt.executeQuery(sql);
 			while(rs.next()){
-				this.insert(rs.getLong("ID"), rs.getString("content"));
+				this.insert(rs.getLong("ID"), rs.getString("content"), rs.getInt("type_cat"));
 
 			}				
 		}catch(Exception ex){
@@ -93,6 +95,7 @@ public class NamedEntityRepository implements Repository{
 		}
 		NoSpaceBetweenWordsChecker.registerDictionary(root.dict);
 		SpaceErrorBetweenWordsChecker.registerDictionary(root.dict);
+		SubVerbRelErrorChecker.addNamedEntity(root.dict);
 		
 	}
 	

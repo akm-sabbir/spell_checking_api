@@ -9,7 +9,7 @@ public class GrammarCheckerConstant {
 	public static final String ERROR_TYPE_INVALID_SPACE = "invalid-space-in-word";
 	public static final String ERROR_TYPE_SUB_VERB = "subject-verb-agreement-error";
 	
-	
+	public static final String NAMED_ENTITY_CATEGORY = "named-entity-category";
 	
 	
 	public static final String WORD_TYPE_NIRDESHOK = "nirdeshok";
