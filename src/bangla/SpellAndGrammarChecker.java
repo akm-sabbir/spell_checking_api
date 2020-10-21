@@ -59,6 +59,7 @@ public class SpellAndGrammarChecker {
 			return null;
 		}
 		List<String> tokenized_sentence = null;
+		text_data = textNormalizer.normalizeText(text_data);
 		HashMap<Integer, SpellCheckingDto> result_list = null;
 		try {
 			tokenized_sentence = sentenceTokenizer.getTokenizedSentence(text_data);

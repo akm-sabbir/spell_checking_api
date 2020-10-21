@@ -122,13 +122,16 @@ public class AhoCoharisck {
 
 		// Targeted result value
 		ArrayList<String> result = new ArrayList<>();
-
+		
 		for (int j = 0; j < text.length(); j++)
 		{
+			
 			// Calculating new state in the trie
 			while (true)
 			{
 				// If we have the edge, then use it
+				if(text.charAt(j) == ' ')
+					break;
 				if (trie.get(currentState).children.containsKey(text.charAt(j))){
 					currentState = (int)trie.get(currentState).children.get(text.charAt(j));
 					break;
@@ -152,15 +155,17 @@ public class AhoCoharisck {
 	public static void main(String args[]) {
 		AhoCoharisck ahocoarisck = new AhoCoharisck();
 		ahocoarisck.initiateGlobalDict("সকাল", 0);
+		//ahocoarisck.initiateGlobalDict("সকালবেলা", 0);
+		ahocoarisck.initiateGlobalDict("কাল", 0);
 		ahocoarisck.initiateGlobalDict("বেলা", 1);
-		ahocoarisck.initiateGlobalDict("ছেলেরা", 2);
-		ahocoarisck.initiateGlobalDict("পানি", 2);
+		ahocoarisck.initiateGlobalDict("বাহিনী", 2);
+		ahocoarisck.initiateGlobalDict("র", 2);
 		ahocoarisck.initiateGlobalDict("তে", 2);
 		ahocoarisck.initiateGlobalDict("সাঁতার", 2);
 		ahocoarisck.initiateGlobalDict("কাট", 2);
 		ahocoarisck.initiateGlobalDict("ছিলো", 2);
 		ahocoarisck.PrepareAho();
-		ArrayList<String> result = ahocoarisck.ProcessString("সকালবেলাছেলেরাপানিতেসাঁতারকাটছিলো");
+		ArrayList<String> result = ahocoarisck.ProcessString("বাহিনীর সকালবেলাছেলেরাপানিতেসাঁতারকাটছিলো");
 		for(String each : result) {
 			System.out.println(each);
 		}

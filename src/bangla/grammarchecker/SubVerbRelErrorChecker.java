@@ -192,7 +192,8 @@ public class SubVerbRelErrorChecker implements BanglaGrammerChecker {
 				verbIndex.put(mixed.get(0), index);
 				subVerbMatrix.add(new ArrayList<>());
 				for (String subject : subjects) {
-					subVerbMatrix.get(index).add(subject);
+					if(subVerbMatrix.get(index).contains(subject) ==false)
+						subVerbMatrix.get(index).add(subject);
 				}
 				index++;
 			}
@@ -201,7 +202,8 @@ public class SubVerbRelErrorChecker implements BanglaGrammerChecker {
 				verbIndex.put(mixed.get(1), index);
 				subVerbMatrix.add(new ArrayList<>());
 				for (String subject : subjects) {
-					subVerbMatrix.get(index).add(subject);
+					if(subVerbMatrix.get(index).contains(subject) ==false)
+						subVerbMatrix.get(index).add(subject);
 				}
 				index++;
 			}

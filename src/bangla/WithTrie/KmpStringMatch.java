@@ -82,11 +82,11 @@ public class KmpStringMatch {
 	   
 	    public static void main(String args[]) 
 	    { 
-	        StringBuilder txt = new StringBuilder("ABABDABACDABABCABAB"); 
-	        String pat = "ABA";
+	        StringBuilder txt = new StringBuilder("নিয়মিত ব্যায়াম করা আপনার "); 
+	        String pat = "নিয়মিত";
 	        for (int i = 0; i < 3;i++) {
 	        	KmpStringMatch.KMPSearch(pat, txt);
-	        	System.out.println(txt);
+	        	System.out.println(txt + " " + pat.length());
 	        }
 	    } 
 	
