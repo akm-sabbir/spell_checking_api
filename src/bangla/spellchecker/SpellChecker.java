@@ -35,6 +35,10 @@ public class SpellChecker {
 			suggested_word.suggestion = new ArrayList<Pair>();
 		Map<String, Integer> wordWithDistance = wordSuggestion.getSuggestedWord(data);
 		for(Map.Entry<String, Integer> entry: wordWithDistance.entrySet()) {
+			if(suggested_word.suggestion.size() !=0) {
+				if(suggested_word.suggestion.get(0).words.contentEquals( entry.getKey()) == false)
+					suggested_word.suggestion.add(new Pair(entry.getKey(), entry.getValue()));
+			}else
 				suggested_word.suggestion.add(new Pair(entry.getKey(), entry.getValue()));
 		}
 		return suggested_word;
