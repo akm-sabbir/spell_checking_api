@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -13,40 +14,48 @@ import java.util.Scanner;
 class TrieNode {
 	char c;
 	boolean isLeaf;
-	HashMap<Character, TrieNode> children = new HashMap<>();
+	HashMap<Character, TrieNode> children;
 	public TrieNode() {
-		
+		children = new HashMap<>();
+		isLeaf = false;
 	}
 	public TrieNode(char c) {
+		children = new HashMap<>();
 		this.c = c;
+		isLeaf = false;
 	}
 }
 public class WordSuggestion {
-	public static TrieNode root;
+	public  TrieNode root;
 	private static double maxMisMatch = 0;
 	private static String letter = "অআইঈউঊঋঌএঐওঔকখগঘঙচছজঝঞটঠডঢণতথদধনপফবভমযরলশষসহড়ঢ়য়";
 	private static double similarLetterWeight = 0.25;
 	private static double firstHalfWeight = 1;
 	private static double secondHalfWeight = 0.5;
 	private static double nonRootLetterWeight = 0.25;
-	public static void insert(String word) {
+	public WordSuggestion() {
+		root = new TrieNode();
+	}
+
+	public  void insert(String word) {
 		HashMap<Character, TrieNode> children = root.children;
 		for(int i=0;i<word.length();i++) {
 			char c = word.charAt(i);
 			TrieNode temp;
 			if(children.containsKey(c)) {
 				temp = children.get(c);
+				temp.isLeaf = false;
 			} else {
 				temp = new TrieNode(c);
 				children.put(c, temp);
 			}
 			children = temp.children;
-			if(i==word.length()-1) {
+			if(i == word.length()-1) {
 				temp.isLeaf = true;
 			}
 		}
 	}
-	public static boolean searchWord(String word) {
+	public  boolean searchWord(String word) {
 		HashMap<Character, TrieNode> children = root.children;
 		for(int i=0;i<word.length();i++) {
 			char c = word.charAt(i);
@@ -65,60 +74,17 @@ public class WordSuggestion {
 	}
 	static Map<String,Double> wordWithDistance;
 	static int cnt;
-	public static void dfs(int curr,String currWord,  String word, double misMatch, TrieNode root) {
+	public  void dfs(HashSet<String> wordCollections,String currWord, TrieNode root) {
 		cnt++;
 		if(root.isLeaf) {
-			String tempWord = currWord+root.c;
-			if(word.length()>curr) {
-				double tempM = 0;
-				if(word.charAt(curr)!=root.c) {
-					tempM = 1;
-				}
-				double total = misMatch+tempM+(word.length()-curr-1);
-				if(total<=maxMisMatch) {
-					if(wordWithDistance.containsKey(tempWord)) {
-						if(total<wordWithDistance.get(tempWord)) {
-							wordWithDistance.put(tempWord, total);
-						}
-					} else {
-						wordWithDistance.put(tempWord, total);
-					}
-					
-				}
-			} else if(misMatch+1<=maxMisMatch) {
-				if(wordWithDistance.containsKey(tempWord)) {
-					if(misMatch+1<wordWithDistance.get(tempWord)) {
-						wordWithDistance.put(tempWord, misMatch+1);
-					}
-				} else {
-					wordWithDistance.put(tempWord, misMatch+1);
-				}
-				
-			}
-			 
-		}
-		if(misMatch>maxMisMatch) {
-			return;
+			wordCollections.add(currWord);
 		}
 		
-		if(word.length()-1 < curr) {
-			for(Map.Entry<Character, TrieNode> entry: root.children.entrySet()) {
-				dfs(curr,currWord+root.c, word, misMatch+1, entry.getValue());
-			}
-			return;
-		}
-		
-		int match=0;
-		if(word.charAt(curr)!=root.c) {
-			match=1;
-		}
 		for(Map.Entry<Character, TrieNode> entry: root.children.entrySet()) {
-			dfs(curr+1,currWord+root.c, word, misMatch+match, entry.getValue());
-			if(match>0) {
-				dfs(curr,currWord+root.c, word, misMatch+match, entry.getValue());
-			}
+			dfs(wordCollections,currWord + entry.getKey(), entry.getValue());
+			
 		}
-		
+		return;
 	}
 	public static void dfsV2(int curr,String currWord,  String word, double misMatch, TrieNode root) {
 		cnt++;
@@ -278,9 +244,9 @@ public class WordSuggestion {
         }
         System.out.println("total word " + cnt);
      }
-	private static void buildTrie() {
-		for(String s: arr) {
-			insert(s);
+	public  void buildTrie(ArrayList<StringBuffer> foundWords) {
+		for(StringBuffer s: foundWords) {
+			insert(s.toString());
 		}
 	}
 

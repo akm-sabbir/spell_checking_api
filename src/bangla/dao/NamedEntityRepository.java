@@ -75,7 +75,7 @@ public class NamedEntityRepository implements Repository{
 		Connection connection = null;
 		ResultSet rs = null;
 		Statement stmt = null;
-		
+//		GlobalDictionaryRepository repo =  GlobalDictionaryRepository.getInstance();
 		String sql = "select ID, content from named_entity where isDeleted=0";
 		try{
 			connection = DBMR.getInstance().getConnection();
@@ -83,6 +83,7 @@ public class NamedEntityRepository implements Repository{
 			rs = stmt.executeQuery(sql);
 			while(rs.next()){
 				this.insert(rs.getLong("ID"), rs.getString("content"));
+				//repo.addToGlobalDictionary(rs.getString("content"), rs.getInt("ID"));
 
 			}				
 		}catch(Exception ex){

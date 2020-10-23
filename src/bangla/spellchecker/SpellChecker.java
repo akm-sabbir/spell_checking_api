@@ -10,6 +10,7 @@ import bangla.WithTrie.*;
 import bangla.WithTrie.KmpStringMatch;
 import bangla.dao.AnnotatedWordRepository;
 import bangla.dao.DictionaryRepository;
+import bangla.dao.GlobalDictionaryRepository;
 import bangla.dao.NamedEntityRepository;
 import bangla.dao.NaturalErrorRepository;
 
@@ -96,6 +97,7 @@ public class SpellChecker {
 					}
 				}
 				
+				
 			}
 			
 			if (BitMasking.extractNthBit( suggested_word.errorType, 1) == 1){
@@ -119,9 +121,24 @@ public class SpellChecker {
 						ex.printStackTrace();
 					}
 				}else {
-				
-					suggested_word.errorType= BitMasking.setBitAt(suggested_word.errorType, 6);
-					suggested_word.errorType= BitMasking.resetBitAt(suggested_word.errorType, 1);
+					if (BitMasking.extractNthBit( suggested_word.errorType, 1) == 1) {
+						if(GlobalDictionaryRepository.getInstance().ahoGlobal.preparedSuffix == 0) {
+							System.out.println("Suffix links have not been prepared yet preparing....");
+							GlobalDictionaryRepository.getInstance().ahoGlobal.PrepareAho();
+							GlobalDictionaryRepository.getInstance().ahoGlobal.preparedSuffix=1;
+						}
+						String ahoResults = GlobalDictionaryRepository.getInstance().ahoGlobal.getInflectedWords(data);
+						if(ahoResults != null) {
+							suggested_word.errorType= BitMasking.setBitAt(suggested_word.errorType, 10);
+							suggested_word.errorType= BitMasking.resetBitAt(suggested_word.errorType, 1);
+							suggested_word.suggestion = getSuggestionList(suggested_word.suggestion);
+							suggested_word.suggestion.add(new Pair(ahoResults,0));
+						}else {
+							suggested_word.errorType= BitMasking.setBitAt(suggested_word.errorType, 6);
+							suggested_word.errorType= BitMasking.resetBitAt(suggested_word.errorType, 1);
+						}
+					}
+					
 					//wordSuggestion.setDictionary(dictionaries.dicWords);
 				}
 				// following piece of code is necessary for querying server

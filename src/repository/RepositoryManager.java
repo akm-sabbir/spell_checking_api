@@ -146,7 +146,7 @@ public class RepositoryManager extends Thread
             	   System.out.println("I am calling update function on dictionary: " + r.getTableName());
             	   r.reload(true);
                }
-               //clearRepository();
+              // clearRepository();// need to be deactivated before server deployment
                shutDown();
                repositoryTableName.clear();
                setSwitchCount();

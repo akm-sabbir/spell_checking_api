@@ -11,4 +11,5 @@ public class ErrorsInBanglaLanguage {
 	public static int nirdeshokChecker = 7;
 	public static int validspacemissingChecker = 8;
 	public static int nospaceNeededChecker = 9;
+	public static int complexOrInflected = 10;
 }
