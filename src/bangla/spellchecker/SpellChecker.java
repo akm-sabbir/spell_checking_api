@@ -121,6 +121,7 @@ public class SpellChecker {
 						ex.printStackTrace();
 					}
 				}else {
+					System.out.println("suggesting words not found in natural error dictionary ");
 					if (BitMasking.extractNthBit( suggested_word.errorType, 1) == 1) {
 						if(GlobalDictionaryRepository.getInstance().ahoGlobal.preparedSuffix == 0) {
 							System.out.println("Suffix links have not been prepared yet preparing....");
@@ -128,14 +129,18 @@ public class SpellChecker {
 							GlobalDictionaryRepository.getInstance().ahoGlobal.preparedSuffix=1;
 						}
 						String ahoResults = GlobalDictionaryRepository.getInstance().ahoGlobal.getInflectedWords(data);
-						if(ahoResults != null && ahoResults.isEmpty()== false) {
-							suggested_word.errorType= BitMasking.setBitAt(suggested_word.errorType, 10);
-							suggested_word.errorType= BitMasking.resetBitAt(suggested_word.errorType, 1);
-							suggested_word.suggestion = getSuggestionList(suggested_word.suggestion);
-							suggested_word.suggestion.add(new Pair(ahoResults,0));
-						}else {
-							suggested_word.errorType= BitMasking.setBitAt(suggested_word.errorType, 6);
-							suggested_word.errorType= BitMasking.resetBitAt(suggested_word.errorType, 1);
+						try {
+							if(ahoResults != null && ahoResults.isEmpty()== false) {
+								suggested_word.errorType= BitMasking.setBitAt(suggested_word.errorType, 10);
+								suggested_word.errorType= BitMasking.resetBitAt(suggested_word.errorType, 1);
+								suggested_word.suggestion = getSuggestionList(suggested_word.suggestion);
+								suggested_word.suggestion.add(new Pair(ahoResults,0));
+							}else {
+								suggested_word.errorType= BitMasking.setBitAt(suggested_word.errorType, 6);
+								suggested_word.errorType= BitMasking.resetBitAt(suggested_word.errorType, 1);
+							}
+						}catch(NullPointerException ex) {
+							System.out.println(ex.getStackTrace());
 						}
 					}
 					

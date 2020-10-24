@@ -190,14 +190,20 @@ public class AhoCoharisck {
 						if(getResult.contains(each.toString())) {
 							finalString.append(each.toString()+ " ");
 							getResult.remove(each.toString());
-							sData.replace(sData.indexOf(each.toString()),each.length(),"");
+							if(sData.indexOf(each.toString())!= -1)
+								sData.replace(sData.indexOf(each.toString()),each.length(),"");
+							else
+								sData.replace(0, sData.length(), "");
 						}
 					}
 				
 				}
 				else if(result.size() == 1) {
 					finalString.append(result.get(0).toString() + " ");
-					sData.replace(sData.indexOf(result.get(0).toString()),result.get(0).length(),"");
+					if(sData.indexOf(result.get(0).toString())!= -1)
+						sData.replace(sData.indexOf(result.get(0).toString()),result.get(0).length(),"");
+					else
+						sData.replace(0, sData.length(), "");
 				}
 				else
 					return null;
