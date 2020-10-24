@@ -55,6 +55,7 @@ public class AhoCoharisck {
 	{
 		Queue<Integer> vertexQueue = new LinkedList<>();
 		vertexQueue.add(root);
+		try {
 		while (vertexQueue.size() > 0){
 			int curVertex = vertexQueue.remove();
 			calcAndBuildSuffix(curVertex);
@@ -63,6 +64,16 @@ public class AhoCoharisck {
 			{
 				vertexQueue.add((int)trie.get(curVertex).children.get(key.getKey()));
 			}
+		}
+		}catch(NullPointerException ex) {
+			System.out.println("This is for null pointer problem");
+			System.out.println(ex.getStackTrace());
+		}catch(ArrayIndexOutOfBoundsException ex) {
+			System.out.println("This is for array index out of boundary problem");
+			System.out.println(ex.getStackTrace());
+		}catch(OutOfMemoryError ex) {
+			System.out.println("This is for Out of memory problem");
+			System.out.println(ex.getStackTrace());
 		}
 	}
 	public void calcAndBuildSuffix(int vertex){
@@ -166,30 +177,40 @@ public class AhoCoharisck {
 		StringBuilder sData = new StringBuilder(data);
 		StringBuffer finalString = new StringBuffer();
 		while(sData.length() > 0) {
-			ArrayList<StringBuffer> result = ProcessString(sData.toString());
-			//		System.out.println(result.size());
-			
-			WordSuggestion wsuggestion = new WordSuggestion();
-			if(result.size()> 1) {
-				wsuggestion.buildTrie(result);
-				HashSet<String> getResult = new HashSet<>();
-				wsuggestion.dfs(getResult, "", wsuggestion.root);
+			ArrayList<StringBuffer> result;
+			try {
+				result = ProcessString(sData.toString());
+				WordSuggestion wsuggestion = new WordSuggestion();
+				if(result.size()> 1) {
+					wsuggestion.buildTrie(result);
+					HashSet<String> getResult = new HashSet<>();
+					wsuggestion.dfs(getResult, "", wsuggestion.root);
 				
-				for(StringBuffer each : result) {
-					if(getResult.contains(each.toString())) {
-						finalString.append(each.toString()+ " ");
-						getResult.remove(each.toString());
-						sData.replace(sData.indexOf(each.toString()),each.length(),"");
+					for(StringBuffer each : result) {
+						if(getResult.contains(each.toString())) {
+							finalString.append(each.toString()+ " ");
+							getResult.remove(each.toString());
+							sData.replace(sData.indexOf(each.toString()),each.length(),"");
+						}
 					}
-				}
 				
+				}
+				else if(result.size() == 1) {
+					finalString.append(result.get(0).toString() + " ");
+					sData.replace(sData.indexOf(result.get(0).toString()),result.get(0).length(),"");
+				}
+				else
+					return null;
+			}catch(NullPointerException ex) {
+				System.out.println("This is for null pointer problem");
+				System.out.println(ex.getStackTrace());
+			}catch(ArrayIndexOutOfBoundsException ex) {
+				System.out.println("This is for array index out of boundary problem");
+				System.out.println(ex.getStackTrace());
+			}catch(OutOfMemoryError ex) {
+				System.out.println("This is for Out of memory problem");
+				System.out.println(ex.getStackTrace());
 			}
-			else if(result.size() == 1) {
-				finalString.append(result.get(0).toString() + " ");
-				sData.replace(sData.indexOf(result.get(0).toString()),result.get(0).length(),"");
-			}
-			else
-				return null;
 		}
 		return finalString.toString().trim();
 	}
@@ -209,7 +230,7 @@ public class AhoCoharisck {
 		ahocoarisck.initiateGlobalDict("নবে", 2);
 		ahocoarisck.initiateGlobalDict("জন্ম", 2);
 		ahocoarisck.initiateGlobalDict("সময়", 2);
-		ahocoarisck.initiateGlobalDict("র", 2);
+		ahocoarisck.initiateGlobalDict("মাসে", 2);
 		ahocoarisck.PrepareAho();
 		//ArrayList<String> result = ahocoarisck.ProcessString("বাহিনীর সকালবেলাছেলেরাপানিতেসাঁতারকাটছিলো");
 		

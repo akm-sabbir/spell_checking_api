@@ -128,7 +128,7 @@ public class SpellChecker {
 							GlobalDictionaryRepository.getInstance().ahoGlobal.preparedSuffix=1;
 						}
 						String ahoResults = GlobalDictionaryRepository.getInstance().ahoGlobal.getInflectedWords(data);
-						if(ahoResults != null) {
+						if(ahoResults != null && ahoResults.isEmpty()== false) {
 							suggested_word.errorType= BitMasking.setBitAt(suggested_word.errorType, 10);
 							suggested_word.errorType= BitMasking.resetBitAt(suggested_word.errorType, 1);
 							suggested_word.suggestion = getSuggestionList(suggested_word.suggestion);
