@@ -86,9 +86,18 @@ public class SubVerbRelErrorChecker implements BanglaGrammerChecker {
 
 				}
 			}
+			SpellCheckingDto verbDto = new SpellCheckingDto();
+			errorType = BitMasking.setBitAt(0, 1);
+			//verbDto.word = verb;
+			verbDto.errorType = BitMasking.setBitAt(errorType, ErrorsInBanglaLanguage.subjectVerbChecker);
+			verbDto.suggestion = new ArrayList<Pair>();
+			
 			for(String word: words) {
 				if(word.equals(subject)) {
 					spellCheckerDtos.add(subjectDto);
+				} else if(word.equals(verb) || word.startsWith(verb)) {
+					verbDto.word = word;
+					spellCheckerDtos.add(verbDto);
 				} else {
 					spellCheckerDtos.add(new SpellCheckingDto());
 				}
