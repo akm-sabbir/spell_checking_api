@@ -32,12 +32,15 @@ public class NaturalErrorRepository implements Repository{
 		root = new DictionaryNaturalError();
 		errorToCorrect = new HashMap();
 		wordSuggestionGenerator = new WordSuggestionV3();
+		
 		if(DictionaryRepository.getInstance().root == null)
 			DictionaryRepository.getInstance().reload(true);
 		if(AnnotatedWordRepository.getInstance().root == null)
 		AnnotatedWordRepository.getInstance().reload(true);
+	
 		if(NamedEntityRepository.getInstance().root==null)
 		NamedEntityRepository.getInstance().reload(true);
+		GlobalDictionaryRepository.getInstance().reload(true);
 		RepositoryManager.getInstance().addRepository(this);
 	}
 	

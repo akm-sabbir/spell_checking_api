@@ -10,6 +10,7 @@ import bangla.WithTrie.*;
 import bangla.WithTrie.KmpStringMatch;
 import bangla.dao.AnnotatedWordRepository;
 import bangla.dao.DictionaryRepository;
+import bangla.dao.GlobalDictionaryRepository;
 import bangla.dao.NamedEntityRepository;
 import bangla.dao.NaturalErrorRepository;
 
@@ -35,6 +36,10 @@ public class SpellChecker {
 			suggested_word.suggestion = new ArrayList<Pair>();
 		Map<String, Integer> wordWithDistance = wordSuggestion.getSuggestedWord(data);
 		for(Map.Entry<String, Integer> entry: wordWithDistance.entrySet()) {
+			if(suggested_word.suggestion.size() !=0) {
+				if(suggested_word.suggestion.get(0).words.contentEquals( entry.getKey()) == false)
+					suggested_word.suggestion.add(new Pair(entry.getKey(), entry.getValue()));
+			}else
 				suggested_word.suggestion.add(new Pair(entry.getKey(), entry.getValue()));
 		}
 		return suggested_word;
@@ -92,6 +97,7 @@ public class SpellChecker {
 					}
 				}
 				
+				
 			}
 			
 			if (BitMasking.extractNthBit( suggested_word.errorType, 1) == 1){
@@ -115,9 +121,29 @@ public class SpellChecker {
 						ex.printStackTrace();
 					}
 				}else {
-				
-					suggested_word.errorType= BitMasking.setBitAt(suggested_word.errorType, 6);
-					suggested_word.errorType= BitMasking.resetBitAt(suggested_word.errorType, 1);
+					System.out.println("suggesting words not found in natural error dictionary ");
+					if (BitMasking.extractNthBit( suggested_word.errorType, 1) == 1) {
+						if(GlobalDictionaryRepository.getInstance().ahoGlobal.preparedSuffix == 0) {
+							System.out.println("Suffix links have not been prepared yet preparing....");
+							GlobalDictionaryRepository.getInstance().ahoGlobal.PrepareAho();
+							GlobalDictionaryRepository.getInstance().ahoGlobal.preparedSuffix=1;
+						}
+						String ahoResults = GlobalDictionaryRepository.getInstance().ahoGlobal.getInflectedWords(data);
+						try {
+							if(ahoResults != null && ahoResults.isEmpty()== false) {
+								suggested_word.errorType= BitMasking.setBitAt(suggested_word.errorType, 10);
+								suggested_word.errorType= BitMasking.resetBitAt(suggested_word.errorType, 1);
+								suggested_word.suggestion = getSuggestionList(suggested_word.suggestion);
+								suggested_word.suggestion.add(new Pair(ahoResults,0));
+							}else {
+								suggested_word.errorType= BitMasking.setBitAt(suggested_word.errorType, 6);
+								suggested_word.errorType= BitMasking.resetBitAt(suggested_word.errorType, 1);
+							}
+						}catch(NullPointerException ex) {
+							System.out.println(ex.getStackTrace());
+						}
+					}
+					
 					//wordSuggestion.setDictionary(dictionaries.dicWords);
 				}
 				// following piece of code is necessary for querying server
