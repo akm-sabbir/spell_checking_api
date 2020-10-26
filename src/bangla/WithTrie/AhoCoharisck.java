@@ -128,15 +128,15 @@ public class AhoCoharisck {
 		else trie.get(vertex).endWordLink = trie.get(trie.get(vertex).suffixLink).endWordLink;
 	}
 	
-	public ArrayList<StringBuffer> ProcessString(String text)
+	public ArrayList<String> ProcessString(String text)
 	{
 		// Current state value
 		int currentState = root;
 
 		// Targeted result value
-		ArrayList<StringBuffer> result = new ArrayList<>();
+		ArrayList<String> result = new ArrayList<>();
 		int matching = 0;
-		
+		StringBuilder strResult = new StringBuilder();
 		for (int j = 0; j < text.length(); j++)
 		{
 			
@@ -149,6 +149,7 @@ public class AhoCoharisck {
 					break;
 				if (trie.get(currentState).children.containsKey(text.charAt(j))){
 					matching = 1;
+					strResult.append(text.charAt(j));
 					currentState = (int)trie.get(currentState).children.get(text.charAt(j));
 					break;
 				}
@@ -166,7 +167,8 @@ public class AhoCoharisck {
 				result.get(result.size()-1).append(text.charAt(j));
 			}*/
 			if(trie.get(currentState).leaf == true) {
-				result.add(new StringBuffer(text.substring(j - (trie.get(currentState).wordLength- 1), j + 1)));
+				//result.add(new StringBuffer(text.substring(j - (trie.get(currentState).wordLength- 1), j + 1)));
+				result.add(new String(strResult.toString()));
 			}
 			// Trying to find all possible words from this prefix
 		}
@@ -176,8 +178,9 @@ public class AhoCoharisck {
 	public String getInflectedWords(String data) {
 		StringBuilder sData = new StringBuilder(data);
 		StringBuffer finalString = new StringBuffer();
-		while(sData.length() > 0) {
-			ArrayList<StringBuffer> result;
+		while(sData.toString().trim().length() > 0) {
+			ArrayList<String> result;
+			System.out.println(sData);
 			try {
 				result = ProcessString(sData.toString());
 				WordSuggestion wsuggestion = new WordSuggestion();
@@ -186,36 +189,51 @@ public class AhoCoharisck {
 					HashSet<String> getResult = new HashSet<>();
 					wsuggestion.dfs(getResult, "", wsuggestion.root);
 				
-					for(StringBuffer each : result) {
+					for(String each : result) {
+						System.out.println("each in result: " + each);
 						if(getResult.contains(each.toString())) {
 							finalString.append(each.toString()+ " ");
 							getResult.remove(each.toString());
-							if(sData.indexOf(each.toString())!= -1)
-								sData.replace(sData.indexOf(each.toString()),each.length(),"");
+							int startIndex = sData.indexOf(each.toString());
+							if(startIndex != -1)
+								sData.replace(startIndex , startIndex + each.length() <= sData.length() ? startIndex + each.length() : sData.length(), " ");
 							else
-								sData.replace(0, sData.length(), "");
+								sData.replace(0, sData.length(), " ");
 						}
 					}
 				
 				}
 				else if(result.size() == 1) {
+					System.out.println("Single word: " + result.get(0));
 					finalString.append(result.get(0).toString() + " ");
-					if(sData.indexOf(result.get(0).toString())!= -1)
-						sData.replace(sData.indexOf(result.get(0).toString()),result.get(0).length(),"");
+					int startIndex = sData.indexOf(result.get(0).toString());
+					if(startIndex!= -1)
+						sData.replace(startIndex, startIndex + result.get(0).length() <= sData.length() ? startIndex + result.get(0).length() : sData.length(), " ");
 					else
-						sData.replace(0, sData.length(), "");
+						sData.replace(0, sData.length(), " ");
 				}
 				else
-					return null;
+					break;
 			}catch(NullPointerException ex) {
 				System.out.println("This is for null pointer problem");
+				System.out.println(ex.getMessage());
 				System.out.println(ex.getStackTrace());
+				break;
 			}catch(ArrayIndexOutOfBoundsException ex) {
 				System.out.println("This is for array index out of boundary problem");
+				System.out.println(ex.getMessage());
 				System.out.println(ex.getStackTrace());
+				break;
 			}catch(OutOfMemoryError ex) {
 				System.out.println("This is for Out of memory problem");
+				System.out.println(ex.getMessage());
 				System.out.println(ex.getStackTrace());
+				break;
+			}catch(StringIndexOutOfBoundsException ex) {
+				System.out.println("This exception is for String index out of problem source text");
+				System.out.println(ex.getMessage());
+				System.out.println(ex.getStackTrace());
+				break;
 			}
 		}
 		return finalString.toString().trim();
@@ -240,6 +258,6 @@ public class AhoCoharisck {
 		ahocoarisck.PrepareAho();
 		//ArrayList<String> result = ahocoarisck.ProcessString("বাহিনীর সকালবেলাছেলেরাপানিতেসাঁতারকাটছিলো");
 		
-		System.out.println(ahocoarisck.getInflectedWords("জন্মনিবে").toString().trim());
+		System.out.println(ahocoarisck.getInflectedWords("সংগঠেনের").toString().trim());
 	}
 }
