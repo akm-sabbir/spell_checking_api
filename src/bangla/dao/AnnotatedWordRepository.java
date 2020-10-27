@@ -5,6 +5,7 @@ package bangla.dao;
 import org.apache.log4j.Logger;
 
 import bangla.WithTrie.TrieNodeWithList;
+import bangla.grammarchecker.NirdeshokErrorChecker;
 import bangla.grammarchecker.NoSpaceBetweenWordsChecker;
 import bangla.grammarchecker.SpaceErrorBetweenWordsChecker;
 import dbm.DBMR;
@@ -93,7 +94,7 @@ public class AnnotatedWordRepository implements Repository{
 		}
 		NoSpaceBetweenWordsChecker.registerDictionary(root.dict);
 		SpaceErrorBetweenWordsChecker.registerDictionary(root.dict);
-		
+		NirdeshokErrorChecker.registerDictionary(root.dict);
 	}
 	
 

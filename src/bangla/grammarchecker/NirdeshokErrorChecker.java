@@ -6,6 +6,7 @@ import java.util.List;
 
 import bangla.ErrorsInBanglaLanguage;
 import bangla.WithTrie.BitMasking;
+import bangla.WithTrie.TrieNodeWithList;
 import bangla.spellchecker.Pair;
 import bangla.spellchecker.SpellCheckingDto;
 
@@ -13,7 +14,7 @@ public class NirdeshokErrorChecker implements BanglaGrammerChecker {
 	static List<String> nirdeshok = Arrays.asList("টার", "টাকে", "টির", "টিকে", "টুকুর", "টুকুকে", "খানার", "খানাকে",
 			"খানির", "জনকে", "গুলির", "গুলিকে", "গুলার", "গুলাকে", "গুলোর", "গুলোকে", "টা", "টে", "টো", "টি", "টু",
 			"টুকু", "টুকুন", "টাক", "খানা", "খানি", "গাছা", "গাছি", "জন", "থান", "পাটি", "গুলি", "গুলা", "গুলো");
-
+	static List<TrieNodeWithList> dictionaries = new ArrayList<>();
 	public List<SpellCheckingDto> hasError(List<String> words) {
 		List<SpellCheckingDto> spellCheckerDtos = new ArrayList<>();
 		for (int i = 0; i < words.size() - 1; i++) {
@@ -58,10 +59,20 @@ public class NirdeshokErrorChecker implements BanglaGrammerChecker {
 
 	private static String getNirdeshokWord(String word) {
 		for (String each_nirdeshok : nirdeshok) {
-			if (word.endsWith(each_nirdeshok)) {
+			if (word.endsWith(each_nirdeshok) && isValidWord(word.substring(0, word.length() - each_nirdeshok.length()))) {
 				return word.substring(0, word.length() - each_nirdeshok.length());
 			}
 		}
 		return "";
+	}
+	public static void registerDictionary(TrieNodeWithList dictionary) {
+		dictionaries.add(dictionary);
+	}
+	public static boolean isValidWord(String word) {
+		for(TrieNodeWithList dictionary : dictionaries) {
+			if(dictionary.searchWord(word).isFound)
+				return true;
+		}
+		return false;
 	}
 }
