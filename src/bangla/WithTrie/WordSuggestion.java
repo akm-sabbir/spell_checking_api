@@ -244,8 +244,8 @@ public class WordSuggestion {
         }
         System.out.println("total word " + cnt);
      }
-	public  void buildTrie(ArrayList<StringBuffer> foundWords) {
-		for(StringBuffer s: foundWords) {
+	public  void buildTrie(ArrayList<String> foundWords) {
+		for(String s: foundWords) {
 			insert(s.toString());
 		}
 	}
