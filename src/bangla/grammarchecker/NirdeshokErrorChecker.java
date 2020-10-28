@@ -7,19 +7,18 @@ import java.util.List;
 import bangla.ErrorsInBanglaLanguage;
 import bangla.WithTrie.BitMasking;
 import bangla.WithTrie.TrieNodeWithList;
+import bangla.dao.GrammarDto;
 import bangla.spellchecker.Pair;
 import bangla.spellchecker.SpellCheckingDto;
 
 public class NirdeshokErrorChecker implements BanglaGrammerChecker {
-	static List<String> nirdeshok = Arrays.asList("টার", "টাকে", "টির", "টিকে", "টুকুর", "টুকুকে", "খানার", "খানাকে",
-			"খানির", "জনকে", "গুলির", "গুলিকে", "গুলার", "গুলাকে", "গুলোর", "গুলোকে", "টা", "টে", "টো", "টি", "টু",
-			"টুকু", "টুকুন", "টাক", "খানা", "খানি", "গাছা", "গাছি", "জন", "থান", "পাটি", "গুলি", "গুলা", "গুলো");
+	static List<String> nirdeshok = new ArrayList<>();
 	static List<TrieNodeWithList> dictionaries = new ArrayList<>();
 	public List<SpellCheckingDto> hasError(List<String> words) {
 		List<SpellCheckingDto> spellCheckerDtos = new ArrayList<>();
 		for (int i = 0; i < words.size() - 1; i++) {
 
-			if ((!words.get(i).equals("এই")) && (!words.get(i).equals("ঐ"))) {
+			if ((!words.get(i).equals("ওই")) && (!words.get(i).equals("এই")) && (!words.get(i).equals("ঐ"))) {
 				spellCheckerDtos.add(new SpellCheckingDto());
 				continue;
 			}
@@ -27,13 +26,10 @@ public class NirdeshokErrorChecker implements BanglaGrammerChecker {
 			if (!str.equals("")) {
 				SpellCheckingDto dto = new SpellCheckingDto();
 				int errorType = BitMasking.setBitAt(0, 1);
-				dto.word = words.get(i+1);
+				dto.word = words.get(i);
 				dto.errorType = BitMasking.setBitAt(errorType, ErrorsInBanglaLanguage.nirdeshokChecker);
 				dto.suggestion = new ArrayList<Pair>();
-				dto.suggestion.add(new Pair(str,-1));
-				spellCheckerDtos.add(new SpellCheckingDto());
 				spellCheckerDtos.add(dto);
-				i++;
 				continue;
 			}
 			if (i + 2 >= words.size())
@@ -42,14 +38,10 @@ public class NirdeshokErrorChecker implements BanglaGrammerChecker {
 			if (!str.equals("")) {
 				SpellCheckingDto dto = new SpellCheckingDto();
 				int errorType = BitMasking.setBitAt(0, 1);
-				dto.word = words.get(i+2);
+				dto.word = words.get(i);
 				dto.errorType = BitMasking.setBitAt(errorType, ErrorsInBanglaLanguage.nirdeshokChecker);
 				dto.suggestion = new ArrayList<Pair>();
-				dto.suggestion.add(new Pair(str,-1));
-				spellCheckerDtos.add(new SpellCheckingDto());
-				spellCheckerDtos.add(new SpellCheckingDto());
 				spellCheckerDtos.add(dto);
-				i+=2;
 				continue;
 			}
 			spellCheckerDtos.add(new SpellCheckingDto());
@@ -64,6 +56,11 @@ public class NirdeshokErrorChecker implements BanglaGrammerChecker {
 			}
 		}
 		return "";
+	}
+	public static void loadNirdeshok(List<GrammarDto> nirdeshokList) {
+		for(GrammarDto dto: nirdeshokList) {
+			nirdeshok.add(dto.marker);
+		}
 	}
 	public static void registerDictionary(TrieNodeWithList dictionary) {
 		dictionaries.add(dictionary);
