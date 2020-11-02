@@ -1,0 +1,11 @@
+select menuid from menu where constantName = 'SPELL_CHECKER_LOG';
+select menuid from menu where constantName = 'SPELL_CHECKER_LOG_ADD';
+select menuid from menu where constantName = 'SPELL_CHECKER_LOG_UPDATE';
+select menuid from menu where constantName = 'SPELL_CHECKER_LOG_SEARCH';
+select menuid from menu where constantName = 'SPELL_CHECKER_LOG_UPLOAD';
+select menuid from menu where constantName = 'SPELL_CHECKER_LOG_APPROVE';
+INSERT INTO `menu` (`menuID`, `parentMenuID`, `menuName`, `menuNameBangla`, `languageTextID`, `orderIndex`, `selectedMenuID`, `isVisible`, `requestMethodType`, `hyperLink`, `icon`, `isAPI`, `constantName`)  VALUES ('257300','-1','SPELL CHECKER LOG','????? ??????? ??????????? ????','-1','1','-1','1','1','','fa fa-arrows','0','SPELL_CHECKER_LOG');
+INSERT INTO menu_permission VALUES(1, 257300);
+INSERT INTO menu_permission VALUES(1, 257301);
+INSERT INTO menu_permission VALUES(1, 257302);
+INSERT INTO menu_permission VALUES(1, 257303);

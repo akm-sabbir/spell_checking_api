@@ -3,6 +3,9 @@ package bangla.WithTrie;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import bangla.grammarchecker.GrammarCheckerConstant;
 
 public class TrieNodeWithList implements Comparable<TrieNodeWithList> {
 	public char c;
@@ -13,6 +16,7 @@ public class TrieNodeWithList implements Comparable<TrieNodeWithList> {
 	public long reference_id;
 	public String viceVersaWord;
 	public TrieNodeWithList parent;
+	public int namedEntityCategory = 0;
 	public int freq;
 	/*following are the new attributes require for aho-coarisck algorithm*/
 	public HashMap<String, Integer> child = new HashMap<String, Integer>();            
@@ -60,7 +64,7 @@ public class TrieNodeWithList implements Comparable<TrieNodeWithList> {
 	public TrieNodeWithList getParent() {
 		return parent;
 	}
-
+	
 	public List<TrieNodeWithList> getChildren() {
 		return children;
 	}
@@ -97,15 +101,25 @@ public class TrieNodeWithList implements Comparable<TrieNodeWithList> {
 			if (temp != null && temp.isWord && isAllowPartialMatch) {
 				lastMatch = i;
 			}
-			if (!isFound)
-				return new TrieNodeSearchResult((lastMatch == -1) ? false : true, null, lastMatch);
+			if (!isFound) {
+				Map<String,String> additional = new HashMap<>();
+				additional.put(GrammarCheckerConstant.NAMED_ENTITY_CATEGORY, "0");
+				return new TrieNodeSearchResult((lastMatch == -1) ? false : true, null, lastMatch, additional);
+			}
+				
 			child = temp.children;
 			if (i == word.length() - 1) {
-				if (temp.isWord)
-					return new TrieNodeSearchResult(true, temp.viceVersaWord, word.length() - 1);
+				if (temp.isWord) {
+					Map<String,String> additional = new HashMap<>();
+					additional.put(GrammarCheckerConstant.NAMED_ENTITY_CATEGORY, String.valueOf(temp.namedEntityCategory));
+					return new TrieNodeSearchResult(true, temp.viceVersaWord, word.length() - 1, additional);
+				}
+					
 			}
 		}
-		return new TrieNodeSearchResult((lastMatch == -1) ? false : true, null, lastMatch);
+		Map<String,String> additional = new HashMap<>();
+		additional.put(GrammarCheckerConstant.NAMED_ENTITY_CATEGORY, "0");
+		return new TrieNodeSearchResult((lastMatch == -1) ? false : true, null, lastMatch, additional);
 	}
 
 	public void insert(String word) {
