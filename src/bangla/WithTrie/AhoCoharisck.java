@@ -192,7 +192,7 @@ public class AhoCoharisck {
 					for(String each : result) {
 						System.out.println("each in result: " + each);
 						if(getResult.contains(each.toString())) {
-							finalString.append(each.toString()+ " ");
+							finalString.append(each.toString());
 							getResult.remove(each.toString());
 							int startIndex = sData.indexOf(each.toString());
 							if(startIndex != -1)
@@ -205,7 +205,7 @@ public class AhoCoharisck {
 				}
 				else if(result.size() == 1) {
 					System.out.println("Single word: " + result.get(0));
-					finalString.append(result.get(0).toString() + " ");
+					finalString.append(result.get(0).toString());
 					int startIndex = sData.indexOf(result.get(0).toString());
 					if(startIndex!= -1)
 						sData.replace(startIndex, startIndex + result.get(0).length() <= sData.length() ? startIndex + result.get(0).length() : sData.length(), " ");

@@ -48,9 +48,8 @@ public class SpellAndGrammarChecker {
 	TextNormalization textNormalizer = new TextNormalization();
 	private SpellChecker spellChecker = new SpellChecker();
 	private SentenceTokenizer sentenceTokenizer = new SentenceTokenizer();
-    private Gson gson = new Gson();
 
-	public String check(String text_data, int option) {
+	public HashMap<Integer, SpellCheckingDto> check(String text_data, int option) {
 		
 		
 		logger.info("Recieved a request to process: " );
@@ -92,8 +91,7 @@ public class SpellAndGrammarChecker {
 			logger.fatal(ex);
 		}
 		//gson formitting should be done explicityly
-		String final_result = this.gson.toJson(result_list);
 		
-		return final_result;
+		return result_list;
 	}
 }

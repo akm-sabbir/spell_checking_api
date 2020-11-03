@@ -63,7 +63,7 @@ public class SpellChecker {
 		return suggestion;
 	}
 	public SpellCheckingDto getProcessedMap(SpellCheckingDto suggested_word, String data, Map<Integer, SpellCheckingDto> result_list, Map<String,Integer> tracker,
-		 Map<Integer, TrieNodeWithList> table_query){
+		 Map<Integer, TrieNodeWithList> table_query, SpellCheckingDto unKnownCounter){
 		WordSuggestionV3 wordSuggestion = new WordSuggestionV3();
 		//String data = normalizeText(data_);
 		System.out.println("After normalization the string data is");
@@ -128,7 +128,7 @@ public class SpellChecker {
 							GlobalDictionaryRepository.getInstance().ahoGlobal.PrepareAho();
 							GlobalDictionaryRepository.getInstance().ahoGlobal.preparedSuffix=1;
 						}
-						String ahoResults = GlobalDictionaryRepository.getInstance().ahoGlobal.getInflectedWords(data);
+						String ahoResults = "";//GlobalDictionaryRepository.getInstance().ahoGlobal.getInflectedWords(data);
 						try {
 							if(ahoResults != null && ahoResults.isEmpty()== false) {
 								suggested_word.errorType= BitMasking.setBitAt(suggested_word.errorType, 10);
@@ -138,6 +138,7 @@ public class SpellChecker {
 							}else {
 								suggested_word.errorType= BitMasking.setBitAt(suggested_word.errorType, 6);
 								suggested_word.errorType= BitMasking.resetBitAt(suggested_word.errorType, 1);
+								unKnownCounter.sequence += 1;
 							}
 						}catch(NullPointerException ex) {
 							System.out.println(ex.getStackTrace());
@@ -169,6 +170,7 @@ public class SpellChecker {
 		HashMap<Integer, SpellCheckingDto> result_list = new HashMap<>();
 		HashMap<String, Integer> tracker = new HashMap<String, Integer>();
 		HashMap<Integer, TrieNodeWithList> table_query = new HashMap<>();
+		SpellCheckingDto unKnownCounter = new SpellCheckingDto();
 		String data;
 		int key;
 		
@@ -179,14 +181,14 @@ public class SpellChecker {
 			SpellCheckingDto suggested_word = new SpellCheckingDto();
 			suggested_word.word = data;
 			suggested_word.sequence = 0;
-			suggested_word = getProcessedMap(suggested_word, data, result_list, tracker, table_query);
+			suggested_word = getProcessedMap(suggested_word, data, result_list, tracker, table_query, unKnownCounter);
 			result_list.put(key, suggested_word);
 			tracker.put(data, key);
 			suggested_word.startIndex = KmpStringMatch.KMPSearch(data, text_data);
 			suggested_word.length =  data.length();
 		
 		}
-		
+		result_list.put(2147483647, unKnownCounter);
 		return  result_list;
 	}
 

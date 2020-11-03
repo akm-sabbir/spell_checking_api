@@ -2,6 +2,8 @@ package word_content;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -20,17 +22,21 @@ import javax.servlet.http.Part;
 import javax.servlet.*;
 import org.apache.log4j.Logger;
 
+import com.google.gson.Gson;
+
 import bangla.dao.AnnotatedWordRepository;
 import bangla.dao.DictionaryRepository;
 import bangla.dao.GlobalDictionaryRepository;
 import bangla.dao.GradedPronoun;
 import bangla.dao.NamedEntityRepository;
 import bangla.dao.NaturalErrorRepository;
-import bangla.dao.NirdeshokRepository;
 import bangla.dao.SadhuCholitMixture;
 import bangla.dao.SubjectVerbRepository;
 import bangla.grammarchecker.GrammerCheckerFactory;
+import bangla.spellchecker.SpellCheckingDto;
 import repository.RepositoryManager;
+import spell_checker_log.Spell_checker_logDAO;
+import spell_checker_log.Spell_checker_logDTO;
 
 /**
  * Servlet implementation class Word_contentServlet
@@ -40,7 +46,9 @@ import repository.RepositoryManager;
 public class Word_contentServlet extends HttpServlet 
 {
 	private static final long serialVersionUID = 1L;
+	private Gson gson = new Gson();
     public static Logger logger = Logger.getLogger(Word_contentServlet.class);
+	//private Object gson;
    	
     /**
      * @see HttpServlet#HttpServlet()
@@ -73,7 +81,6 @@ public class Word_contentServlet extends HttpServlet
     	RepositoryManager.getInstance().addRepository(SubjectVerbRepository.getInstance(),true);
     	RepositoryManager.getInstance().addRepository(SadhuCholitMixture.getInstance(),true);
     	RepositoryManager.getInstance().addRepository(GlobalDictionaryRepository.getInstance(), true);
-    	RepositoryManager.getInstance().addRepository(NirdeshokRepository.getInstance(), true);
     	return;
     }
 		
@@ -85,6 +92,8 @@ public class Word_contentServlet extends HttpServlet
 		//System.out.println(" calling the doPost operation");
 		String URL = "word_content/word_contentInPlaceEdit.jsp";
 		logger.info("Recieved a request to process: " );
+		Spell_checker_logDTO spell_checking_dto = new Spell_checker_logDTO();
+		spell_checking_dto.time = System.currentTimeMillis();
 		String text_data = request.getParameter("content");
 		//String permission = request.getParameter("PermissionToStoreData");
 		String service = request.getParameter("Service");
@@ -93,7 +102,7 @@ public class Word_contentServlet extends HttpServlet
 			response.sendError(400, "could not understand input request text is either empty or noninterpretable");
 			return;
 		}
-		String results= null;
+		HashMap<Integer, SpellCheckingDto> results= null;
 		if(service.toLowerCase().equals("spellandgrammarchecking")) {
 			bangla.SpellAndGrammarChecker spgChecker = new bangla.SpellAndGrammarChecker();
 			results = spgChecker.check(text_data,3);
@@ -105,14 +114,40 @@ public class Word_contentServlet extends HttpServlet
 			response.sendError(400, "could not understand input request text is either empty or noninterpretable");
 			return;
 		}
+		String final_result = this.gson.toJson(results);
+		// the following lines for IP address.
+		String ipAddress = request.getHeader("X-FORWARDED-FOR");  
+		if (ipAddress == null) {  
+		    ipAddress = request.getRemoteAddr();  
+		}
+		System.out.println(ipAddress);
+		spell_checking_dto.ip = 0;  
+		for (byte b: InetAddress.getByName(request.getRemoteAddr()).getAddress())  
+		{  
+			spell_checking_dto.ip = spell_checking_dto.ip << 8 | (b & 0xFF);  
+		}
+		spell_checking_dto.content = text_data;
+		spell_checking_dto.response = final_result;
+		spell_checking_dto.session = request.getSession().toString();
+		spell_checking_dto.clientCat = 1;
+		spell_checking_dto.unknownWordCount = results.get(2147483647).sequence;
+		results.remove(2147483647);
+		Spell_checker_logDAO spell_dao = new Spell_checker_logDAO();
 		
+		try {
+			spell_dao.add(spell_checking_dto);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		}
 		PrintWriter out = response.getWriter();
 		response.setContentType("application/json;charset=UTF-8");
 		//response.setCharacterEncoding("UTF-8");
 		response.setHeader("Access-Control-Allow-Origin", "*");
 		response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
 		logger.debug("End of request processing: " );
-		out.print(results);
+		out.print(final_result);
 		out.flush();
 		
 	}
