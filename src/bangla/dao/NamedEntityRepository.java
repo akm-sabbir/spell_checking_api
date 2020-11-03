@@ -65,7 +65,6 @@ public class NamedEntityRepository implements Repository{
 				temp.createTime = System.currentTimeMillis();
 				this.root.inverseDict.put(ID, word);
 				temp.namedEntityCategory = category;
-			
 			}
 			recurseRoot = temp;
 		}
@@ -96,6 +95,7 @@ public class NamedEntityRepository implements Repository{
 		SpaceErrorBetweenWordsChecker.registerDictionary(root.dict);
 		SubVerbRelErrorChecker.addNamedEntity(root.dict);
 		NirdeshokErrorChecker.registerDictionary(root.dict);
+
 	}
 	
 

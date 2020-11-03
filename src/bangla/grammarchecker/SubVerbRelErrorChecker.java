@@ -14,7 +14,6 @@ import bangla.ErrorsInBanglaLanguage;
 import bangla.WithTrie.BitMasking;
 import bangla.WithTrie.TrieNodeWithList;
 import bangla.dao.GrammarDto;
-import bangla.dao.NamedEntityRepository;
 import bangla.preprocessingUnit.*;
 import bangla.spellchecker.Pair;
 import bangla.spellchecker.SpellCheckingDto;
@@ -23,8 +22,9 @@ import bangla.tokenizer.WordTokenizer;
 public class SubVerbRelErrorChecker implements BanglaGrammerChecker {
 	private static Logger logger = LogManager.getLogger(SubVerbRelErrorChecker.class);
 	private static final String notFound = "NotFound";
-	private static final List<String> organismSubjects = Arrays.asList("সে","এরা","ও","এই");
-	private static final List<String> uttomPurush = Arrays.asList("আমি", "আমরা", "আমাকে", "আমার", "আমাদের", "মোর", "মোরা");
+	private static final List<String> organismSubjects = Arrays.asList("সে", "এরা", "ও", "এই");
+	private static final List<String> uttomPurush = Arrays.asList("আমি", "আমরা", "আমাকে", "আমার", "আমাদের", "মোর",
+			"মোরা");
 	private static final List<String> priority1 = Arrays.asList("তোরা", "উনারা", "তাহারা", "আমি", "আমরা", "মোরা",
 			"তুমি", "তোমরা", "তোমাদের", "সে", "তারা", "আপনি", "আপনারা", "তিনি", "তিঁনি", "তারা", "ইনি", "এরা", "উনি",
 			"ওরা");
@@ -45,30 +45,26 @@ public class SubVerbRelErrorChecker implements BanglaGrammerChecker {
 			return getDtosWithoutError(words.size());
 		}
 		String subject = findSubject(words);
-        if(subject.equals(notFound)) {
-        	subject = findSubjectFromNamedEntity(words);
-        	if(!subject.equals(notFound))
-        		namedEntityType = getNamedEntityCategory(subject);
-        }
-		
-		
+		if (subject.equals(notFound)) {
+			subject = findSubjectFromNamedEntity(words);
+			if (!subject.equals(notFound))
+				namedEntityType = getNamedEntityCategory(subject);
+		}
 		String verb = findVerb(words);
-		
-		System.out.println("subject is "  +  subject);
-		
+
 		if (subject.equals(notFound) || verb.equals(notFound)) {
 			return getDtosWithoutError(words.size());
 		}
-		
 		if (!isSubjectVerbConflict(subject, verb, namedEntityType)) {
 			return getDtosWithoutError(words.size());
 		} else {
-			
+
 			SpellCheckingDto subjectDto = new SpellCheckingDto();
 			int errorType = BitMasking.setBitAt(0, 1);
 			subjectDto.word = subject;
 			subjectDto.errorType = BitMasking.setBitAt(errorType, ErrorsInBanglaLanguage.subjectVerbChecker);
 			subjectDto.suggestion = new ArrayList<Pair>();
+
 			List<String> alternativ_subjects = getSuggestedSubject(verb);
 			int indicator = 0;
 			if (sadhuCholitMap.containsKey(verb)) {
@@ -88,30 +84,32 @@ public class SubVerbRelErrorChecker implements BanglaGrammerChecker {
 			}
 			SpellCheckingDto verbDto = new SpellCheckingDto();
 			errorType = BitMasking.setBitAt(0, 1);
-			//verbDto.word = verb;
+			// verbDto.word = verb;
 			verbDto.errorType = BitMasking.setBitAt(errorType, ErrorsInBanglaLanguage.subjectVerbChecker);
 			verbDto.suggestion = new ArrayList<Pair>();
-			
-			for(String word: words) {
-				if(word.equals(subject)) {
+
+			for (String word : words) {
+				if (word.equals(subject)) {
 					spellCheckerDtos.add(subjectDto);
-				} else if(word.equals(verb) || word.startsWith(verb)) {
+				} else if (word.equals(verb) || word.startsWith(verb)) {
 					verbDto.word = word;
 					spellCheckerDtos.add(verbDto);
 				} else {
 					spellCheckerDtos.add(new SpellCheckingDto());
 				}
 			}
-			
+
 			return spellCheckerDtos;
 		}
 	}
-	
+
 	private List<SpellCheckingDto> getDtosWithoutError(int numberOfWords) {
 		List<SpellCheckingDto> spellCheckerDtos = new ArrayList<>();
-		for(int i=0;i<numberOfWords;i++) spellCheckerDtos.add(new SpellCheckingDto());
+		for (int i = 0; i < numberOfWords; i++)
+			spellCheckerDtos.add(new SpellCheckingDto());
 		return spellCheckerDtos;
 	}
+
 	private static List<String> getSuggestedSubject(String verb) {
 		int index = verbIndex.get(verb);
 		if (subVerbMatrix.get(index).size() > 0)
@@ -120,17 +118,18 @@ public class SubVerbRelErrorChecker implements BanglaGrammerChecker {
 	}
 
 	private static boolean isSubjectVerbConflict(String subject, String verb, int namedEntityType) {
-		if(!verbIndex.containsKey(verb)) return false;
+		if (!verbIndex.containsKey(verb))
+			return false;
 		int index = verbIndex.get(verb);
-		if (namedEntityType==0) {
+		if (namedEntityType == 0) {
 			if (!subVerbMatrix.get(index).contains(subject)) {
 				return true;
 			}
-		} else if(namedEntityType==3) { // for organism (animals)
+		} else if (namedEntityType == 3) { // for organism (animals)
 			if (Collections.disjoint(subVerbMatrix.get(index), organismSubjects)) {
 				return true;
 			}
-		} else if(namedEntityType==5) { // for person name
+		} else if (namedEntityType == 5) { // for person name
 			if (!Collections.disjoint(subVerbMatrix.get(index), uttomPurush)) {
 				return true;
 			}
@@ -160,23 +159,6 @@ public class SubVerbRelErrorChecker implements BanglaGrammerChecker {
 		return allSubject.get(0);
 
 	}
-	private static String findSubjectFromNamedEntity(List<String> words) {
-		List<String> allSubject = new ArrayList<>();
-		for (String word : words) {
-			if(isNamedEntity(word)) {
-				int cat = getNamedEntityCategory(word);
-				if(cat==3 || cat==5) {
-					allSubject.add(word);
-				}
-				
-			}
-		}
-		if (allSubject.size() == 0) {
-			return notFound;
-		}
-		return allSubject.get(0);
-
-	}
 
 	private static String findVerb(List<String> words) {
 		String verb = notFound;
@@ -200,9 +182,10 @@ public class SubVerbRelErrorChecker implements BanglaGrammerChecker {
 	}
 
 	private static String removeIfNeg(String word) {
-		if(word.endsWith(NA) || word.endsWith(NI))
-			return word.substring(0, word.length()-2);
-		else return word;
+		if (word.endsWith(NA) || word.endsWith(NI))
+			return word.substring(0, word.length() - 2);
+		else
+			return word;
 	}
 
 	public static void setPurushMap(List<GrammarDto> rows) {
@@ -224,18 +207,6 @@ public class SubVerbRelErrorChecker implements BanglaGrammerChecker {
 			}
 		}
 	}
-	
-	public static void addNamedEntity(TrieNodeWithList dictionary) {
-		namedEntity = dictionary;
-	}
-	private static boolean isNamedEntity(String word) {
-		return namedEntity.searchWord(word).isFound;
-	}
-	private static int getNamedEntityCategory(String word) {
-		Map<String,String> additional = namedEntity.searchWord(word).additional;
-		int category = (additional.containsKey(GrammarCheckerConstant.NAMED_ENTITY_CATEGORY) ? Integer.valueOf(additional.get(GrammarCheckerConstant.NAMED_ENTITY_CATEGORY)) : 0);
-		return category;
-	}
 
 	public static void buildSubVerbMap(List<ArrayList<String>> subVerbMap) {
 		int index = 0;
@@ -251,7 +222,7 @@ public class SubVerbRelErrorChecker implements BanglaGrammerChecker {
 				verbIndex.put(mixed.get(0), index);
 				subVerbMatrix.add(new ArrayList<>());
 				for (String subject : subjects) {
-					if(subVerbMatrix.get(index).contains(subject) ==false)
+					if (subVerbMatrix.get(index).contains(subject) == false)
 						subVerbMatrix.get(index).add(subject);
 				}
 				index++;
@@ -261,7 +232,7 @@ public class SubVerbRelErrorChecker implements BanglaGrammerChecker {
 				verbIndex.put(mixed.get(1), index);
 				subVerbMatrix.add(new ArrayList<>());
 				for (String subject : subjects) {
-					if(subVerbMatrix.get(index).contains(subject) ==false)
+					if (subVerbMatrix.get(index).contains(subject) == false)
 						subVerbMatrix.get(index).add(subject);
 				}
 				index++;
@@ -269,11 +240,45 @@ public class SubVerbRelErrorChecker implements BanglaGrammerChecker {
 		}
 	}
 
+	public static void addNamedEntity(TrieNodeWithList dictionary) {
+		namedEntity = dictionary;
+	}
+
+	private static boolean isNamedEntity(String word) {
+		return namedEntity.searchWord(word).isFound;
+	}
+
+	private static int getNamedEntityCategory(String word) {
+		Map<String, String> additional = namedEntity.searchWord(word).additional;
+		int category = (additional.containsKey(GrammarCheckerConstant.NAMED_ENTITY_CATEGORY)
+				? Integer.valueOf(additional.get(GrammarCheckerConstant.NAMED_ENTITY_CATEGORY))
+				: 0);
+		return category;
+	}
+
 	private static List<String> getAllSubjects(String subjects) {
 		if (subjects == null || subjects.length() == 0)
 			return new ArrayList<>();
 		List<String> ret = Arrays.asList(subjects.split(","));
 		return ret;
+	}
+
+	private static String findSubjectFromNamedEntity(List<String> words) {
+		List<String> allSubject = new ArrayList<>();
+		for (String word : words) {
+			if (isNamedEntity(word)) {
+				int cat = getNamedEntityCategory(word);
+				if (cat == 3 || cat == 5) {
+					allSubject.add(word);
+				}
+
+			}
+		}
+		if (allSubject.size() == 0) {
+			return notFound;
+		}
+		return allSubject.get(0);
+
 	}
 
 	public static boolean isVerb(String word) {

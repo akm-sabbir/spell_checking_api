@@ -5,6 +5,8 @@ public class CommonDTO {
 	public int isDeleted = 0;
 	public long lastModificationTime = 0;
 	public int jobCat = -1;
+	public String remarks = "";
+	public long fileID = -1;
 	
 	
 	public static final int ACTIVE = 0;

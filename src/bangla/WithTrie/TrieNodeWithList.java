@@ -64,7 +64,7 @@ public class TrieNodeWithList implements Comparable<TrieNodeWithList> {
 	public TrieNodeWithList getParent() {
 		return parent;
 	}
-	
+
 	public List<TrieNodeWithList> getChildren() {
 		return children;
 	}
@@ -106,7 +106,6 @@ public class TrieNodeWithList implements Comparable<TrieNodeWithList> {
 				additional.put(GrammarCheckerConstant.NAMED_ENTITY_CATEGORY, "0");
 				return new TrieNodeSearchResult((lastMatch == -1) ? false : true, null, lastMatch, additional);
 			}
-				
 			child = temp.children;
 			if (i == word.length() - 1) {
 				if (temp.isWord) {
@@ -114,7 +113,6 @@ public class TrieNodeWithList implements Comparable<TrieNodeWithList> {
 					additional.put(GrammarCheckerConstant.NAMED_ENTITY_CATEGORY, String.valueOf(temp.namedEntityCategory));
 					return new TrieNodeSearchResult(true, temp.viceVersaWord, word.length() - 1, additional);
 				}
-					
 			}
 		}
 		Map<String,String> additional = new HashMap<>();
