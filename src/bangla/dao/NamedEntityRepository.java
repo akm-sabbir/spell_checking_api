@@ -5,6 +5,7 @@ package bangla.dao;
 import org.apache.log4j.Logger;
 
 import bangla.WithTrie.TrieNodeWithList;
+import bangla.grammarchecker.NirdeshokErrorChecker;
 import bangla.grammarchecker.NoSpaceBetweenWordsChecker;
 import bangla.grammarchecker.SpaceErrorBetweenWordsChecker;
 import bangla.grammarchecker.SubVerbRelErrorChecker;
@@ -77,7 +78,6 @@ public class NamedEntityRepository implements Repository{
 		Connection connection = null;
 		ResultSet rs = null;
 		Statement stmt = null;
-		
 		String sql = "select ID, content, type_cat from named_entity where isDeleted=0";
 		try{
 			connection = DBMR.getInstance().getConnection();
@@ -85,7 +85,6 @@ public class NamedEntityRepository implements Repository{
 			rs = stmt.executeQuery(sql);
 			while(rs.next()){
 				this.insert(rs.getLong("ID"), rs.getString("content"), rs.getInt("type_cat"));
-
 			}				
 		}catch(Exception ex){
 			ex.printStackTrace();
@@ -96,7 +95,7 @@ public class NamedEntityRepository implements Repository{
 		NoSpaceBetweenWordsChecker.registerDictionary(root.dict);
 		SpaceErrorBetweenWordsChecker.registerDictionary(root.dict);
 		SubVerbRelErrorChecker.addNamedEntity(root.dict);
-		
+		NirdeshokErrorChecker.registerDictionary(root.dict);
 	}
 	
 

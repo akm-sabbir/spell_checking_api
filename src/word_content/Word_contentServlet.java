@@ -22,9 +22,11 @@ import org.apache.log4j.Logger;
 
 import bangla.dao.AnnotatedWordRepository;
 import bangla.dao.DictionaryRepository;
+import bangla.dao.GlobalDictionaryRepository;
 import bangla.dao.GradedPronoun;
 import bangla.dao.NamedEntityRepository;
 import bangla.dao.NaturalErrorRepository;
+import bangla.dao.NirdeshokRepository;
 import bangla.dao.SadhuCholitMixture;
 import bangla.dao.SubjectVerbRepository;
 import bangla.grammarchecker.GrammerCheckerFactory;
@@ -70,7 +72,8 @@ public class Word_contentServlet extends HttpServlet
     	RepositoryManager.getInstance().addRepository(GradedPronoun.getInstance(),true);
     	RepositoryManager.getInstance().addRepository(SubjectVerbRepository.getInstance(),true);
     	RepositoryManager.getInstance().addRepository(SadhuCholitMixture.getInstance(),true);
-    	
+    	RepositoryManager.getInstance().addRepository(GlobalDictionaryRepository.getInstance(), true);
+    	RepositoryManager.getInstance().addRepository(NirdeshokRepository.getInstance(), true);
     	return;
     }
 		

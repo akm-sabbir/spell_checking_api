@@ -5,6 +5,7 @@ package bangla.dao;
 import org.apache.log4j.Logger;
 
 import bangla.WithTrie.TrieNodeWithList;
+import bangla.grammarchecker.NirdeshokErrorChecker;
 import bangla.grammarchecker.NoSpaceBetweenWordsChecker;
 import bangla.grammarchecker.SpaceErrorBetweenWordsChecker;
 import dbm.DBMR;
@@ -75,7 +76,7 @@ public class DictionaryRepository implements Repository{
 		Connection connection = null;
 		ResultSet rs = null;
 		Statement stmt = null;
-		
+		GlobalDictionaryRepository repo =  GlobalDictionaryRepository.getInstance();
 		String sql = "select ID, content from dictionary_words where isDeleted=0";
 		try{
 			connection = DBMR.getInstance().getConnection();
@@ -83,6 +84,7 @@ public class DictionaryRepository implements Repository{
 			rs = stmt.executeQuery(sql);
 			while(rs.next()){
 				this.insert(rs.getLong("ID"), rs.getString("content"));
+				repo.addToGlobalDictionary(rs.getString("content"), rs.getInt("ID"));
 
 			}				
 		}catch(Exception ex){
@@ -93,6 +95,7 @@ public class DictionaryRepository implements Repository{
 		}
 		NoSpaceBetweenWordsChecker.registerDictionary(root.dict);
 		SpaceErrorBetweenWordsChecker.registerDictionary(root.dict);
+		NirdeshokErrorChecker.registerDictionary(root.dict);
 	}
 	
 

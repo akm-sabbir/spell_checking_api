@@ -1,6 +1,7 @@
 package bangla.WithTrie;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -10,9 +11,10 @@ public class AhoCoharisck {
 
 	List<Vertex> trie;
 	List<Integer> wordsLength;
+	String dependantChar = "ঁংঃ়ৎািীুূৃৄেৈোৌ্ৗৢৣ";
 	int size = 0;
 	int root = 0;
-
+	public int preparedSuffix = 0;
 	public AhoCoharisck(){
 		trie = new ArrayList<Vertex>();
 		wordsLength = new ArrayList<Integer>();
@@ -53,6 +55,7 @@ public class AhoCoharisck {
 	{
 		Queue<Integer> vertexQueue = new LinkedList<>();
 		vertexQueue.add(root);
+		try {
 		while (vertexQueue.size() > 0){
 			int curVertex = vertexQueue.remove();
 			calcAndBuildSuffix(curVertex);
@@ -61,6 +64,16 @@ public class AhoCoharisck {
 			{
 				vertexQueue.add((int)trie.get(curVertex).children.get(key.getKey()));
 			}
+		}
+		}catch(NullPointerException ex) {
+			System.out.println("This is for null pointer problem");
+			System.out.println(ex.getStackTrace());
+		}catch(ArrayIndexOutOfBoundsException ex) {
+			System.out.println("This is for array index out of boundary problem");
+			System.out.println(ex.getStackTrace());
+		}catch(OutOfMemoryError ex) {
+			System.out.println("This is for Out of memory problem");
+			System.out.println(ex.getStackTrace());
 		}
 	}
 	public void calcAndBuildSuffix(int vertex){
@@ -122,17 +135,25 @@ public class AhoCoharisck {
 
 		// Targeted result value
 		ArrayList<String> result = new ArrayList<>();
-
+		int matching = 0;
+		StringBuilder strResult = new StringBuilder();
 		for (int j = 0; j < text.length(); j++)
 		{
+			
 			// Calculating new state in the trie
+			matching = 0;
 			while (true)
 			{
 				// If we have the edge, then use it
+				if(text.charAt(j) == ' ')
+					break;
 				if (trie.get(currentState).children.containsKey(text.charAt(j))){
+					matching = 1;
+					strResult.append(text.charAt(j));
 					currentState = (int)trie.get(currentState).children.get(text.charAt(j));
 					break;
 				}
+				
 				// Otherwise, jump by suffix links and try to find the edge with
 				// this char
 	            // If there aren't any possible edges we will eventually ascend to
@@ -141,28 +162,102 @@ public class AhoCoharisck {
 				currentState = trie.get(currentState).suffixLink;
 			}
 			//int checkState = currentState;
+			/*
+			if(dependantChar.indexOf(text.charAt(j)) != -1 &&  matching == 0) {
+				result.get(result.size()-1).append(text.charAt(j));
+			}*/
 			if(trie.get(currentState).leaf == true) {
-				result.add(text.substring(j - (trie.get(currentState).wordLength- 1), j + 1));
+				//result.add(new StringBuffer(text.substring(j - (trie.get(currentState).wordLength- 1), j + 1)));
+				result.add(new String(strResult.toString()));
 			}
 			// Trying to find all possible words from this prefix
 		}
 
 		return result;
 	}
+	public String getInflectedWords(String data) {
+		StringBuilder sData = new StringBuilder(data);
+		StringBuffer finalString = new StringBuffer();
+		while(sData.toString().trim().length() > 0) {
+			ArrayList<String> result;
+			System.out.println(sData);
+			try {
+				result = ProcessString(sData.toString());
+				WordSuggestion wsuggestion = new WordSuggestion();
+				if(result.size()> 1) {
+					wsuggestion.buildTrie(result);
+					HashSet<String> getResult = new HashSet<>();
+					wsuggestion.dfs(getResult, "", wsuggestion.root);
+				
+					for(String each : result) {
+						System.out.println("each in result: " + each);
+						if(getResult.contains(each.toString())) {
+							finalString.append(each.toString()+ " ");
+							getResult.remove(each.toString());
+							int startIndex = sData.indexOf(each.toString());
+							if(startIndex != -1)
+								sData.replace(startIndex , startIndex + each.length() <= sData.length() ? startIndex + each.length() : sData.length(), " ");
+							else
+								sData.replace(0, sData.length(), " ");
+						}
+					}
+				
+				}
+				else if(result.size() == 1) {
+					System.out.println("Single word: " + result.get(0));
+					finalString.append(result.get(0).toString() + " ");
+					int startIndex = sData.indexOf(result.get(0).toString());
+					if(startIndex!= -1)
+						sData.replace(startIndex, startIndex + result.get(0).length() <= sData.length() ? startIndex + result.get(0).length() : sData.length(), " ");
+					else
+						sData.replace(0, sData.length(), " ");
+				}
+				else
+					break;
+			}catch(NullPointerException ex) {
+				System.out.println("This is for null pointer problem");
+				System.out.println(ex.getMessage());
+				System.out.println(ex.getStackTrace());
+				break;
+			}catch(ArrayIndexOutOfBoundsException ex) {
+				System.out.println("This is for array index out of boundary problem");
+				System.out.println(ex.getMessage());
+				System.out.println(ex.getStackTrace());
+				break;
+			}catch(OutOfMemoryError ex) {
+				System.out.println("This is for Out of memory problem");
+				System.out.println(ex.getMessage());
+				System.out.println(ex.getStackTrace());
+				break;
+			}catch(StringIndexOutOfBoundsException ex) {
+				System.out.println("This exception is for String index out of problem source text");
+				System.out.println(ex.getMessage());
+				System.out.println(ex.getStackTrace());
+				break;
+			}
+		}
+		return finalString.toString().trim();
+	}
 	public static void main(String args[]) {
 		AhoCoharisck ahocoarisck = new AhoCoharisck();
+		WordSuggestion wsuggestion = new WordSuggestion();
 		ahocoarisck.initiateGlobalDict("সকাল", 0);
+		//ahocoarisck.initiateGlobalDict("সকালবেলা", 0);
+		ahocoarisck.initiateGlobalDict("কাল", 0);
 		ahocoarisck.initiateGlobalDict("বেলা", 1);
-		ahocoarisck.initiateGlobalDict("ছেলেরা", 2);
-		ahocoarisck.initiateGlobalDict("পানি", 2);
+		ahocoarisck.initiateGlobalDict("বাহিনী", 2);
+		ahocoarisck.initiateGlobalDict("র", 2);
 		ahocoarisck.initiateGlobalDict("তে", 2);
 		ahocoarisck.initiateGlobalDict("সাঁতার", 2);
 		ahocoarisck.initiateGlobalDict("কাট", 2);
-		ahocoarisck.initiateGlobalDict("ছিলো", 2);
+		ahocoarisck.initiateGlobalDict("নিবে", 2);
+		ahocoarisck.initiateGlobalDict("নবে", 2);
+		ahocoarisck.initiateGlobalDict("জন্ম", 2);
+		ahocoarisck.initiateGlobalDict("সময়", 2);
+		ahocoarisck.initiateGlobalDict("মাসে", 2);
 		ahocoarisck.PrepareAho();
-		ArrayList<String> result = ahocoarisck.ProcessString("সকালবেলাছেলেরাপানিতেসাঁতারকাটছিলো");
-		for(String each : result) {
-			System.out.println(each);
-		}
+		//ArrayList<String> result = ahocoarisck.ProcessString("বাহিনীর সকালবেলাছেলেরাপানিতেসাঁতারকাটছিলো");
+		
+		System.out.println(ahocoarisck.getInflectedWords("সংগঠেনের").toString().trim());
 	}
 }

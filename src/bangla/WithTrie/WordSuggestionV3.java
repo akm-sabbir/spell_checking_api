@@ -369,6 +369,11 @@ public class WordSuggestionV3 {
 				}
 				maxMisMatch += 25;
 			}
+			maxMisMatch = 25;
+			for(TrieNodeWithList node: root.dict.children) {
+				if (node.c != word.charAt(0))
+					dfsV2(0, "", word, 0, node);
+			}
 			/*
 			for(int i=0;i<=maxMisMatch;i+=25) {
 				if(!wordWithDistance.containsValue(i))
