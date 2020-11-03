@@ -75,7 +75,6 @@ public class NamedEntityRepository implements Repository{
 		Connection connection = null;
 		ResultSet rs = null;
 		Statement stmt = null;
-<<<<<<< HEAD
 //		GlobalDictionaryRepository repo =  GlobalDictionaryRepository.getInstance();
 		String sql = "select ID, content from named_entity where isDeleted=0";
 		try{
