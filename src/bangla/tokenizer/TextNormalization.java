@@ -21,6 +21,54 @@ public class TextNormalization {
 		return t;		
 	}
 	
+	
+//TODO : optimize above function by below single loop replacement	
+	public String normalizeTextN(String s)
+	{
+		StringBuffer buffer = new StringBuffer((int)(s.length()*1.1));
+		
+		int n=s.length();
+		for(int i=0;i<n-1;i++)
+		{
+			char c = s.charAt(i);
+			char d= s.charAt(i+1);
+			boolean appended = false;
+			switch(c)
+			{
+			case 0x200A:
+				if(i<n-2)
+				{
+					if(d==0x200B)
+					{
+						char e = s.charAt(i+2);
+						if(e==0x200C)
+						{
+							appended=true;
+							i+=2;
+						}
+					}
+				}
+				break;
+				
+			case 'অ':
+				if(d=='া')
+				{
+					buffer.append('আ');
+					appended=true;
+				}
+				break;
+				
+			}
+			
+			if(appended==false)
+			{
+				buffer.append(c);
+				if(i==n-1)buffer.append(d);
+			}
+		}
+		return buffer.toString();
+		
+	}
 	public ArrayList<Integer> getUnicdeCodePoints(String text) {
 		ArrayList<Integer> codePointContainer = new ArrayList<>();
 		try {

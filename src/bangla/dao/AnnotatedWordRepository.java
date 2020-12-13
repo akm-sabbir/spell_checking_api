@@ -71,8 +71,8 @@ public class AnnotatedWordRepository implements Repository{
 	}
 	
 	@Override
-	public void reload(boolean realoadAll) {
-		
+	public void reload(boolean reloadAll) {
+		logger.debug("AnnotatedWordRepository.reload("+reloadAll+") Started");
 		Connection connection = null;
 		ResultSet rs = null;
 		Statement stmt = null;

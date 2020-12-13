@@ -24,7 +24,4 @@ public interface Repository
      * @return String
      */
     public String getTableName();
-//    public String getRepoName();
-    public default boolean isUpdateNeeded() {return false;}
-    public default void set_size() {}
 }

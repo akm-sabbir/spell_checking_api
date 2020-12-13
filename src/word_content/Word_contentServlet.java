@@ -1,5 +1,6 @@
 package word_content;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Inet4Address;
@@ -21,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 import javax.servlet.*;
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 
 import com.google.gson.Gson;
 
@@ -34,6 +36,7 @@ import bangla.dao.SadhuCholitMixture;
 import bangla.dao.SubjectVerbRepository;
 import bangla.grammarchecker.GrammerCheckerFactory;
 import bangla.spellchecker.SpellCheckingDto;
+import dbm.DBMW;
 import repository.RepositoryManager;
 import spell_checker_log.Spell_checker_logDAO;
 import spell_checker_log.Spell_checker_logDTO;
@@ -68,19 +71,33 @@ public class Word_contentServlet extends HttpServlet
 		}
     }   
     
-    public void init(ServletConfig confit) {
+    public void init(ServletConfig confit)  throws ServletException
+    {
+    	System.out.println("Starting Bangla Spell & Grammar server: init(ServletConfig confit) called");
+    	String logFilePath = "log4j.properties";
     	
-    	System.out.println("this is the start of the server");
-    	System.out.println("Start loading web servers and servlets");
+    	try
+    	{
+    		logFilePath = getClass().getClassLoader().getResource(logFilePath).toString();
+    		if(logFilePath.startsWith("file:"))logFilePath = logFilePath.substring(5);
+    		PropertyConfigurator.configure(logFilePath);
+    	}catch(Exception ex){ex.printStackTrace();}
+    	
+    	logger.debug("Starting Bangla Spell & Grammar Error Checker at "+new java.util.Date());
+    	
+    	DictionaryRepository.getInstance();
+    	AnnotatedWordRepository.getInstance();
+    	NamedEntityRepository.getInstance();
+    	NaturalErrorRepository.getInstance();
+    	
+    	GradedPronoun.getInstance();
+    	SubjectVerbRepository.getInstance();
+    	SadhuCholitMixture.getInstance();
+    	GlobalDictionaryRepository.getInstance();
+    	
+    	
     	GrammerCheckerFactory.initializeRegisteredCheckers();
-    	RepositoryManager.getInstance().addRepository(AnnotatedWordRepository.getInstance(), true);
-    	RepositoryManager.getInstance().addRepository(DictionaryRepository.getInstance(), true);
-    	RepositoryManager.getInstance().addRepository(NamedEntityRepository.getInstance(), true);
-    	RepositoryManager.getInstance().addRepository(NaturalErrorRepository.getInstance(), true);
-    	RepositoryManager.getInstance().addRepository(GradedPronoun.getInstance(),true);
-    	RepositoryManager.getInstance().addRepository(SubjectVerbRepository.getInstance(),true);
-    	RepositoryManager.getInstance().addRepository(SadhuCholitMixture.getInstance(),true);
-    	RepositoryManager.getInstance().addRepository(GlobalDictionaryRepository.getInstance(), true);
+    	
     	return;
     }
 		
@@ -168,5 +185,9 @@ public class Word_contentServlet extends HttpServlet
 		  //resp.setHeader("Content-Type", "application/json");
 	  }
 		
+	  public void destroy()
+	  {
+		RepositoryManager.getInstance().shutDown();  
+	  }
 }
 

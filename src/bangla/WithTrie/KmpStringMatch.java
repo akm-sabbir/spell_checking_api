@@ -22,8 +22,7 @@ public class KmpStringMatch {
 	                i++; 
 	            } 
 	            if (j == M) { 
-	                System.out.println("Found pattern "
-	                                   + "at index " + (i - j));
+	              //  System.out.println("Found pattern "+ "at index " + (i - j));
 	                for(int at = i-j; at < i; at++) {
 	                	txt = txt.replace(at, at+1, " ");
 	                }

@@ -1,69 +1,52 @@
 package bangla;
 
-import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.annotation.MultipartConfig;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.Part;
-import javax.servlet.*;
 
-import org.apache.commons.collections4.iterators.EntrySetMapIterator;
 import org.apache.log4j.Logger;
 
-import com.google.gson.Gson;
-
-import bangla.WithTrie.WordSuggestionV3;
 import bangla.spellchecker.SpellCheckingDto;
 import bangla.spellchecker.SpellChecker;
 import bangla.tokenizer.SentenceTokenizer;
 import bangla.tokenizer.TextNormalization;
-import bangla.tokenizer.WordTokenizer;
-import word_content.Word_contentDAO;
 import word_content.Word_contentServlet;
 
 public class SpellAndGrammarChecker {
-	private static final long serialVersionUID = 1L;
+	
     public static Logger logger = Logger.getLogger(Word_contentServlet.class);
-    String tableName = "word_content";
-    String tempTableName = "word_content_temp";
-	Word_contentDAO word_contentDAO;
-	int maxMissmatch=100;
-	SpellCheckingDto suggested_word;
-	TextNormalization textNormalizer = new TextNormalization();
-	private SpellChecker spellChecker = new SpellChecker();
-	private SentenceTokenizer sentenceTokenizer = new SentenceTokenizer();
 
-	public HashMap<Integer, SpellCheckingDto> check(String text_data, int option) {
-		
-		
-		logger.info("Recieved a request to process: " );
-		if (text_data.length() == 0) {
-			logger.debug("End of request processing: " );
+    public static final int OPTION_SPELL_CHECKING=2;
+    public static final int OPTION_SPELL_AND_GRAMMAR_CHECKING=3;
+    
+    TextNormalization textNormalizer;
+    SentenceTokenizer sentenceTokenizer;
+    SpellChecker spellChecker;
+	
+
+	public SpellAndGrammarChecker()
+	{
+	    textNormalizer = new TextNormalization();
+		sentenceTokenizer = new SentenceTokenizer();
+		spellChecker = new SpellChecker();
+	}
+
+	public HashMap<Integer, SpellCheckingDto> check(String param_str, int option) 
+	{
+		logger.debug("SpellAndGrammarChecker:check("+param_str+", "+option+")");
+		if (param_str.length() == 0) {
+			logger.debug("Given text length is zero." );
 			return null;
 		}
+		
+		String text_data = textNormalizer.normalizeText(param_str);
+		
 		List<String> tokenized_sentence = null;
-		text_data = textNormalizer.normalizeText(text_data);
-		HashMap<Integer, SpellCheckingDto> result_list = null;
 		try {
 			tokenized_sentence = sentenceTokenizer.getTokenizedSentence(text_data);
 			if(tokenized_sentence.size() <= 0 ) {
-				logger.debug("End of request processing: " );
+				logger.debug("Received 0 tokenized sentence." );
 				return null;
 			}
 		}catch(Exception ex) {
@@ -72,18 +55,26 @@ public class SpellAndGrammarChecker {
 			return null;
 		}
 		
+		HashMap<Integer, SpellCheckingDto> result_list = null;
 		try {
 			StringBuilder sbData = new StringBuilder(text_data);
 			Map<Integer, String> indexedWords = textNormalizer.getIndexedWords(tokenized_sentence);
-			if(option == 3) {
-				result_list = spellChecker.getWordValidationInfo(sbData, indexedWords);
-				logger.debug("Total Tokenized words after validation process completion " + result_list.size());
-				result_list = sentenceTokenizer.getSentenceValidationInfo(tokenized_sentence, result_list);
-				logger.debug("Total Valided words after process completion" + result_list.size());
-			}else if(option == 2) {
-				result_list = spellChecker.getWordValidationInfo(sbData, indexedWords);
-				logger.debug("Total Tokenized words after validation process completion " + result_list.size());
-			}else {
+			
+			switch(option)
+			{
+			case OPTION_SPELL_AND_GRAMMAR_CHECKING:
+					result_list = spellChecker.getWordValidationInfo(sbData, indexedWords);
+					logger.debug("Total Tokenized words after validation process completion " + result_list.size());
+					result_list = sentenceTokenizer.getSentenceValidationInfo(tokenized_sentence, result_list);
+					logger.debug("Total Valided words after process completion" + result_list.size());
+					break;
+			case OPTION_SPELL_CHECKING:
+					result_list = spellChecker.getWordValidationInfo(sbData, indexedWords);
+					logger.debug("Total Tokenized words after validation process completion " + result_list.size());
+					break;
+			default:
+			break;
+				
 				
 			}
 			

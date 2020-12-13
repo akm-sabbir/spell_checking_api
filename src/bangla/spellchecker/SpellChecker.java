@@ -62,33 +62,37 @@ public class SpellChecker {
 			return new ArrayList<Pair>();
 		return suggestion;
 	}
+	
 	public SpellCheckingDto getProcessedMap(SpellCheckingDto suggested_word, String data, Map<Integer, SpellCheckingDto> result_list, Map<String,Integer> tracker,
-		 Map<Integer, TrieNodeWithList> table_query, SpellCheckingDto unKnownCounter){
-		WordSuggestionV3 wordSuggestion = new WordSuggestionV3();
-		//String data = normalizeText(data_);
-		System.out.println("After normalization the string data is");
-		System.out.println(data);
-		if (tracker.containsKey(data) == true) {	
+		 Map<Integer, TrieNodeWithList> table_query, SpellCheckingDto unKnownCounter)
+	{
+		
+		if (tracker.containsKey(data) == true) 
+		{	
 			suggested_word = copyDto(result_list, data, tracker, suggested_word);
+			return suggested_word;
+		}
+		
+		
+		WordSuggestionV3 wordSuggestion = new WordSuggestionV3();
+				
+		wordSuggestion.setDictionary(NamedEntityRepository.getInstance().root);
+		if(wordSuggestion.searchWord(data) == true) {
+			suggested_word.errorType = BitMasking.resetBitAt(suggested_word.errorType, 1);
 		}else {
-			
-			wordSuggestion.setDictionary(NamedEntityRepository.getInstance().root);
+			suggested_word.errorType = BitMasking.setBitAt(suggested_word.errorType, 1);
+		}
+				
+		if (BitMasking.extractNthBit( suggested_word.errorType, 1) == 1) {
+			wordSuggestion.setDictionary(DictionaryRepository.getInstance().root);
+			System.out.println("suggesting words not found in named entity ");
 			if(wordSuggestion.searchWord(data) == true) {
 				suggested_word.errorType = BitMasking.resetBitAt(suggested_word.errorType, 1);
 			}else {
 				suggested_word.errorType = BitMasking.setBitAt(suggested_word.errorType, 1);
 			}
-				
 			if (BitMasking.extractNthBit( suggested_word.errorType, 1) == 1) {
-				wordSuggestion.setDictionary(DictionaryRepository.getInstance().root);
-				System.out.println("suggesting words not found in named entity ");
-				if(wordSuggestion.searchWord(data) == true) {
-					suggested_word.errorType = BitMasking.resetBitAt(suggested_word.errorType, 1);
-				}else {
-					suggested_word.errorType = BitMasking.setBitAt(suggested_word.errorType, 1);
-				}
-				if (BitMasking.extractNthBit( suggested_word.errorType, 1) == 1) {
-					System.out.println("suggesting words not found in dictionary ");
+				System.out.println("suggesting words not found in dictionary ");
 					wordSuggestion.setDictionary(AnnotatedWordRepository.getInstance().root);
 					if(wordSuggestion.searchWord(data) == true) {
 						suggested_word.errorType = BitMasking.resetBitAt(suggested_word.errorType, 1);
@@ -156,8 +160,7 @@ public class SpellChecker {
 				wordSuggestion.setDictionary(NamedEntityRepository.getInstance().root);
 				suggested_word = createSuggestion(suggested_word, data, wordSuggestion );
 			}
-		}
-		//encoded = this.gson.toJson(suggested_word);		
+				
 		return suggested_word;
 
 	}

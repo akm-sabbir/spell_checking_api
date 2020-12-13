@@ -149,7 +149,7 @@ public class WordTokenizer {
     public List<String> _tokenization() {
     	if (this.text == null) throw new NullPointerException("text field can not be null");
     	this.text = this.replace_parenthesis(this.text);
-    	System.out.println(this.text);
+//    	System.out.println(this.text);
     	List<String> words = this.spliting(this.text);
     	List<String> results = new ArrayList<>();
     	for(String word: words) {
@@ -162,7 +162,7 @@ public class WordTokenizer {
     		tWord = tWord.stream().map(t -> this.replace_stop_signs(t)).filter(t -> t != null).collect(Collectors.toList());
     		tWord = tWord.stream().map(t -> this.replace_group(t)).map(t -> this.trim_tokens(t)).filter(t -> t != null).collect(Collectors.toList());
     		
-    		System.out.println("Word length can be of any size except zero");
+//    		System.out.println("Word length can be of any size except zero");
     		for(String w: tWord) {
     			if(w.length() >= 1) {
     				results.add(w);

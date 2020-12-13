@@ -23,7 +23,7 @@ public class NaturalErrorRepository implements Repository{
 	private final static int DICTIONARY_WORD = 1;
 	private final static int NAMED_ENTITY = 2;
 	private final static int ANNOTATED_WORD = 3;
-	private static WordSuggestionV3 wordSuggestionGenerator;
+
 
 	public HashMap<String, String> errorToCorrect ;
 	
@@ -31,16 +31,7 @@ public class NaturalErrorRepository implements Repository{
 		
 		root = new DictionaryNaturalError();
 		errorToCorrect = new HashMap();
-		wordSuggestionGenerator = new WordSuggestionV3();
-		
-		if(DictionaryRepository.getInstance().root == null)
-			DictionaryRepository.getInstance().reload(true);
-		if(AnnotatedWordRepository.getInstance().root == null)
-		AnnotatedWordRepository.getInstance().reload(true);
-	
-		if(NamedEntityRepository.getInstance().root==null)
-		NamedEntityRepository.getInstance().reload(true);
-		GlobalDictionaryRepository.getInstance().reload(true);
+
 		RepositoryManager.getInstance().addRepository(this);
 	}
 	
@@ -106,8 +97,8 @@ public class NaturalErrorRepository implements Repository{
 		return false;
 	}
 	@Override
-	public void reload(boolean realoadAll) {
-
+	public void reload(boolean reloadAll) {
+		logger.debug("NaturalErrorRepository.reload("+reloadAll+") Started");
 		Connection connection = null;
 		ResultSet rs = null;
 		Statement stmt = null;
@@ -117,11 +108,10 @@ public class NaturalErrorRepository implements Repository{
 			connection = DBMR.getInstance().getConnection();
 			stmt = connection.createStatement();
 			rs = stmt.executeQuery(sql);
-			while(rs.next()){
+			while(rs.next())
+			{
 				this.insert(rs.getLong("ID"), rs.getString("content"));
 				this.loadInverseDictionary(rs.getString("content"), rs.getInt("reference_table"), rs.getLong("reference_id"));
-				// we have to load the errorToCorrect hashmap
-
 			}				
 		}catch(Exception ex){
 			ex.printStackTrace();
